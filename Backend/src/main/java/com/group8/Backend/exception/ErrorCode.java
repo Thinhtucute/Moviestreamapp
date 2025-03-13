@@ -1,8 +1,12 @@
 package com.group8.Backend.exception;
 
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode
 {
-    EMAIL_ALREADY_EXISTS(1001, "Email existed")
+    EMAIL_ALREADY_EXISTS(1001, "Email existed"),
+    USER_NOT_EXISTS(1002, "User not exists"),
     ;
     private int code;
     private String message;
@@ -11,14 +15,4 @@ public enum ErrorCode
         this.code = code;
         this.message = message;
     }
-
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
 }

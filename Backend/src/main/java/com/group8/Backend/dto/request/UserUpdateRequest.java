@@ -5,7 +5,6 @@ import com.group8.Backend.entity.SubscriptionPlan;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 public class UserUpdateRequest {

@@ -8,6 +8,8 @@ import com.group8.Backend.exception.ErrorCode;
 import com.group8.Backend.mapper.UserMapper;
 import com.group8.Backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +28,8 @@ public class UserService {
         }
         User user = userMapper.toUser(request);
 
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10); //ma hoa password thep bcypt
+        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
 //        User user = new User();
 //        user.setUsername(request.getUsername());
 //        user.setEmail(request.getEmail());
@@ -43,13 +47,13 @@ public class UserService {
             throw new RuntimeException("User with ID " + userId + " not found.");
         }
         User user = optionalUser.get();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPasswordHash(request.getPasswordHash());
-        user.setSubscriptionPlan(request.getSubscriptionPlan());
-        user.setSubscriptionExpiry(request.getSubscriptionExpiry());
-        user.setAvatarURL(request.getAvatarUrl());
-        user.setAccountStatus(request.getAccountStatus());
+//        user.setUsername(request.getUsername());
+//        user.setEmail(request.getEmail());
+//        user.setPasswordHash(request.getPasswordHash());
+//        user.setSubscriptionPlan(request.getSubscriptionPlan());
+//        user.setSubscriptionExpiry(request.getSubscriptionExpiry());
+//        user.setAvatarURL(request.getAvatarUrl());
+//        user.setAccountStatus(request.getAccountStatus());
         return userRepository.save(user);
     }
     public void deleteUser(int userId){
