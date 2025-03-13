@@ -1,6 +1,5 @@
 package com.group8.Backend.service;
 
-import com.group8.Backend.dto.request.ApiResponse;
 import com.group8.Backend.dto.request.AuthenticationRequest;
 import com.group8.Backend.exception.AppException;
 import com.group8.Backend.exception.ErrorCode;
