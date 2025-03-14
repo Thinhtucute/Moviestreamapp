@@ -29,7 +29,7 @@ public class UserService {
         User user = userMapper.toUser(request);
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10); //ma hoa password thep bcypt
-        user.setPasswordHash(passwordEncoder.encode(user.getPasswordHash()));
+        user.setPasswordHash(passwordEncoder.encode(request.getPasswordHash()));
 //        User user = new User();
 //        user.setUsername(request.getUsername());
 //        user.setEmail(request.getEmail());

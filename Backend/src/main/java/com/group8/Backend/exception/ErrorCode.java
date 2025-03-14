@@ -7,6 +7,7 @@ public enum ErrorCode
 {
     EMAIL_ALREADY_EXISTS(1001, "Email existed"),
     USER_NOT_EXISTS(1002, "User not exists"),
+    UNAUTHENTICATED(1003, "Unauthenticated"),
     ;
     private int code;
     private String message;

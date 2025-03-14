@@ -1,5 +1,4 @@
-package com.group8.Backend.dto.request;
-
+package com.group8.Backend.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -8,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationRequest {
-    String username;
-    String password;
+
+public class IntrospectResponse {
+    boolean valid;
 }
