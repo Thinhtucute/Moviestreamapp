@@ -81,7 +81,7 @@ public class AuthenticationService {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new  JWTClaimsSet.Builder()
                 .subject(username)
-                .issuer("devteria.com")
+                .issuer("movie.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
