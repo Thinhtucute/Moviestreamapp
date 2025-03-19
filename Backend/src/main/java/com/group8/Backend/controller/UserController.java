@@ -37,14 +37,17 @@ public class UserController {
                 .result(userService.getAllUsers())
                 .build();
     }
+    @GetMapping("/myInfo")
+    ApiResponse<UserResponse> getMyInfo()  {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getMyInfo())
+                .build();
+    }
     @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable int userId) {
-        Optional<User> user = userService.getUserById(userId);
-        if (user.isPresent()) {
-            return ResponseEntity.ok(user.get());
-        } else {
-            return ResponseEntity.status(404).body("User not found");
-        }
+    ApiResponse<UserResponse> getUser(@PathVariable("userId") int userId) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUser(userId))
+                .build();
     }
 
     @PutMapping("/{userId}")
@@ -53,12 +56,13 @@ public class UserController {
     }
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable int userId) {
-        Optional<User> user = userService.getUserById(userId);
-        if (user.isPresent()) {
+        UserResponse user = userService.getUser(userId);
+        if (user != null) {
             userService.deleteUser(userId);
             return ResponseEntity.ok("User successfully deleted");
         } else {
             return ResponseEntity.status(404).body("User not found");
         }
     }
+
 }

@@ -14,9 +14,13 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.HashSet;
@@ -47,7 +51,7 @@ public UserResponse createUser(UserCreationRequest request) {
     }
 
     public User updateUser(int userId, UserUpdateRequest request){
-        Optional<User> optionalUser = getUserById(userId);
+        Optional<User> optionalUser =  userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
             throw new RuntimeException("User with ID " + userId + " not found.");
         }
@@ -64,11 +68,25 @@ public UserResponse createUser(UserCreationRequest request) {
     public void deleteUser(int userId){
         userRepository.deleteById(userId);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")  // kiemr tra role admin truoc khi goi duoc ham
     public List<UserResponse> getAllUsers(){
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
-    public Optional<User> getUserById(int userId){
-        return userRepository.findById(userId);
+
+    @PostAuthorize("returnObject.username == authentication.name") // se goi ham truoc nhung se check kets qua tra ve neu username trung voi authen thi success
+    public UserResponse getUser(int userId){
+        return  userMapper.toUserResponse(userRepository.findById(userId)
+                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTS)));
     }
 
+    // lay thong tin sau khi dang nhap khong can truong tham so
+    public UserResponse getMyInfo(){
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+
+       User user =  userRepository.findByUsername(username).
+               orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTS));
+       return userMapper.toUserResponse(user);
+    }
 }
