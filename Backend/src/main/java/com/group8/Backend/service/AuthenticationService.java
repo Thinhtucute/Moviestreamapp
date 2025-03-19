@@ -4,6 +4,7 @@ import com.group8.Backend.dto.request.AuthenticationRequest;
 import com.group8.Backend.dto.request.IntrospectRequest;
 import com.group8.Backend.dto.response.AuthenticationResponse;
 import com.group8.Backend.dto.response.IntrospectResponse;
+import com.group8.Backend.entity.User;
 import com.group8.Backend.exception.AppException;
 import com.group8.Backend.exception.ErrorCode;
 import com.group8.Backend.repository.UserRepository;
@@ -21,11 +22,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.StringJoiner;
 
 @Slf4j
 @Service
@@ -64,7 +67,7 @@ public class AuthenticationService {
 
         String token = null;
         try {
-            token = generateToken(request.getUsername());
+            token = generateToken(user);
         } catch (KeyLengthException e) {
             throw new RuntimeException(e);
         }
@@ -77,16 +80,16 @@ public class AuthenticationService {
 
     }
 
-    private  String generateToken( String username ) throws KeyLengthException {
+    private  String generateToken( User user ) throws KeyLengthException {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new  JWTClaimsSet.Builder()
-                .subject(username)
+                .subject(user.getUsername())
                 .issuer("movie.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
-                .claim("customClaim", "Custom")
+                .claim("scope", buildScope(user))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -101,4 +104,12 @@ public class AuthenticationService {
         }
 
     }
+
+    private String buildScope(User user) {
+        StringJoiner stringJoiner = new StringJoiner(", ");
+        if(!CollectionUtils.isEmpty(user.getRoles()))
+            user.getRoles().forEach(stringJoiner::add);
+
+        return stringJoiner.toString();
+    } // them role vao token
 }

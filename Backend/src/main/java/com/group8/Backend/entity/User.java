@@ -1,46 +1,60 @@
 package com.group8.Backend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchConnectionDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "users")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+@Table(name = "Users") // Khớp với tên bảng trong DB
+
+
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int userID;
+     int userID;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String username;
+     String username;
 
     @Column(nullable = false, unique = true, length = 100)
-    private String email;
+     String email;
 
     @Column(nullable = false, length = 255)
-    private String passwordHash;
+     String passwordHash;
 
     @Column(nullable = false, updatable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime joinDate = LocalDateTime.now();
+     LocalDateTime joinDate = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "ENUM('Free', 'Premium', 'VIP') DEFAULT 'Free'")
-    private SubscriptionPlan subscriptionPlan = SubscriptionPlan.Free;
+     SubscriptionPlan subscriptionPlan = SubscriptionPlan.Free;
 
-    private LocalDate subscriptionExpiry;
+     LocalDate subscriptionExpiry;
 
-    private String avatarURL;
+     String avatarURL;
 
-    private LocalDateTime lastLogin;
+     LocalDateTime lastLogin;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "ENUM('Active', 'Banned', 'Suspended') DEFAULT 'Active'")
-    private AccountStatus accountStatus = AccountStatus.Active;
+     AccountStatus accountStatus = AccountStatus.Active;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "Roles", joinColumns = @JoinColumn(name = "UserID"))
+    @Column(name = "role", nullable = false)
+     Set<String> roles;
 
 }
 

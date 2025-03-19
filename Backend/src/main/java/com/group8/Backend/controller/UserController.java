@@ -2,6 +2,7 @@ package com.group8.Backend.controller;
 
 import com.group8.Backend.dto.request.ApiResponse;
 import com.group8.Backend.dto.request.UserUpdateRequest;
+import com.group8.Backend.dto.response.UserResponse;
 import com.group8.Backend.entity.User;
 import com.group8.Backend.service.UserService;
 import com.group8.Backend.dto.request.UserCreationRequest;
@@ -12,22 +13,29 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClient;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private RestClient.Builder builder;
 
     @PostMapping("/add")
-    ApiResponse<User> addUser(@RequestBody @Valid UserCreationRequest userDTO) {
-        ApiResponse<User> newUser = new ApiResponse<>();
-        newUser.setResult(userService.createUser(userDTO));
-        return newUser;
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.createUser(request))
+                .build();
     }
+
+
     @GetMapping
-    List<User> getAllUsers(){
-        return userService.getAllUsers();
+    ApiResponse<List<UserResponse>> getAllUsers(){
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getAllUsers())
+                .build();
     }
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable int userId) {
