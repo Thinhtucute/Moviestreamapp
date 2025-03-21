@@ -3,6 +3,7 @@ package com.group8.Backend.controller;
 import com.group8.Backend.dto.request.ApiResponse;
 import com.group8.Backend.dto.request.AuthenticationRequest;
 import com.group8.Backend.dto.request.IntrospectRequest;
+import com.group8.Backend.dto.request.LogoutRequest;
 import com.group8.Backend.dto.response.AuthenticationResponse;
 import com.group8.Backend.dto.response.IntrospectResponse;
 import com.group8.Backend.service.AuthenticationService;
@@ -43,6 +44,16 @@ public class AuthenticationController {
         return ApiResponse.<IntrospectResponse>builder()
                 .code(1000)
                 .result(result)
+                .build();
+
+
+    }
+
+    @PostMapping("/logout")
+    ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws JOSEException, ParseException {
+        authenticationService.logout(request);
+        return ApiResponse.<Void>builder()
+                .code(1000)
                 .build();
 
 
