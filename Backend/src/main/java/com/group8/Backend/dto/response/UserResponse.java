@@ -26,6 +26,6 @@ public class UserResponse {
     String avatarURL;
     LocalDateTime lastLogin;
     AccountStatus accountStatus;
-    Set<String> roles;
+    Set<RoleResponse> roles;
 
 }

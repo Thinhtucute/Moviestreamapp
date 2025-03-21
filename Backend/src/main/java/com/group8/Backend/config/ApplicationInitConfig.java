@@ -1,7 +1,8 @@
 package com.group8.Backend.config;
 
+import com.group8.Backend.entity.Role;
 import com.group8.Backend.entity.User;
-import com.group8.Backend.enums.Role;
+import com.group8.Backend.repository.RoleRepository;
 import com.group8.Backend.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,25 +17,30 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Configuration
-@RequiredArgsConstructor  // Tự động inject dependencies
-@Slf4j  // Inject Logger
+@RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApplicationInitConfig {
 
-    final PasswordEncoder passwordEncoder;
-    final UserRepository userRepository; // Thêm final để được inject
+    PasswordEncoder passwordEncoder;
+    UserRepository userRepository;
+    RoleRepository roleRepository; // Thêm RoleRepository để lấy Role entity
 
     @Bean
     ApplicationRunner applicationRunner() {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                Set<String> roles = new HashSet<>();
-                roles.add(Role.ADMIN.name());
+                // Tìm Role ADMIN từ cơ sở dữ liệu
+                Role adminRole = roleRepository.findByRoleName("ROLE_ADMIN")
+                        .orElseThrow(() -> new RuntimeException("ROLE_ADMIN not found in database"));
+
+                Set<Role> roles = new HashSet<>();
+                roles.add(adminRole);
 
                 User user = User.builder()
                         .email("admin@admin.com")
                         .username("admin")
-                        .passwordHash(passwordEncoder.encode("admin1234")) // Đảm bảo đúng tên field
+                        .passwordHash(passwordEncoder.encode("admin1234"))
                         .roles(roles)
                         .build();
 
