@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,23 +51,23 @@ public class AuthenticationService {
         var token = request.getToken();
         try {
             verifyToken(token);
-        }catch (AppException e){
+        } catch (AppException e) {
             return IntrospectResponse.builder()
-                .valid(false)
-                .build();
-    }
+                    .valid(false)
+                    .build();
+        }
         return IntrospectResponse.builder()
                 .valid(true)
                 .build();
     }
 
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request){
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        boolean authenticated = passwordEncoder.matches(request.getPassword(),user.getPasswordHash());
-        if(!authenticated) {
+        boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
+        if (!authenticated) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
@@ -77,7 +78,7 @@ public class AuthenticationService {
             throw new RuntimeException(e);
         }
 
-        return  AuthenticationResponse.builder()
+        return AuthenticationResponse.builder()
                 .token(token)
                 .authenticated(true)
                 .build();
@@ -98,29 +99,31 @@ public class AuthenticationService {
         invalidatedTokenRepository.save(invalidatedToken);
     }
 
-    private SignedJWT verifyToken(String token)  throws JOSEException, ParseException {
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        var verified =  signedJWT.verify(verifier);
+        var verified = signedJWT.verify(verifier);
 
-        if(!verified && expiryTime.after(new Date()))
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
 
-        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+        // Kiểm tra chữ ký và thời gian hết hạn
+        if (!signedJWT.verify(verifier) || expiryTime.before(new Date())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
 
         return signedJWT;
     }
 
 
-
-    private  String generateToken( User user ) throws KeyLengthException {
+    private String generateToken(User user) throws KeyLengthException {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-        JWTClaimsSet jwtClaimsSet = new  JWTClaimsSet.Builder()
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
                 .issuer("movie.com")
                 .issueTime(new Date())
@@ -132,20 +135,20 @@ public class AuthenticationService {
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-        JWSObject jwsObject = new JWSObject(header,payload);
+        JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
-            log.error("Cannot create token",e);
+            log.error("Cannot create token", e);
             throw new RuntimeException(e);
         }
 
     }
 
     private String buildScope(User user) {
-        StringJoiner stringJoiner = new StringJoiner(", ");
+        StringJoiner stringJoiner = new StringJoiner(" ");
         if (!CollectionUtils.isEmpty(user.getRoles())) {
             user.getRoles().forEach(role -> {
                 stringJoiner.add(role.getRoleName());

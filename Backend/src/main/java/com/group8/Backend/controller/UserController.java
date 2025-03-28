@@ -7,7 +7,9 @@ import com.group8.Backend.entity.User;
 import com.group8.Backend.service.UserService;
 import com.group8.Backend.dto.request.UserCreationRequest;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {

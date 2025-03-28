@@ -66,7 +66,7 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")  // kiemr tra role admin truoc khi goi duoc ham
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")// kiemr tra role admin truoc khi goi duoc ham
     public List<UserResponse> getAllUsers(){
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }

@@ -24,13 +24,12 @@ public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
-    RoleRepository roleRepository; // Thêm RoleRepository để lấy Role entity
+    RoleRepository roleRepository;
 
     @Bean
     ApplicationRunner applicationRunner() {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                // Tìm Role ADMIN từ cơ sở dữ liệu
                 Role adminRole = roleRepository.findByRoleName("ROLE_ADMIN")
                         .orElseThrow(() -> new RuntimeException("ROLE_ADMIN not found in database"));
 
