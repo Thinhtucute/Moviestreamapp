@@ -2,7 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
 :root {
-    --primary: #ff6500;
+    --primary: #ff6500 !important;
+    --black: #000 !important;
+    --text-color: #9b9b9b;
+    --default-layout-header-height: 50px;
 }
 
 html {
@@ -18,4 +21,8 @@ body {
     font-size: 1.6rem;
     line-height: 1.5;
     text-rendering: optimizeSpeed;
+    max-width: 100%;
+    margin-left: 12%;
+    margin-right: 12%;
+    // background-color: var(--black);
 }

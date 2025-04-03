@@ -1,5 +1,5 @@
-import Home from '@/pages/Home';
-import Search from '@/pages/Search';
+import Home from '@/pages/Home/Home';
+import Search from '@/pages/Search/Search';
 
 const publicRoutes = [
     { path: '/', component: Home },
