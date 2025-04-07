@@ -1,0 +1,58 @@
+// src/components/MovieSlider/MovieSlider.module.scss
+.movie-slider {
+  position: relative;
+  width: 100%;
+  margin: 20px 0;
+
+  .slider-container {
+    position: relative;
+  }
+
+  .movie-list {
+    &.large {
+      .movie-item {
+        width: 300px; // Dọc lớn
+        height: 450px;
+      }
+    }
+
+    &.small {
+      .movie-item {
+        width: 200px; // Dọc nhỏ
+        height: 300px;
+      }
+    }
+
+    &.landscape.large {
+      .movie-item {
+        width: 450px; // Ngang lớn
+        height: 250px;
+      }
+    }
+
+    &.landscape.small {
+      .movie-item {
+        width: 300px; // Ngang nhỏ
+        height: 170px;
+      }
+    }
+  }
+
+  .movie-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+

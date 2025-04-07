@@ -1,71 +1,77 @@
 .header {
-  .header-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    min-height: 64px;
+    .header-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 0px;
+        min-height: 64px;
 
-    .logo {
-      width: 125px;
-      height: 52.234px;
-      object-fit: contain;
+        .logo {
+            width: 125px;
+            // height: 52.234px;
+            object-fit: contain;
+        }
+
+        .menu-items {
+            display: flex;
+            align-items: center;
+
+            .menu-item {
+                color: var(--white);
+                font-size: 16px;
+                margin: 0 10px;
+                text-transform: none;
+
+                &:hover {
+                    color: var(--primary);
+                }
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+
+            .search-btn {
+                svg {
+                    width: 20px; // Kích thước SearchIcon: 20x20px
+                    height: 20px;
+                    color: var(--white);
+                    &:hover {
+                        color: var(--primary);
+                    }
+                }
+            }
+
+            .notification-btn {
+                svg {
+                    width: 24px; // Kích thước NotificationsNoneIcon: 24x24px
+                    height: 24px;
+                    color: var(--white);
+                    &:hover {
+                        color: var(--primary);
+                    }
+                }
+            }
+
+            .buy-package-btn {
+                text-transform: none;
+                margin: 0 10px;
+                padding: 5px 21px;
+                background-color: var(--primary);
+                color: var(--white);
+                font-size: 16px;
+            }
+
+            .login-btn {
+                color: var(--white);
+                text-transform: none;
+                font-size: 16px;
+
+                &:hover {
+                    color: var(--primary);
+                }
+            }
+        }
     }
-
-    .menu-items {
-      display: flex;
-      align-items: center;
-
-      .menu-item {
-        color: var(--text-color);
-        font-size: 16px;
-        margin: 0 10px;
-        text-transform: none;
-
-        &:hover {
-          color: #ff6200;
-        }
-      }
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-
-      .search-btn {
-        svg {
-          width: 20px; // Kích thước SearchIcon: 20x20px
-          height: 20px;
-          color: var(--text-color);
-        }
-      }
-
-      .notification-btn {
-        svg {
-          width: 24px; // Kích thước NotificationsNoneIcon: 24x24px
-          height: 24px;
-          color: var(--text-color);
-        }
-      }
-
-      .buy-package-btn {
-        text-transform: none;
-        margin: 0 10px;
-        padding: 5px 21px;
-        background-color: #ff6200;
-        color: #ffffff;
-        font-size: 16px;
-      }
-
-      .login-btn {
-        color: var(--text-color);
-        text-transform: none;
-        font-size: 16px;
-
-        &:hover {
-          color: #ff6200;
-        }
-      }
-    }
-  }
 }

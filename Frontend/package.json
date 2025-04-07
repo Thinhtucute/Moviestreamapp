@@ -13,11 +13,14 @@
     "@testing-library/user-event": "^13.5.0",
     "classnames": "^2.5.1",
     "customize-cra": "^1.0.0",
+    "framer-motion": "^12.6.3",
     "react": "^19.1.0",
     "react-app-rewired": "^2.2.1",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.4.1",
     "react-scripts": "5.0.1",
+    "react-slick": "^0.30.3",
+    "slick-carousel": "^1.8.1",
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {

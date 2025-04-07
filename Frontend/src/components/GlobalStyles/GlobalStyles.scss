@@ -4,8 +4,11 @@
 :root {
     --primary: #ff6500 !important;
     --black: #000 !important;
+    --white: #fff;
     --text-color: #9b9b9b;
+
     --default-layout-header-height: 50px;
+    --margin-full-page: 0 10%;
 }
 
 html {
@@ -14,6 +17,7 @@ html {
 
 * {
     box-sizing: border-box;
+
 }
 
 body {
@@ -22,7 +26,10 @@ body {
     line-height: 1.5;
     text-rendering: optimizeSpeed;
     max-width: 100%;
-    margin-left: 12%;
-    margin-right: 12%;
-    // background-color: var(--black);
+
+    background-color: var(--black);
+    overflow-x: hidden; // Ẩn thanh cuộn ngang
+    // display: flex;
+    // flex-direction: column;
+    margin: var(--margin-full-page);
 }

@@ -4,30 +4,31 @@ import { AppBar, Toolbar, Button, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import images from '@/assets/images';
+import { Link } from 'react-router-dom'; // Import Link từ react-router-dom
 
 const cx = classNames.bind(styles);
 
 function Header() {
     return (
-        <AppBar position="static" className={cx('header')} sx={{ backgroundColor: 'var(--black)', boxShadow: 'none' }}>
+        <AppBar position="sticky" className={cx('header')} sx={{ backgroundColor: 'var(--black)', boxShadow: 'none' }}>
             <Toolbar className={cx('header-toolbar')}>
                 <img src={images.logo} alt="Logo" className={cx('logo')} />
 
                 {/* Menu chính */}
                 <div className={cx('menu-items')}>
-                    <Button color="inherit" className={cx('menu-item')}>
+                    <Button color="inherit" className={cx('menu-item')} component={Link} to="/">
                         Trang chủ
                     </Button>
-                    <Button color="inherit" className={cx('menu-item')}>
+                    <Button color="inherit" className={cx('menu-item')} component={Link} to="/phim-moi">
                         Phim mới
                     </Button>
-                    <Button color="inherit" className={cx('menu-item')}>
+                    <Button color="inherit" className={cx('menu-item')} component={Link} to="/phim-bo">
                         Phim bộ
                     </Button>
-                    <Button color="inherit" className={cx('menu-item')}>
+                    <Button color="inherit" className={cx('menu-item')} component={Link} to="/phim-le">
                         Phim lẻ
                     </Button>
-                    <Button color="inherit" className={cx('menu-item')}>
+                    <Button color="inherit" className={cx('menu-item')} component={Link} to="/anime">
                         Anime
                     </Button>
                 </div>
