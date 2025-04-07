@@ -1,0 +1,35 @@
+@import 'normalize.css';
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+:root {
+    --primary: #ff6500 !important;
+    --black: #000 !important;
+    --white: #fff;
+    --text-color: #9b9b9b;
+
+    --default-layout-header-height: 50px;
+    --margin-full-page: 0 10%;
+}
+
+html {
+    font-size: 62.5%;
+}
+
+* {
+    box-sizing: border-box;
+
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    text-rendering: optimizeSpeed;
+    max-width: 100%;
+
+    background-color: var(--black);
+    overflow-x: hidden; // Ẩn thanh cuộn ngang
+    // display: flex;
+    // flex-direction: column;
+    margin: var(--margin-full-page);
+}
