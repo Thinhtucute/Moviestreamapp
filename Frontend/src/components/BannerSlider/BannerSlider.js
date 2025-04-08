@@ -1,4 +1,4 @@
-// src/components/BannerSlider/BannerSlider.jsx
+// src/components/BannerSlider/BannerSlider.js
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Button, Typography } from '@mui/material';
@@ -7,56 +7,10 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import classNames from 'classnames/bind';
 import styles from './BannerSlider.module.scss';
-
-// Updated banner data to match the content in the images
-const banners = [
-    {
-        image: 'https://trustmedia.com.vn/wp-content/uploads/2023/09/mat-biec-1_1607937967.jpg',
-        alt: 'Thanh Kiếm Của Thợ Săn Quỷ',
-        title: 'Thanh Kiếm Của Thợ Săn Quỷ',
-        subTitle: 'Kuin Gentosho',
-        description: 'Mới • 2025 • T16 • 1/24 tập • Nhật Bản',
-    },
-    {
-        image: 'https://trustmedia.com.vn/wp-content/uploads/2023/09/mat-biec-1_1607937967.jpg',
-        alt: 'Học Viện Anh Hùng Phần 5',
-        title: 'Học Viện Anh Hùng',
-        subTitle: 'Phần 5',
-        description: '2021 • T13 • 27/27 tập • Nhật Bản',
-    },
-    {
-        image: 'https://trustmedia.com.vn/wp-content/uploads/2023/09/mat-biec-1_1607937967.jpg',
-        alt: 'Học Viện Anh Hùng Phần 5',
-        title: 'Học Viện Anh Hùng',
-        subTitle: 'Phần 5',
-        description: '2021 • T13 • 27/27 tập • Nhật Bản',
-    },
-    {
-        image: 'https://insieutoc.vn/wp-content/uploads/2021/02/poster-ngang.jpg',
-        alt: 'Banner 4',
-        title: 'Banner 4',
-        subTitle: 'Phần 4',
-        description: '2020 • T12 • 10/10 tập • Nhật Bản',
-    },
-    {
-        image: 'https://d1j8r0kxyu9tj8.cloudfront.net/images/1566809317niNpzY2khA3tzMg.jpg',
-        alt: 'Banner 5',
-        title: 'Banner 5',
-        subTitle: 'Phần 5',
-        description: '2019 • T11 • 15/15 tập • Nhật Bản',
-    },
-    {
-        image: 'https://trustmedia.com.vn/wp-content/uploads/2023/09/mat-biec-1_1607937967.jpg',
-        alt: 'Banner 6',
-        title: 'Banner 6',
-        subTitle: 'Phần 6',
-        description: '2018 • T10 • 20/20 tập • Nhật Bản',
-    },
-];
+import { getMedia } from '@/services/bannerServices';
 
 const cx = classNames.bind(styles);
 
-// Animation variants for the slider
 const sliderVariants = {
     enter: (direction) => ({
         x: direction > 0 ? 1000 : -1000,
@@ -74,43 +28,64 @@ const sliderVariants = {
 
 function BannerSlider() {
     const [[currentIndex, direction], setCurrentIndex] = useState([0, 0]);
+    const [banners, setBanners] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const sliderRef = useRef(null);
 
-    // Handle next slide
+   useEffect(() => {
+       async function fetchBanners() {
+           try {
+               const response = await getMedia();
+               // Trích xuất mảng content từ response.data.result
+               const bannersData = response?.result?.content || [];
+               setBanners(bannersData);
+           } catch (err) {
+               setError('Không thể tải dữ liệu banner');
+               console.error('Lỗi khi tải dữ liệu banner:', err);
+           } finally {
+               setLoading(false);
+           }
+       }
+       fetchBanners();
+   }, []);
+
     const handleNext = () => {
-        setCurrentIndex([currentIndex + 1 >= banners.length ? 0 : currentIndex + 1, 1]);
-    };
-
-    // Handle previous slide
-    const handlePrev = () => {
-        setCurrentIndex([currentIndex - 1 < 0 ? banners.length - 1 : currentIndex - 1, -1]);
-    };
-
-    // Handle dot click
-    const handleDotClick = (index) => {
-        setCurrentIndex([index, index > currentIndex ? 1 : -1]);
-    };
-
-    // Handle drag end to determine swipe direction
-    const handleDragEnd = (event, info) => {
-        const threshold = 50; // Minimum drag distance to trigger a slide change
-        if (info.offset.x < -threshold) {
-            handleNext(); // Swipe left to go to the next slide
-        } else if (info.offset.x > threshold) {
-            handlePrev(); // Swipe right to go to the previous slide
+        if (banners.length > 0) {
+            setCurrentIndex([currentIndex + 1 >= banners.length ? 0 : currentIndex + 1, 1]);
         }
     };
 
-    // Add auto-slide functionality
-    useEffect(() => {
-        const interval = setInterval(() => {
+    const handlePrev = () => {
+        if (banners.length > 0) {
+            setCurrentIndex([currentIndex - 1 < 0 ? banners.length - 1 : currentIndex - 1, -1]);
+        }
+    };
+
+    const handleDotClick = (index) => {
+        if (banners.length > 0) {
+            setCurrentIndex([index, index > currentIndex ? 1 : -1]);
+        }
+    };
+
+    const handleDragEnd = (event, info) => {
+        const threshold = 50;
+        if (info.offset.x < -threshold) {
             handleNext();
-        }, 5000); // Change banner every 5 seconds
+        } else if (info.offset.x > threshold) {
+            handlePrev();
+        }
+    };
 
-        return () => clearInterval(interval); // Cleanup interval on component unmount
-    }, [currentIndex]);
+    useEffect(() => {
+        if (banners.length > 0) {
+            const interval = setInterval(() => {
+                handleNext();
+            }, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [currentIndex, banners]);
 
-    // Add swipe functionality to navigate banners without dragging the image
     useEffect(() => {
         const slider = sliderRef.current;
         if (!slider) return;
@@ -121,7 +96,7 @@ function BannerSlider() {
         const onMouseDown = (e) => {
             isDown = true;
             startX = e.pageX;
-            e.preventDefault(); // Prevent dragging the image
+            e.preventDefault();
         };
 
         const onMouseMove = (e) => {
@@ -153,14 +128,21 @@ function BannerSlider() {
         };
     }, [handleNext, handlePrev]);
 
-    // Limit the number of dots to 5
     const maxDots = 5;
     const visibleDots = Math.min(banners.length, maxDots);
     const dotIndices = Array.from({ length: visibleDots }, (_, i) => i);
 
+    // Log dữ liệu banners trước khi render
+    console.log('Giá trị banners trước khi render:', banners);
+
+    if (loading) return <Box>Đang tải...</Box>;
+    if (error) return <Box>{error}</Box>;
+    if (!banners || banners.length === 0) return <Box>Không có dữ liệu banner</Box>;
+
+    const currentBanner = banners[currentIndex];
+
     return (
         <Box className={cx('banner-slider')}>
-            {/* Slider Container */}
             <Box
                 ref={sliderRef}
                 className={cx('slider-container')}
@@ -169,43 +151,40 @@ function BannerSlider() {
                 <AnimatePresence initial={false} custom={direction}>
                     <motion.img
                         key={currentIndex}
-                        src={banners[currentIndex].image}
-                        alt={banners[currentIndex].alt}
+                        src={currentBanner?.posterURL || ''} // Sử dụng posterURL thay vì posterUrl
+                        alt={currentBanner?.title || 'Banner'}
                         custom={direction}
                         variants={sliderVariants}
                         initial="enter"
                         animate="center"
                         exit="exit"
                         transition={{ x: { type: 'spring', stiffness: 300, damping: 30 }, opacity: { duration: 0.3 } }}
-                        drag="x" // Enable dragging on the x-axis
-                        dragConstraints={{ left: 0, right: 0 }} // Constrain drag to prevent moving the image out of bounds
-                        onDragEnd={handleDragEnd} // Handle swipe gesture
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        onDragEnd={handleDragEnd}
                         style={{
                             position: 'absolute',
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            cursor: 'grab', // Show grab cursor for dragging
+                            cursor: 'grab',
                         }}
-                        whileTap={{ cursor: 'grabbing' }} // Change cursor while dragging
+                        whileTap={{ cursor: 'grabbing' }}
                     />
                 </AnimatePresence>
 
-                {/* Overlay for gradient effect at the bottom */}
                 <Box
                     sx={{
                         position: 'absolute',
                         bottom: 0,
                         left: 0,
                         width: '100%',
-                        height: '50%', // Cover the bottom half with a gradient
+                        height: '50%',
                         background: 'linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent)',
                         borderRadius: '8px',
                     }}
                 />
-              
 
-                {/* Banner Content (Title, Description, Buttons) */}
                 <Box
                     sx={{
                         position: 'absolute',
@@ -217,22 +196,15 @@ function BannerSlider() {
                         gap: '8px',
                     }}
                 >
-                    {/* Title and Subtitle */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Typography variant="h2" sx={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
-                            {banners[currentIndex].title}
-                        </Typography>
-                        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'var(--primary)' }}>
-                            {banners[currentIndex].subTitle}
+                            {currentBanner?.title || 'Không có tiêu đề'}
                         </Typography>
                     </Box>
-
-                    {/* Description */}
                     <Typography variant="h5" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                        {banners[currentIndex].description}
+                        {currentBanner?.releaseYear} •{' '}
+                        {currentBanner?.duration > 0 ? `${currentBanner.duration} phút` : 'Không xác định'}
                     </Typography>
-
-                    {/* Action Buttons */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 2 }}>
                         <Button
                             variant="contained"
@@ -276,7 +248,6 @@ function BannerSlider() {
                     </Box>
                 </Box>
 
-                {/* Navigation Arrows (without circular background) */}
                 <Box
                     onClick={handlePrev}
                     sx={{
@@ -304,7 +275,6 @@ function BannerSlider() {
                     <ArrowForwardIosIcon sx={{ fontSize: '40px', opacity: 0.7, '&:hover': { opacity: 1 } }} />
                 </Box>
 
-                {/* Navigation Dots (limited to 5) */}
                 <Box
                     sx={{
                         position: 'absolute',
