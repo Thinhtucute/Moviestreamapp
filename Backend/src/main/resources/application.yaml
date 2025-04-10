@@ -3,7 +3,6 @@ spring:
     url: jdbc:mysql://localhost:3306/MOVIE_STREAMING_APP?useSSL=false&serverTimezone=UTC
     username: root
     password: thinh3012004
-
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,3 +15,6 @@ server:
 
 jwt:
   signerKey: "Nn+SxidQSS72KF1eLyV9UMzBco/U/zauCadj15iEEStFO3uTePbAlkssV7sfPqvp"
+  valid-duration: 36000
+  refreshable-duration: 360000
+

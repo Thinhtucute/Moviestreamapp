@@ -24,7 +24,7 @@ public class Media {
     @Column(name = "Title", nullable = false)
     String title;
 
-    @Column(name = "Description")
+    @Column(name = "Description", columnDefinition = "TEXT") // Hoặc @Column(length = 500)
     String description;
 
     @Column(name = "ReleaseYear")
@@ -82,6 +82,6 @@ public class Media {
     )
     Set<Director> directors = new HashSet<>();
 
-    @OneToMany(mappedBy = "media", cascade = CascadeType.ALL, orphanRemoval = true)
-    Set<Season> seasons = new HashSet<>();
+    @OneToMany(mappedBy = "mediaId", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<Episode> episodes = new HashSet<>();
 }

@@ -14,14 +14,16 @@ public interface MediaMapper {
     @Mapping(target = "genres", source = "genres")
     @Mapping(target = "actors", source = "actors")
     @Mapping(target = "directors", source = "directors")
-    @Mapping(target = "seasons", source = "seasons")
+    @Mapping(target = "episodes", source = "episodes")
+
     MediaResponse toMediaResponse(Media media);
 
     @Mapping(target = "mediaId", ignore = true)
     @Mapping(target = "genres", ignore = true)
     @Mapping(target = "actors", ignore = true)
     @Mapping(target = "directors", ignore = true)
-    @Mapping(target = "seasons", ignore = true)
+    @Mapping(target = "episodes", ignore = true)
+
     void updateMedia(@MappingTarget Media media, MediaUpdateRequest request);
 
     GenreResponse toGenreResponse(Genre genre);
@@ -29,8 +31,6 @@ public interface MediaMapper {
     ActorResponse toActorResponse(Actor actor);
 
     DirectorResponse toDirectorResponse(Director director);
-
-    SeasonResponse toSeasonResponse(Season season);
 
     EpisodeResponse toEpisodeResponse(Episode episode);
 }

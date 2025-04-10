@@ -34,6 +34,5 @@ public class MediaResponse {
     List<GenreResponse> genres;
     List<ActorResponse> actors;
     List<DirectorResponse> directors;
-    Set<SeasonResponse> seasons;
-
+    List<EpisodeResponse> episodes;
 }

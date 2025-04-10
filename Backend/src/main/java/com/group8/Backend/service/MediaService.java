@@ -115,47 +115,49 @@ public class MediaService {
         mediaRepository.delete(media);
     }
 
-//    public PaginatedResponse<MediaResponse> getAllMedia(
-//            Integer page, Integer size, String mediaType, String accessLevel, Integer genreId) {
-//        Pageable pageable = PageRequest.of(page, size);
-//        MediaType type = mediaType != null ? MediaType.valueOf(mediaType) : null;
-//        Page<Media> mediaPage = mediaRepository.findAllWithFilters(type, accessLevel, genreId, pageable);
-//
-//        List<MediaResponse> mediaResponses = mediaPage.getContent().stream()
-//                .map(mediaMapper::toMediaResponse)
-//                .toList();
-//
-//        return PaginatedResponse.<MediaResponse>builder()
-//                .content(mediaResponses)
-//                .page(mediaPage.getNumber())
-//                .size(mediaPage.getSize())
-//                .totalElements(mediaPage.getTotalElements())
-//                .totalPages(mediaPage.getTotalPages())
-//                .build();
-//    }
-//
-//    public MediaResponse getMediaDetails(int mediaId) {
-//        Media media = mediaRepository.findById(mediaId)
-//                .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
-//        return mediaMapper.toMediaResponse(media);
-//    }
-//
-//    public PaginatedResponse<MediaResponse> searchMedia(
-//            Integer page, Integer size, String title, String mediaType, Integer releaseYear, Integer genreId) {
-//        Pageable pageable = PageRequest.of(page, size);
-//        MediaType type = mediaType != null ? MediaType.valueOf(mediaType) : null;
-//        Page<Media> mediaPage = mediaRepository.searchMedia(title, type, releaseYear, genreId, pageable);
-//
-//        List<MediaResponse> mediaResponses = mediaPage.getContent().stream()
-//                .map(mediaMapper::toMediaResponse)
-//                .toList();
-//
-//        return PaginatedResponse.<MediaResponse>builder()
-//                .content(mediaResponses)
-//                .page(mediaPage.getNumber())
-//                .size(mediaPage.getSize())
-//                .totalElements(mediaPage.getTotalElements())
-//                .totalPages(mediaPage.getTotalPages())
-//                .build();
-//    }
+
+
+    public PaginatedResponse<MediaResponse> getAllMedia(
+            Integer page, Integer size, String mediaType, String accessLevel, Integer genreId) {
+        Pageable pageable = PageRequest.of(page, size);
+        MediaType type = mediaType != null ? MediaType.valueOf(mediaType) : null;
+        Page<Media> mediaPage = mediaRepository.findAllWithFilters(type, accessLevel, genreId, pageable);
+
+        List<MediaResponse> mediaResponses = mediaPage.getContent().stream()
+                .map(mediaMapper::toMediaResponse)
+                .toList();
+
+        return PaginatedResponse.<MediaResponse>builder()
+                .content(mediaResponses)
+                .page(mediaPage.getNumber())
+                .size(mediaPage.getSize())
+                .totalElements(mediaPage.getTotalElements())
+                .totalPages(mediaPage.getTotalPages())
+                .build();
+    }
+
+    public MediaResponse getMediaDetails(int mediaId) {
+        Media media = mediaRepository.findById(mediaId)
+                .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
+        return mediaMapper.toMediaResponse(media);
+    }
+
+    public PaginatedResponse<MediaResponse> searchMedia(
+            Integer page, Integer size, String title, String mediaType, Integer releaseYear, Integer genreId) {
+        Pageable pageable = PageRequest.of(page, size);
+        MediaType type = mediaType != null ? MediaType.valueOf(mediaType) : null;
+        Page<Media> mediaPage = mediaRepository.searchMedia(title, type, releaseYear, genreId, pageable);
+
+        List<MediaResponse> mediaResponses = mediaPage.getContent().stream()
+                .map(mediaMapper::toMediaResponse)
+                .toList();
+
+        return PaginatedResponse.<MediaResponse>builder()
+                .content(mediaResponses)
+                .page(mediaPage.getNumber())
+                .size(mediaPage.getSize())
+                .totalElements(mediaPage.getTotalElements())
+                .totalPages(mediaPage.getTotalPages())
+                .build();
+    }
 }

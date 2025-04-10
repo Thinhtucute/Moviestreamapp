@@ -14,8 +14,10 @@ import java.time.LocalDate;
 public class EpisodeResponse {
     int episodeId;
     int episodeNumber;
+    String season;
     String title;
     String description;
     Integer duration;
+
     LocalDate releaseDate;
 }

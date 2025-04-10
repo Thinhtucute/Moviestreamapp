@@ -1,9 +1,6 @@
 package com.group8.Backend.controller;
 
-import com.group8.Backend.dto.request.ApiResponse;
-import com.group8.Backend.dto.request.AuthenticationRequest;
-import com.group8.Backend.dto.request.IntrospectRequest;
-import com.group8.Backend.dto.request.LogoutRequest;
+import com.group8.Backend.dto.request.*;
 import com.group8.Backend.dto.response.AuthenticationResponse;
 import com.group8.Backend.dto.response.IntrospectResponse;
 import com.group8.Backend.service.AuthenticationService;
@@ -43,6 +40,16 @@ public class AuthenticationController {
         var result = authenticationService.introspect(request);
         return ApiResponse.<IntrospectResponse>builder()
                 .code(1000)
+                .result(result)
+                .build();
+
+
+    }
+
+    @PostMapping("/refresh")
+    ApiResponse<AuthenticationResponse>authenticate(@RequestBody RefreshRequest request) throws JOSEException, ParseException {
+        var result = authenticationService.refreshToken(request);
+        return ApiResponse.<AuthenticationResponse>builder()
                 .result(result)
                 .build();
 

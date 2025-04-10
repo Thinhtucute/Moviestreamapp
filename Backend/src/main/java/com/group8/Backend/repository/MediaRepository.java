@@ -12,4 +12,26 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MediaRepository extends JpaRepository<Media, Integer> {
     boolean existsByTitle(String title);
+
+    @Query("SELECT m FROM Media m " +
+            "WHERE (:mediaType IS NULL OR m.mediaType = :mediaType) " +
+            "AND (:accessLevel IS NULL OR m.accessLevel = :accessLevel) " +
+            "AND (:genreId IS NULL OR EXISTS (SELECT g FROM m.genres g WHERE g.genreId = :genreId))")
+    Page<Media> findAllWithFilters(
+            @Param("mediaType") MediaType mediaType,
+            @Param("accessLevel") String accessLevel,
+            @Param("genreId") Integer genreId,
+            Pageable pageable);
+
+    @Query("SELECT m FROM Media m " +
+            "WHERE (:title IS NULL OR LOWER(m.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
+            "AND (:mediaType IS NULL OR m.mediaType = :mediaType) " +
+            "AND (:releaseYear IS NULL OR m.releaseYear = :releaseYear) " +
+            "AND (:genreId IS NULL OR EXISTS (SELECT g FROM m.genres g WHERE g.genreId = :genreId))")
+    Page<Media> searchMedia(
+            @Param("title") String title,
+            @Param("mediaType") MediaType mediaType,
+            @Param("releaseYear") Integer releaseYear,
+            @Param("genreId") Integer genreId,
+            Pageable pageable);
 }

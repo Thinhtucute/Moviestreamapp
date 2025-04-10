@@ -19,9 +19,11 @@ public class Episode {
     @Column(name = "EpisodeID")
     int episodeId;
 
-    @ManyToOne
-    @JoinColumn(name = "SeasonID", nullable = false)
-    Season season;
+    @Column(name = "MediaID")
+    int mediaId;
+
+    @JoinColumn(name = "Season", nullable = false)
+    String season;
 
     @Column(name = "EpisodeNumber", nullable = false)
     int episodeNumber;
@@ -29,7 +31,7 @@ public class Episode {
     @Column(name = "Title", nullable = false)
     String title;
 
-    @Column(name = "Description")
+    @Column(name = "Description", columnDefinition = "TEXT") // Hoặc @Column(length = 500)
     String description;
 
     @Column(name = "Duration")
