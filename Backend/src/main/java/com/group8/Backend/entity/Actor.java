@@ -22,7 +22,7 @@ public class Actor {
     @Column(name = "ActorName", nullable = false)
     String actorName;
 
-    @Column(name = "Bio")
+    @Column(name = "Bio",columnDefinition = "TEXT")
     String bio;
 
     @Column(name = "Birthdate")

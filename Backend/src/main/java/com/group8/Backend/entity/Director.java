@@ -20,6 +20,6 @@ public class Director {
     @Column(name = "DirectorName", nullable = false)
     String directorName;
 
-    @Column(name = "Bio")
+    @Column(name = "Bio", columnDefinition = "TEXT")
     String bio;
 }

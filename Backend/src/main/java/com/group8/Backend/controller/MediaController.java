@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MediaController {
     private final MediaService mediaService;
-
     @PostMapping
     public ApiResponse<MediaResponse> createMedia(@RequestBody MediaCreationRequest request) {
         return ApiResponse.<MediaResponse>builder()
