@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MediaController {
     private final MediaService mediaService;
+
     @PostMapping
     public ApiResponse<MediaResponse> createMedia(@RequestBody MediaCreationRequest request) {
         return ApiResponse.<MediaResponse>builder()
@@ -41,4 +42,40 @@ public class MediaController {
                 .build();
     }
 
+    @GetMapping
+    public ApiResponse<PaginatedResponse<MediaResponse>> getAllMedia(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String mediaType,
+            @RequestParam(required = false) String accessLevel,
+            @RequestParam(required = false) Integer genreId) {
+        return ApiResponse.<PaginatedResponse<MediaResponse>>builder()
+                .code(1000)
+                .result(mediaService.getAllMedia(page, size, mediaType, accessLevel, genreId))
+                .build();
+    }
+
+    @GetMapping("/{mediaId}")
+    public ApiResponse<MediaResponse> getMediaDetails(@PathVariable int mediaId) {
+        return ApiResponse.<MediaResponse>builder()
+                .code(1000)
+                .result(mediaService.getMediaDetails(mediaId))
+                .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<PaginatedResponse<MediaResponse>> searchMedia(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String mediaType,
+            @RequestParam(required = false) Integer releaseYear,
+            @RequestParam(required = false) Integer genreId) {
+        return ApiResponse.<PaginatedResponse<MediaResponse>>builder()
+                .code(1000)
+                .result(mediaService.searchMedia(page, size, title, mediaType, releaseYear, genreId))
+                .build();
+    }
 }
+
+
