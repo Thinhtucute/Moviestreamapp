@@ -1,5 +1,5 @@
 // src/components/BannerSlider/BannerSlider.js
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useReducer, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Button, Typography } from '@mui/material';
 import { PlayArrow, FavoriteBorder, Share } from '@mui/icons-material';
@@ -7,10 +7,11 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import classNames from 'classnames/bind';
 import styles from './BannerSlider.module.scss';
-import { getMedia } from '@/services/bannerServices';
+import { useBanners } from '@/hooks/useBanners';
 
 const cx = classNames.bind(styles);
 
+// Variants cho animation
 const sliderVariants = {
     enter: (direction) => ({
         x: direction > 0 ? 1000 : -1000,
@@ -26,66 +27,86 @@ const sliderVariants = {
     }),
 };
 
+// Khởi tạo trạng thái ban đầu cho slider
+const initialState = {
+    currentIndex: 0,
+    direction: 0,
+    isPlaying: true,
+};
+
+// Reducer để xử lý trạng thái slider
+const sliderReducer = (state, action) => {
+    switch (action.type) {
+        case 'NEXT':
+            return {
+                ...state,
+                currentIndex: state.currentIndex + 1 >= action.payload ? 0 : state.currentIndex + 1,
+                direction: 1,
+            };
+        case 'PREV':
+            return {
+                ...state,
+                currentIndex: state.currentIndex - 1 < 0 ? action.payload - 1 : state.currentIndex - 1,
+                direction: -1,
+            };
+        case 'SET_INDEX':
+            return {
+                ...state,
+                currentIndex: action.payload,
+                direction: action.payload > state.currentIndex ? 1 : -1,
+            };
+        case 'TOGGLE_PLAY':
+            return { ...state, isPlaying: !state.isPlaying };
+        default:
+            return state;
+    }
+};
+
 function BannerSlider() {
-    const [[currentIndex, direction], setCurrentIndex] = useState([0, 0]);
-    const [banners, setBanners] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [state, dispatch] = useReducer(sliderReducer, initialState);
+    const { banners, loading, error } = useBanners();
     const sliderRef = useRef(null);
 
-   useEffect(() => {
-       async function fetchBanners() {
-           try {
-               const response = await getMedia();
-               // Trích xuất mảng content từ response.data.result
-               const bannersData = response?.result?.content || [];
-               setBanners(bannersData);
-           } catch (err) {
-               setError('Không thể tải dữ liệu banner');
-               console.error('Lỗi khi tải dữ liệu banner:', err);
-           } finally {
-               setLoading(false);
-           }
-       }
-       fetchBanners();
-   }, []);
-
-    const handleNext = () => {
+    // Memoize các hàm xử lý sự kiện để tránh tạo lại
+    const handleNext = useCallback(() => {
         if (banners.length > 0) {
-            setCurrentIndex([currentIndex + 1 >= banners.length ? 0 : currentIndex + 1, 1]);
+            dispatch({ type: 'NEXT', payload: banners.length });
         }
-    };
+    }, [banners.length]);
 
-    const handlePrev = () => {
+    const handlePrev = useCallback(() => {
         if (banners.length > 0) {
-            setCurrentIndex([currentIndex - 1 < 0 ? banners.length - 1 : currentIndex - 1, -1]);
+            dispatch({ type: 'PREV', payload: banners.length });
         }
-    };
+    }, [banners.length]);
 
-    const handleDotClick = (index) => {
-        if (banners.length > 0) {
-            setCurrentIndex([index, index > currentIndex ? 1 : -1]);
-        }
-    };
+    const handleDotClick = useCallback((index) => {
+        dispatch({ type: 'SET_INDEX', payload: index });
+    }, []);
 
-    const handleDragEnd = (event, info) => {
-        const threshold = 50;
-        if (info.offset.x < -threshold) {
-            handleNext();
-        } else if (info.offset.x > threshold) {
-            handlePrev();
-        }
-    };
+    const handleDragEnd = useCallback(
+        (event, info) => {
+            const threshold = 50;
+            if (info.offset.x < -threshold) {
+                handleNext();
+            } else if (info.offset.x > threshold) {
+                handlePrev();
+            }
+        },
+        [handleNext, handlePrev],
+    );
 
+    // Auto-play slider
     useEffect(() => {
-        if (banners.length > 0) {
+        if (banners.length > 0 && state.isPlaying) {
             const interval = setInterval(() => {
                 handleNext();
             }, 5000);
             return () => clearInterval(interval);
         }
-    }, [currentIndex, banners]);
+    }, [banners.length, state.isPlaying, handleNext]);
 
+    // Xử lý sự kiện kéo thả chuột
     useEffect(() => {
         const slider = sliderRef.current;
         if (!slider) return;
@@ -128,18 +149,20 @@ function BannerSlider() {
         };
     }, [handleNext, handlePrev]);
 
+    // Tính toán dots hiển thị
     const maxDots = 5;
     const visibleDots = Math.min(banners.length, maxDots);
     const dotIndices = Array.from({ length: visibleDots }, (_, i) => i);
 
-    // Log dữ liệu banners trước khi render
+    // Log dữ liệu để kiểm tra
     console.log('Giá trị banners trước khi render:', banners);
 
+    // Xử lý trạng thái loading, error, hoặc không có dữ liệu
     if (loading) return <Box>Đang tải...</Box>;
     if (error) return <Box>{error}</Box>;
     if (!banners || banners.length === 0) return <Box>Không có dữ liệu banner</Box>;
 
-    const currentBanner = banners[currentIndex];
+    const currentBanner = banners[state.currentIndex];
 
     return (
         <Box className={cx('banner-slider')}>
@@ -148,12 +171,12 @@ function BannerSlider() {
                 className={cx('slider-container')}
                 sx={{ position: 'relative', overflow: 'hidden', height: '100%', cursor: 'grab' }}
             >
-                <AnimatePresence initial={false} custom={direction}>
+                <AnimatePresence initial={false} custom={state.direction}>
                     <motion.img
-                        key={currentIndex}
-                        src={currentBanner?.posterURL || ''} // Sử dụng posterURL thay vì posterUrl
-                        alt={currentBanner?.title || 'Banner'}
-                        custom={direction}
+                        key={state.currentIndex}
+                        src={currentBanner.posterURL || ''}
+                        alt={currentBanner.title || 'Banner'}
+                        custom={state.direction}
                         variants={sliderVariants}
                         initial="enter"
                         animate="center"
@@ -178,10 +201,9 @@ function BannerSlider() {
                         position: 'absolute',
                         bottom: 0,
                         left: 0,
-                        width: '100%',
-                        height: '50%',
+                        width: '160%',
+                        height: '90%',
                         background: 'linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent)',
-                        borderRadius: '8px',
                     }}
                 />
 
@@ -198,12 +220,12 @@ function BannerSlider() {
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Typography variant="h2" sx={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
-                            {currentBanner?.title || 'Không có tiêu đề'}
+                            {currentBanner.title || 'Không có tiêu đề'}
                         </Typography>
                     </Box>
                     <Typography variant="h5" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                        {currentBanner?.releaseYear} •{' '}
-                        {currentBanner?.duration > 0 ? `${currentBanner.duration} phút` : 'Không xác định'}
+                        {currentBanner.releaseYear} •{' '}
+                        {currentBanner.duration > 0 ? `${currentBanner.duration} phút` : 'Không xác định'}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 2 }}>
                         <Button
@@ -292,7 +314,8 @@ function BannerSlider() {
                                 width: '10px',
                                 height: '10px',
                                 borderRadius: '50%',
-                                backgroundColor: currentIndex === index ? 'var(--primary)' : 'rgba(255, 255, 255, 0.5)',
+                                backgroundColor:
+                                    state.currentIndex === index ? 'var(--primary)' : 'rgba(255, 255, 255, 0.5)',
                                 cursor: 'pointer',
                             }}
                         />
