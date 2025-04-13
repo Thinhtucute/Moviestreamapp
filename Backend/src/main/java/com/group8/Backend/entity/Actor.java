@@ -27,4 +27,7 @@ public class Actor {
 
     @Column(name = "Birthdate")
     LocalDate birthdate;
+
+    @Column(name = "ProfileImageURL")
+    String profileImageURL;
 }
