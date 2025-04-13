@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,4 +17,5 @@ public class ActorResponse {
     String actorName;
     String bio;
     LocalDate birthdate;
+    String profileImageURL;
 }

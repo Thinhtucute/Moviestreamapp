@@ -18,6 +18,5 @@ public class EpisodeResponse {
     String title;
     String description;
     Integer duration;
-
     LocalDate releaseDate;
 }
