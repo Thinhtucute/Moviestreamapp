@@ -40,7 +40,7 @@ function Header() {
                         <NotificationsNoneIcon />
                     </IconButton>
                     <Button className={cx('buy-package-btn')}>Mua gói</Button>
-                    <Button color="inherit" className={cx('login-btn')}>
+                    <Button color="inherit" className={cx('login-btn')} component={Link} to="/login">
                         Đăng nhập
                     </Button>
                 </div>
