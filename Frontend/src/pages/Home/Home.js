@@ -9,7 +9,7 @@ function Home() {
      return (
          <Box className={cx('home')}>
              {/* Banner Slider */}
-             <BannerSlider />
+             {/* <BannerSlider /> */}
              <MoviesSlider size="large" title="Phim Nổi Bật" />
              <MoviesSlider size="small" title="Phim Đề Xuất" />
              <MoviesSlider size="large" orientation="landscape" title="Phim đang chiếu"></MoviesSlider>

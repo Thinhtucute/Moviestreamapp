@@ -1,6 +1,11 @@
 'use client';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { login } from '@/redux/features/auth/authSlice';
 import bgImage from '@/assets/images/bg.jpg';
-import { useState } from 'react';
+import Notification from '@/components/Notification/Notification';
+import useNotification from '@/hooks/useNotification';
 import {
     Box,
     Container,
@@ -14,15 +19,44 @@ import {
     FormControlLabel,
     Checkbox,
     Grid,
+    Alert,
 } from '@mui/material';
-import { Email, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
+import { Person, Lock, Visibility, VisibilityOff, Style } from '@mui/icons-material';
+
 
 export default function Login() {
+    const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+    const { notification, showNotification, closeNotification } = useNotification(); // Sử dụng custom hook
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+
+    const handleChange = (e) => {
+        setCredentials({ ...credentials, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const result = await dispatch(login(credentials));
+        if (login.fulfilled.match(result)) {
+            showNotification('Đăng ký nhập thành công!', 'success'); // Hiển thị thông bá0
+            setTimeout(() => {
+                navigate('/'); // Chuyển hướng sau 1 giây để người dùng thấy thông báo
+            }, 3000);
+        }
+    };
+
+    // Chuyển hướng nếu đã đăng nhập
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/');
+        }
+    }, [isAuthenticated, navigate]);
 
     return (
         <Box
@@ -31,7 +65,7 @@ export default function Login() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundImage: "url('" + bgImage + "')",
+                backgroundImage: `url(${bgImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
@@ -43,7 +77,7 @@ export default function Login() {
                     left: 0,
                     width: '100%',
                     height: '100%',
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
                 },
             }}
         >
@@ -51,7 +85,7 @@ export default function Login() {
                 <Paper
                     elevation={6}
                     sx={{
-                        padding: 4, // Tăng padding
+                        padding: 4,
                         backgroundColor: 'rgba(18, 18, 18, 0.8)',
                         backdropFilter: 'blur(8px)',
                         color: 'white',
@@ -62,37 +96,39 @@ export default function Login() {
                         Đăng Nhập
                     </Typography>
 
-                    <Box component="form" sx={{ mt: 1 }}>
+                    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
                         <TextField
                             margin="normal"
                             required
                             fullWidth
-                            id="email"
-                            label="Email"
-                            name="email"
-                            autoComplete="email"
+                            id="username"
+                            label="Tên đăng nhập"
+                            name="username"
+                            autoComplete="username"
                             variant="outlined"
+                            value={credentials.username}
+                            onChange={handleChange}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Email sx={{ color: 'var(--primary)' }} />
+                                        <Person sx={{ color: 'var(--primary)' }} />
                                     </InputAdornment>
                                 ),
                             }}
                             sx={{
                                 mb: 3,
-                                fontSize: '1.2rem', // Tăng kích thước chữ
+                                fontSize: '1.2rem',
                                 '& .MuiOutlinedInput-root': {
                                     '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.23)' },
                                     '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
                                     '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
                                 },
                                 '& .MuiInputLabel-root': {
-                                    fontSize: '1.2rem', // Tăng kích thước label
+                                    fontSize: '1.2rem',
                                     color: 'rgba(255, 255, 255, 0.7)',
                                     '&.Mui-focused': { color: 'var(--primary)' },
                                 },
-                                '& .MuiOutlinedInput-input': { color: 'white', fontSize: '1.2rem' }, // Tăng kích thước chữ trong ô nhập
+                                '& .MuiOutlinedInput-input': { color: 'white', fontSize: '1.2rem' },
                             }}
                         />
 
@@ -106,6 +142,8 @@ export default function Login() {
                             id="password"
                             autoComplete="current-password"
                             variant="outlined"
+                            value={credentials.password}
+                            onChange={handleChange}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -134,11 +172,11 @@ export default function Login() {
                                     '&.Mui-focused fieldset': { borderColor: 'var(--primary)' },
                                 },
                                 '& .MuiInputLabel-root': {
-                                    fontSize: '1.2rem', // Tăng kích thước label
+                                    fontSize: '1.2rem',
                                     color: 'rgba(255, 255, 255, 0.7)',
                                     '&.Mui-focused': { color: 'var(--primary)' },
                                 },
-                                '& .MuiOutlinedInput-input': { color: 'white', fontSize: '1.2rem' }, // Tăng kích thước chữ trong ô nhập
+                                '& .MuiOutlinedInput-input': { color: 'white', fontSize: '1.2rem' },
                             }}
                         />
 
@@ -158,7 +196,7 @@ export default function Login() {
                                         />
                                     }
                                     label="Ghi nhớ đăng nhập"
-                                    sx={{ fontSize: '1.1rem', color: 'rgba(255, 255, 255, 0.7)' }} // Tăng kích thước chữ
+                                    sx={{ fontSize: '1.1rem', color: 'rgba(255, 255, 255, 0.7)' }}
                                 />
                             </Grid>
                             <Grid item>
@@ -166,7 +204,7 @@ export default function Login() {
                                     href="#"
                                     variant="body2"
                                     sx={{
-                                        fontSize: '1.1rem', // Tăng kích thước chữ
+                                        fontSize: '1.1rem',
                                         color: 'var(--primary)',
                                         textDecoration: 'none',
                                         '&:hover': {
@@ -179,15 +217,22 @@ export default function Login() {
                             </Grid>
                         </Grid>
 
+                        {error && (
+                            <Alert severity="error" sx={{ mb: 2, lineHeight: 2, fontSize: 12 }}>
+                                {error}
+                            </Alert>
+                        )}
+
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
+                            disabled={loading}
                             sx={{
                                 mt: 2,
                                 mb: 3,
-                                py: 1.5, // Tăng chiều cao nút
-                                fontSize: '1.1rem', // Tăng kích thước chữ
+                                py: 1.5,
+                                fontSize: '1.1rem',
                                 fontWeight: 'bold',
                                 borderRadius: '8px',
                                 background: 'var(--primary)',
@@ -196,7 +241,7 @@ export default function Login() {
                                 },
                             }}
                         >
-                            Đăng Nhập
+                            {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
                         </Button>
 
                         <Box sx={{ textAlign: 'center', mt: 1 }}>
@@ -206,7 +251,7 @@ export default function Login() {
                                     href="/register"
                                     variant="body2"
                                     sx={{
-                                        fontSize: '1.1rem', // Tăng kích thước chữ
+                                        fontSize: '1.1rem',
                                         color: 'var(--primary)',
                                         textDecoration: 'none',
                                         '&:hover': {
@@ -221,6 +266,7 @@ export default function Login() {
                     </Box>
                 </Paper>
             </Container>
+            <Notification notification={notification} closeNotification={closeNotification} />
         </Box>
     );
 }
