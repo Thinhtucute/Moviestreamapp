@@ -1,27 +1,42 @@
-// src/components/BannerSlider/BannerSlider.module.scss
 .banner-slider {
-  width: 100%;
-  height: 600px; // Mặc định là 600px
-
-  margin: 0 auto;
-
-  .slider-container {
-    position: relative;
     width: 100%;
-    height: 100%; // Chiều cao theo .banner-slider
-    overflow: hidden;
+    height: 600px; // Mặc định là 600px
+    margin: 0 auto;
 
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .slider-container {
+        position: relative;
+        width: 100%;
+        height: 100%; // Chiều cao theo .banner-slider
+        overflow: hidden;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .info {
+            bottom: 30px; // Vị trí mặc định
+        }
+
+        .thumbnails {
+            bottom: 62px; // Mặc định là 10px
+        }
     }
-  }
 }
 
-// Media query cho màn hình lớn hơn 960px
+// Media query cho màn hình lớn hơn 1600px
 @media (min-width: 1600px) {
-  .banner-slider {
-    height: 760px; // Tăng chiều cao lên 760px
-  }
+    .banner-slider {
+        height: 760px; // Tăng chiều cao lên 760px
+    }
+
+    .slider-container .info {
+        bottom: 80px; // Thay đổi vị trí bottom khi màn hình lớn hơn 1600px
+        left: 60px; // Điều chỉnh khoảng cách từ bên trái
+    }
+
+    .slider-container .thumbnails {
+        bottom: 110px; // Thay đổi vị trí bottom khi màn hình lớn hơn 1600px
+    }
 }

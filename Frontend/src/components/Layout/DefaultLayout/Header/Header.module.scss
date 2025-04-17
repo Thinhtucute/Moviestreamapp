@@ -11,7 +11,7 @@
     }
 
     &.scrolled {
-        background-color: var(--black); // Màu hiện tại khi cuộn xuống
+        background-color: black; // Màu hiện tại khi cuộn xuống
     }
 
     .header-toolbar {
@@ -22,7 +22,7 @@
         min-height: 64px;
 
         .logo {
-            width: 125px;
+            width: 150px;
             object-fit: contain;
         }
 
@@ -45,18 +45,14 @@
         .header-actions {
             display: flex;
             align-items: center;
-
-            .search-btn svg,
-            .notification-btn svg {
-                color: var(--white);
-                &:hover {
-                    color: var(--primary);
-                }
-            }
+            gap: 10px;
 
             .buy-package-btn {
                 background-color: var(--primary);
                 color: var(--white);
+                font-size: 12px;
+                padding-left: 15px;
+                padding-right: 15px;
             }
 
             .login-btn {
@@ -64,6 +60,7 @@
                 &:hover {
                     color: var(--primary);
                 }
+                font-size: 12px;
             }
         }
     }

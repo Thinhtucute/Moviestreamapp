@@ -1,5 +1,5 @@
 import React, { useReducer, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence, color } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Button, Typography } from '@mui/material';
 import { PlayArrow, FavoriteBorder, Share } from '@mui/icons-material';
 import classNames from 'classnames/bind';
@@ -208,7 +208,7 @@ function BannerSlider() {
                         style={{
                             position: 'absolute',
                             width: '100%',
-                            height: '100%',
+                            height: '100 THROUGH',
                             objectFit: 'cover',
                             cursor: 'grab',
                         }}
@@ -216,19 +216,51 @@ function BannerSlider() {
                     />
                 </AnimatePresence>
 
+                {/* Gradient overlay from top to bottom */}
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%', // Adjusted from 160% to 100% for better fit
+                        height: '20%',
+                        background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent)', // Gradient from top to bottom
+                    }}
+                />
                 <Box
                     sx={{
                         position: 'absolute',
                         bottom: 0,
                         left: 0,
-                        width: '160%',
-                        height: '90%',
+                        width: '100%',
+                        height: '20%',
                         background: 'linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent)',
+                    }}
+                />
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '2%',
+                        height: '100%',
+                        background: 'linear-gradient(to right, rgba(0, 0, 0, 0.4), transparent)',
+                    }}
+                />
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: '2%',
+                        height: '100%',
+                        background: 'linear-gradient(to left, rgba(0, 0, 0, 0.4), transparent)',
                     }}
                 />
 
                 <AnimatePresence initial={false} custom={state.direction}>
                     <motion.div
+                        className={cx('info')}
                         key={state.currentIndex}
                         custom={state.direction}
                         variants={infoVariants}
@@ -238,7 +270,6 @@ function BannerSlider() {
                         transition={{ x: { type: 'spring', stiffness: 300, damping: 30 }, opacity: { duration: 0.3 } }}
                         style={{
                             position: 'absolute',
-                            bottom: '40px',
                             left: '40px',
                             color: 'white',
                             display: 'flex',
@@ -279,14 +310,14 @@ function BannerSlider() {
                         >
                             {currentBanner.description}
                         </Typography>
-                        <Box sx={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             {currentBanner.genres.map((genre) => (
                                 <Button
                                     key={genre.genreId}
                                     variant="outlined"
                                     color="white"
                                     sx={{
-                                        borderColor: 'var(--primary)', // Màu viền cam (sử dụng biến CSS nếu có)
+                                        borderColor: 'var(--primary)',
                                     }}
                                 >
                                     {genre.genreName}
@@ -340,10 +371,11 @@ function BannerSlider() {
 
                 {/* Thumbnails Section */}
                 <Box
+                    className={cx('thumbnails')}
                     sx={{
                         position: 'absolute',
-                        bottom: '10%',
-                        right: '40px', // Matches the left margin of the info box (40px)
+                        bottom: '60px',
+                        right: '40px',
                         display: 'flex',
                         gap: '8px',
                     }}
