@@ -3,10 +3,10 @@
 
 :root {
     --primary: #ff6500 !important;
-    --black: #000 !important;
+    --black: #191b24 !important;
     --white: #fff;
-    --text-color: #9b9b9b;
-    --margin-full-page: 0 15%;
+    --text-color: rgba(255, 255, 255, 0.8);
+    --margin-left-right: 40px;
     --default-layout-header-height: 50px;
 }
 
@@ -26,9 +26,9 @@ body {
     text-rendering: optimizeSpeed;
     max-width: 100%;
 
-    background-color: var(--black);
+    background-color: #191b24;
     overflow-x: hidden; // Ẩn thanh cuộn ngang
     // display: flex;
     // flex-direction: column;
-    margin: var(--margin-full-page);
+    // margin: var(--margin-full-page);
 }

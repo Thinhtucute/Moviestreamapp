@@ -1,16 +1,39 @@
-import classNames from 'classnames/bind'; // Sửa "classnames" thành "classnames/bind"
+import React, { useState, useEffect } from 'react';
+import classNames from 'classnames/bind';
 import styles from '@/components/Layout/DefaultLayout/Header/Header.module.scss';
 import { AppBar, Toolbar, Button, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import images from '@/assets/images';
-import { Link } from 'react-router-dom'; // Import Link từ react-router-dom
+import { Link } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
 function Header() {
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 0) {
+                setIsScrolled(true);
+            } else {
+                setIsScrolled(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
     return (
-        <AppBar position="sticky" className={cx('header')} sx={{ backgroundColor: 'var(--black)', boxShadow: 'none' }}>
+        <AppBar
+            position="fixed"
+            className={cx('header', { transparent: !isScrolled, scrolled: isScrolled })}
+            sx={{ boxShadow: 'none' }}
+        >
             <Toolbar className={cx('header-toolbar')}>
                 <img src={images.logo} alt="Logo" className={cx('logo')} />
 

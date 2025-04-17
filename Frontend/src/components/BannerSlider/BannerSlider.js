@@ -1,18 +1,18 @@
-// src/components/BannerSlider/BannerSlider.js
 import React, { useReducer, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, color } from 'framer-motion';
 import { Box, Button, Typography } from '@mui/material';
 import { PlayArrow, FavoriteBorder, Share } from '@mui/icons-material';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import classNames from 'classnames/bind';
 import styles from './BannerSlider.module.scss';
 import { useBanners } from '@/hooks/useBanners';
+import { useNavigate } from 'react-router-dom';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 
 const cx = classNames.bind(styles);
 
-// Variants cho animation
-const sliderVariants = {
+// Variants for the poster (slide in from the right)
+const posterVariants = {
     enter: (direction) => ({
         x: direction > 0 ? 1000 : -1000,
         opacity: 0,
@@ -27,14 +27,30 @@ const sliderVariants = {
     }),
 };
 
-// Khởi tạo trạng thái ban đầu cho slider
+// Variants for the info box (slide in from the left)
+const infoVariants = {
+    enter: (direction) => ({
+        x: direction > 0 ? -500 : 500,
+        opacity: 0,
+    }),
+    center: {
+        x: 0,
+        opacity: 1,
+    },
+    exit: (direction) => ({
+        x: direction < 0 ? -500 : 500,
+        opacity: 0,
+    }),
+};
+
+// Initial state for the slider
 const initialState = {
     currentIndex: 0,
     direction: 0,
     isPlaying: true,
 };
 
-// Reducer để xử lý trạng thái slider
+// Reducer to handle slider state
 const sliderReducer = (state, action) => {
     switch (action.type) {
         case 'NEXT':
@@ -66,8 +82,15 @@ function BannerSlider() {
     const [state, dispatch] = useReducer(sliderReducer, initialState);
     const { banners, loading, error } = useBanners();
     const sliderRef = useRef(null);
+    const navigate = useNavigate();
 
-    // Memoize các hàm xử lý sự kiện để tránh tạo lại
+    const handleWatchNow = useCallback(() => {
+        const currentBanner = banners[state.currentIndex];
+        if (currentBanner && currentBanner.mediaId) {
+            navigate(`/media/${currentBanner.mediaId}`);
+        }
+    }, [banners, state.currentIndex, navigate]);
+
     const handleNext = useCallback(() => {
         if (banners.length > 0) {
             dispatch({ type: 'NEXT', payload: banners.length });
@@ -80,7 +103,7 @@ function BannerSlider() {
         }
     }, [banners.length]);
 
-    const handleDotClick = useCallback((index) => {
+    const handleThumbnailClick = useCallback((index) => {
         dispatch({ type: 'SET_INDEX', payload: index });
     }, []);
 
@@ -101,12 +124,12 @@ function BannerSlider() {
         if (banners.length > 0 && state.isPlaying) {
             const interval = setInterval(() => {
                 handleNext();
-            }, 5000);
+            }, 30000);
             return () => clearInterval(interval);
         }
     }, [banners.length, state.isPlaying, handleNext]);
 
-    // Xử lý sự kiện kéo thả chuột
+    // Handle mouse drag events
     useEffect(() => {
         const slider = sliderRef.current;
         if (!slider) return;
@@ -149,15 +172,6 @@ function BannerSlider() {
         };
     }, [handleNext, handlePrev]);
 
-    // Tính toán dots hiển thị
-    const maxDots = 5;
-    const visibleDots = Math.min(banners.length, maxDots);
-    const dotIndices = Array.from({ length: visibleDots }, (_, i) => i);
-
-    // Log dữ liệu để kiểm tra
-    console.log('Giá trị banners trước khi render:', banners);
-
-    // Xử lý trạng thái loading, error, hoặc không có dữ liệu
     if (loading) return <Box>Đang tải...</Box>;
     if (error) return <Box>{error}</Box>;
     if (!banners || banners.length === 0) return <Box>Không có dữ liệu banner</Box>;
@@ -169,7 +183,13 @@ function BannerSlider() {
             <Box
                 ref={sliderRef}
                 className={cx('slider-container')}
-                sx={{ position: 'relative', overflow: 'hidden', height: '100%', cursor: 'grab' }}
+                sx={{
+                    position: 'relative',
+                    overflow: 'hidden',
+                    height: { xs: '100%' },
+                    cursor: 'grab',
+                    boxShadow: 'inset 0 0 200px 50px #191b24, 0 0 50px #000',
+                }}
             >
                 <AnimatePresence initial={false} custom={state.direction}>
                     <motion.img
@@ -177,7 +197,7 @@ function BannerSlider() {
                         src={currentBanner.posterURL || ''}
                         alt={currentBanner.title || 'Banner'}
                         custom={state.direction}
-                        variants={sliderVariants}
+                        variants={posterVariants}
                         initial="enter"
                         animate="center"
                         exit="exit"
@@ -207,118 +227,155 @@ function BannerSlider() {
                     }}
                 />
 
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        bottom: '40px',
-                        left: '40px',
-                        color: 'white',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '8px',
-                    }}
-                >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Typography variant="h2" sx={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
-                            {currentBanner.title || 'Không có tiêu đề'}
+                <AnimatePresence initial={false} custom={state.direction}>
+                    <motion.div
+                        key={state.currentIndex}
+                        custom={state.direction}
+                        variants={infoVariants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{ x: { type: 'spring', stiffness: 300, damping: 30 }, opacity: { duration: 0.3 } }}
+                        style={{
+                            position: 'absolute',
+                            bottom: '40px',
+                            left: '40px',
+                            color: 'white',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '20px',
+                        }}
+                    >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Typography variant="h2" sx={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                {currentBanner.title || 'Không có tiêu đề'}
+                            </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: '10px' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                <EventAvailableIcon fontSize="medium" sx={{ color: 'var(--primary)' }} />
+                                <Typography variant="h5" sx={{ color: 'var(--white)' }}>
+                                    {currentBanner.releaseYear}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                <HourglassEmptyIcon fontSize="medium" sx={{ color: 'var(--primary)' }} />
+                                <Typography variant="h5" sx={{ color: 'var(--white)' }}>
+                                    {currentBanner.duration > 0 ? `${currentBanner.duration} phút` : '90 phút'}
+                                </Typography>
+                            </Box>
+                        </Box>
+                        <Typography
+                            variant="h5"
+                            sx={{
+                                color: 'var(--white)',
+                                width: '40%',
+                                display: '-webkit-box',
+                                WebkitBoxOrient: 'vertical',
+                                WebkitLineClamp: 3,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            }}
+                        >
+                            {currentBanner.description}
                         </Typography>
-                    </Box>
-                    <Typography variant="h5" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-                        {currentBanner.releaseYear} •{' '}
-                        {currentBanner.duration > 0 ? `${currentBanner.duration} phút` : 'Không xác định'}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 2 }}>
-                        <Button
-                            variant="contained"
-                            startIcon={<PlayArrow />}
-                            sx={{
-                                backgroundColor: 'var(--primary)',
-                                color: 'white',
-                                fontWeight: 'bold',
-                                textTransform: 'none',
-                                fontSize: '16px',
-                                padding: '10px 40px',
-                                '&:hover': { backgroundColor: '#e55b00' },
-                            }}
-                        >
-                            Xem ngay
-                        </Button>
-                        <Button
-                            sx={{
-                                color: 'white',
-                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                borderRadius: '50%',
-                                minWidth: '48px',
-                                height: '48px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
-                            }}
-                        >
-                            <FavoriteBorder fontSize="large" />
-                        </Button>
-                        <Button
-                            sx={{
-                                color: 'white',
-                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                borderRadius: '50%',
-                                minWidth: '48px',
-                                height: '48px',
-                                '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
-                            }}
-                        >
-                            <Share fontSize="large" />
-                        </Button>
-                    </Box>
-                </Box>
+                        <Box sx={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                            {currentBanner.genres.map((genre) => (
+                                <Button
+                                    key={genre.genreId}
+                                    variant="outlined"
+                                    color="white"
+                                    sx={{
+                                        borderColor: 'var(--primary)', // Màu viền cam (sử dụng biến CSS nếu có)
+                                    }}
+                                >
+                                    {genre.genreName}
+                                </Button>
+                            ))}
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 4, mb: 4 }}>
+                            <Button
+                                variant="contained"
+                                startIcon={<PlayArrow />}
+                                onClick={handleWatchNow}
+                                sx={{
+                                    backgroundColor: 'var(--primary)',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    textTransform: 'none',
+                                    fontSize: '16px',
+                                    padding: '10px 40px',
+                                    '&:hover': { backgroundColor: '#e55b00' },
+                                }}
+                            >
+                                Xem ngay
+                            </Button>
+                            <Button
+                                sx={{
+                                    color: 'white',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '50%',
+                                    minWidth: '48px',
+                                    height: '48px',
+                                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
+                                }}
+                            >
+                                <FavoriteBorder fontSize="large" />
+                            </Button>
+                            <Button
+                                sx={{
+                                    color: 'white',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '50%',
+                                    minWidth: '48px',
+                                    height: '48px',
+                                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
+                                }}
+                            >
+                                <Share fontSize="large" />
+                            </Button>
+                        </Box>
+                    </motion.div>
+                </AnimatePresence>
 
-                <Box
-                    onClick={handlePrev}
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '10px',
-                        transform: 'translateY(-50%)',
-                        color: 'white',
-                        cursor: 'pointer',
-                    }}
-                >
-                    <ArrowBackIosIcon sx={{ fontSize: '40px', opacity: 0.7, '&:hover': { opacity: 1 } }} />
-                </Box>
-                <Box
-                    onClick={handleNext}
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        right: '10px',
-                        transform: 'translateY(-50%)',
-                        color: 'white',
-                        cursor: 'pointer',
-                    }}
-                >
-                    <ArrowForwardIosIcon sx={{ fontSize: '40px', opacity: 0.7, '&:hover': { opacity: 1 } }} />
-                </Box>
-
+                {/* Thumbnails Section */}
                 <Box
                     sx={{
                         position: 'absolute',
-                        bottom: '10px',
-                        right: '20px',
+                        bottom: '10%',
+                        right: '40px', // Matches the left margin of the info box (40px)
                         display: 'flex',
                         gap: '8px',
                     }}
                 >
-                    {dotIndices.map((index) => (
+                    {banners.map((banner, index) => (
                         <Box
                             key={index}
-                            onClick={() => handleDotClick(index)}
+                            onClick={() => handleThumbnailClick(index)}
                             sx={{
-                                width: '10px',
-                                height: '10px',
-                                borderRadius: '50%',
-                                backgroundColor:
-                                    state.currentIndex === index ? 'var(--primary)' : 'rgba(255, 255, 255, 0.5)',
+                                width: '80px',
+                                height: '45px',
+                                borderRadius: '4px',
+                                overflow: 'hidden',
                                 cursor: 'pointer',
+                                border: state.currentIndex === index ? '2px solid var(--primary)' : 'none',
+                                opacity: state.currentIndex === index ? 1 : 0.7,
+                                transition: 'opacity 0.3s ease',
+                                '&:hover': {
+                                    opacity: 1,
+                                },
                             }}
-                        />
+                        >
+                            <img
+                                src={banner.posterURL || ''}
+                                alt={banner.title || 'Thumbnail'}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                }}
+                            />
+                        </Box>
                     ))}
                 </Box>
             </Box>
