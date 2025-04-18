@@ -204,7 +204,11 @@ const authSlice = createSlice({
             })
             .addCase(logout.rejected, (state, action) => {
                 state.loading = false;
+                state.token = null;
+                state.isAuthenticated = false;
+                state.user = null;
                 state.error = action.payload.message || 'Đăng xuất thất bại';
+                localStorage.removeItem('token'); // Xóa token ngay cả khi lỗi
             });
 
         // Check Token

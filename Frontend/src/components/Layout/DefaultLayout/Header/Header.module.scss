@@ -47,20 +47,12 @@
             align-items: center;
             gap: 10px;
 
-            .buy-package-btn {
+            .buy-package-btn, .login-btn {
                 background-color: var(--primary);
                 color: var(--white);
                 font-size: 12px;
                 padding-left: 15px;
                 padding-right: 15px;
-            }
-
-            .login-btn {
-                color: var(--white);
-                &:hover {
-                    color: var(--primary);
-                }
-                font-size: 12px;
             }
         }
     }

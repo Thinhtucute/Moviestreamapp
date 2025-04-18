@@ -1,24 +1,36 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicRoutes } from '@/routes/routes';
-import { DefaultLayout } from '@/components/Layout'; // Ensure this path is correct
+import { DefaultLayout } from '@/components/Layout';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { checkToken } from '@/redux/features/auth/authSlice';
 
 function App() {
+    const dispatch = useDispatch();
+    const { token } = useSelector((state) => state.auth);
+
+    // Kiểm tra token khi ứng dụng khởi động
+    useEffect(() => {
+        if (token) {
+            dispatch(checkToken());
+        }
+    }, [dispatch, token]);
+
     return (
         <Router>
             <div className="App">
                 <Routes>
                     {publicRoutes.map((route, index) => {
-                        const Layout = route.layout || DefaultLayout; // Default layout nếu không có layout
+                        const Layout = route.layout || DefaultLayout;
                         const Page = route.component;
 
-                        // Nếu không có layout thì không bọc trong Layout
                         return (
                             <Route
                                 key={index}
                                 path={route.path}
                                 element={
                                     route.layout === null ? (
-                                        <Page /> // Nếu layout là null, chỉ render component
+                                        <Page />
                                     ) : (
                                         <Layout>
                                             <Page />

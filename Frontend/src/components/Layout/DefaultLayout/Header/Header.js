@@ -5,31 +5,58 @@ import { AppBar, Toolbar, Button, IconButton, Box, Badge } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import images from '@/assets/images';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import { Autocomplete, InputAdornment } from '@mui/material';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import Typography from '@mui/material/Typography';
-
-
+import { logout } from '@/redux/features/auth/authSlice';
+import avatar from '@/assets/images/avatar.jpg';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 const cx = classNames.bind(styles);
 const options = ['Option 1', 'Option 2'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
-
+ const settings = [
+     { text: 'Favorite', icon: <FavoriteBorderIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+     { text: 'Playlist', icon: <LibraryBooksIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+     { text: 'Keep watching', icon: <VisibilityIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+     { text: 'Profile', icon: <PersonOutlineIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+     { text: 'Logout', icon: <ExitToAppIcon sx={{ fontSize: '20px', color: 'var(--primary)' }} /> },
+ ];
 function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
-    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-    const [anchorElUser, setAnchorElUser] = React.useState(null);
+    const { isAuthenticated, loading, token } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [anchorElUser, setAnchorElUser] = useState(null);
+
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
     };
+
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
+
+    const handleMenuItemClick = async (setting) => {
+        handleCloseUserMenu();
+        if (setting === 'Logout') {
+            try {
+                await dispatch(logout(token)).unwrap();
+                navigate('/login');
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+    };
+
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 0) {
@@ -76,12 +103,15 @@ function Header() {
                                 border: 'none',
                             },
                             '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                border: '1px solid var(--white)', // Viền trắng khi focus
+                                border: '1px solid var(--white)',
                             },
                             '& input::placeholder': {
                                 color: 'white',
                                 opacity: 1,
                                 fontSize: '12px',
+                            },
+                            '& .MuiAutocomplete-endAdornment': {
+                                display: 'none', // Ẩn mũi tên xuống
                             },
                         }}
                         renderInput={(params) => (
@@ -101,7 +131,6 @@ function Header() {
                         )}
                     />
 
-                    {/* Menu chính */}
                     <div className={cx('menu-items')}>
                         <Button color="inherit" className={cx('menu-item')} component={Link} to="/">
                             Trang chủ
@@ -122,23 +151,33 @@ function Header() {
                 </Box>
 
                 <div className={cx('header-actions')}>
-                    <IconButton size="large" aria-label="show 17 new notifications" color="inherit">
-                        <Badge badgeContent={17} color="error">
-                            <NotificationsIcon sx={{ fontSize: '20px' }} />
-                        </Badge>
-                    </IconButton>
-                    <Button size="large" className={cx('buy-package-btn')}>
-                        Mua gói
-                    </Button>
-                    {isAuthenticated ? (
-                        <Box sx={{ flexGrow: 0 }}>
-                            <Tooltip title="Open settings">
+                    {loading ? (
+                        <Typography>Loading...</Typography>
+                    ) : isAuthenticated ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Button size="large" className={cx('buy-package-btn')}>
+                                Mua gói
+                            </Button>
+                            <IconButton size="large" aria-label="show 17 new notifications" color="inherit">
+                                <Badge badgeContent={17} color="error">
+                                    <NotificationsIcon sx={{ fontSize: '20px' }} />
+                                </Badge>
+                            </IconButton>
+                            <Tooltip>
                                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                    <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                                    <Avatar alt="User" src={avatar} />
                                 </IconButton>
                             </Tooltip>
                             <Menu
-                                sx={{ mt: '45px' }}
+                                sx={{
+                                    mt: '45px',
+                                    '& .MuiPaper-root': {
+                                        backgroundColor: 'var(--black)',
+                                        borderRadius: '10px',
+                                        minWidth: '200px',
+                                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.5)',
+                                    },
+                                }}
                                 id="menu-appbar"
                                 anchorEl={anchorElUser}
                                 anchorOrigin={{
@@ -153,16 +192,47 @@ function Header() {
                                 open={Boolean(anchorElUser)}
                                 onClose={handleCloseUserMenu}
                             >
+                                {/* Header with user greeting */}
+                                <MenuItem
+                                    sx={{
+                                        backgroundColor: 'var(--black)',
+                                        justifyContent: 'center',
+                                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                                        pointerEvents: 'none', // Disable clicking on header
+                                    }}
+                                >
+                                    <Typography sx={{ color: 'var(--white)', fontWeight: 'bold' }}>
+                                        Chào, thinhnocode
+                                    </Typography>
+                                </MenuItem>
+
+                                {/* Menu items */}
                                 {settings.map((setting) => (
-                                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                        <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+                                    <MenuItem
+                                        key={setting.text}
+                                        onClick={() => handleMenuItemClick(setting.text)}
+                                        sx={{
+                                            backgroundColor: 'var(--black)',
+                                            color: 'var(--white)',
+                                            padding: '10px 20px',
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                            },
+                                            display: 'flex',
+                                            gap: '10px', // Space between icon and text
+                                        }}
+                                    >
+                                        {setting.icon}
+                                        <Typography sx={{ color: 'var(--white)', fontSize: '16px' }}>
+                                            {setting.text}
+                                        </Typography>
                                     </MenuItem>
                                 ))}
                             </Menu>
                         </Box>
                     ) : (
-                        <Button size="large" color="inherit" className={cx('login-btn')} component={Link} to="/login">
-                            Đăng nhập
+                        <Button size="large" className={cx('login-btn')} component={Link} to="/login">
+                            LOGIN NOW
                         </Button>
                     )}
                 </div>
