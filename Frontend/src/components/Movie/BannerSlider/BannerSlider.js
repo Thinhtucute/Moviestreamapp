@@ -8,6 +8,7 @@ import { useBanners } from '@/hooks/useBanners';
 import { useNavigate } from 'react-router-dom';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import GenreCategory from '@/components/Movie/GenreCategory';
 
 const cx = classNames.bind(styles);
 
@@ -259,6 +260,15 @@ function BannerSlider() {
                 />
 
                 <AnimatePresence initial={false} custom={state.direction}>
+                    <Box
+                        sx={{
+                            position: 'absolute', // Cố định vị trí
+                            bottom: '0px', // Đặt phía dưới thumbnails
+                            zIndex: 10, // Đảm bảo hiển thị trên slide
+                        }}
+                    >
+                        <GenreCategory />
+                    </Box>
                     <motion.div
                         className={cx('info')}
                         key={state.currentIndex}
@@ -324,7 +334,7 @@ function BannerSlider() {
                                 </Button>
                             ))}
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 4, mb: 4 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 1, mb: 4 }}>
                             <Button
                                 variant="contained"
                                 startIcon={<PlayArrow />}
@@ -339,7 +349,7 @@ function BannerSlider() {
                                     '&:hover': { backgroundColor: '#e55b00' },
                                 }}
                             >
-                                Xem ngay
+                                Watch Now
                             </Button>
                             <Button
                                 sx={{

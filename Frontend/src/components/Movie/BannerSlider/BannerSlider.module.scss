@@ -1,6 +1,6 @@
 .banner-slider {
     width: 100%;
-    height: 600px; // Mặc định là 600px
+    height: 820px; // Mặc định là 600px
     margin: 0 auto;
 
     .slider-container {
@@ -16,11 +16,11 @@
         }
 
         .info {
-            bottom: 30px; // Vị trí mặc định
+            bottom: 200px; // Vị trí mặc định
         }
 
         .thumbnails {
-            bottom: 62px; // Mặc định là 10px
+            bottom: 230px; // Mặc định là 10px
         }
     }
 }
@@ -28,15 +28,14 @@
 // Media query cho màn hình lớn hơn 1600px
 @media (min-width: 1600px) {
     .banner-slider {
-        height: 760px; // Tăng chiều cao lên 760px
+        height: 900px; // Tăng chiều cao lên 760px
     }
 
     .slider-container .info {
-        bottom: 80px; // Thay đổi vị trí bottom khi màn hình lớn hơn 1600px
-        left: 60px; // Điều chỉnh khoảng cách từ bên trái
+        bottom: 120px; // Thay đổi vị trí bottom khi màn hình lớn hơn 1600px
     }
 
     .slider-container .thumbnails {
-        bottom: 110px; // Thay đổi vị trí bottom khi màn hình lớn hơn 1600px
+        bottom: 150px; // Thay đổi vị trí bottom khi màn hình lớn hơn 1600px
     }
 }

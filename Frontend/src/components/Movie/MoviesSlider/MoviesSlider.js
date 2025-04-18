@@ -141,12 +141,11 @@ function MoviesSlider({ movies = mockData, size = 'large', orientation = 'portra
 
     return (
         <Box className={cx('movie-slider')} sx={{ position: 'relative', overflow: 'hidden' }}>
-            {title && (
-                <Typography variant="h4" sx={{ color: 'white', mb: 2 }}>
-                    {title}
-                </Typography>
-            )}
-
+                {title && (
+                    <Typography variant="h4" sx={{ color: 'white', mb: 2 }}>
+                        {title}
+                    </Typography>
+                )}
             <Box className={cx('slider-container')} sx={{ position: 'relative' }}>
                 {canScrollLeft && (
                     <Box
