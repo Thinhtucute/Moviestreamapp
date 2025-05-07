@@ -2,7 +2,7 @@ import BannerSlider from '@/components/Movie/BannerSlider/BannerSlider';
 import classNames from 'classnames/bind';
 import styles from '@/pages/Home/Home.module.scss';
 import { Box } from '@mui/material';
-import MoviesSlider from '@/components/Movie/MoviesSlider/MoviesSlider';
+import VerticalMovieSections from '@/components/Movie/VerticalMovieCarousel/VerticalMovieSections'
 import MoviesCategorySlider from '@/components/Movie/MoviesHome1/MoviesCategorySlider'
 const cx = classNames.bind(styles);
 function Home() {
@@ -18,6 +18,8 @@ function Home() {
             <Box>
                <MoviesCategorySlider/>
             </Box>
+            
+            <VerticalMovieSections/>
         </Box>
     );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, CircularProgress, Typography, Button } from '@mui/material';
-import MoviesSlider from './MoviesHome'; // Đường dẫn tới MoviesSlider
+import MoviesHome from './MoviesHome'; // Đường dẫn tới MoviesHome
 import useFetch from '@/hooks/useFetch'; // Đường dẫn tới useFetch hook
 
 function MoviesCategorySlider() {
@@ -9,7 +9,9 @@ function MoviesCategorySlider() {
     const actionMovies = useFetch(`${process.env.REACT_APP_API_URL}/api/media/search?releaseYear=2025&genreId=1`);
     const familyMovies = useFetch(`${process.env.REACT_APP_API_URL}/api/media/search?releaseYear=2025&genreId=8`);
 
-    // Hàm ánh xạ dữ liệu API sang định dạng MoviesSlider
+
+
+    // Hàm ánh xạ dữ liệu API sang định dạng MoviesHome
     const mapMovies = (data) => {
         // Kiểm tra nếu data không tồn tại hoặc không có result.content
         if (!data || !data.result || !Array.isArray(data.result.content)) {
@@ -19,6 +21,7 @@ function MoviesCategorySlider() {
 
         // Ánh xạ dữ liệu từ result.content
         return data.result.content.map((item) => ({
+            mediaId: item.mediaId,
             image: item.posterURL || 'https://via.placeholder.com/300x169', // Lấy posterURL
             title: item.title || 'Không có tiêu đề',
             description: `${item.releaseYear || 'N/A'} • ${item.duration || 'N/A'} phút`,
@@ -51,7 +54,7 @@ function MoviesCategorySlider() {
                     </Box>
                 )}
                 {!comedyMovies.loading && !comedyMovies.error && (
-                    <MoviesSlider
+                    <MoviesHome
                         movies={comedyMoviesList}
                         size="small"
                         orientation="landscape"
@@ -72,7 +75,7 @@ function MoviesCategorySlider() {
                     </Box>
                 )}
                 {!actionMovies.loading && !actionMovies.error && (
-                    <MoviesSlider
+                    <MoviesHome
                         movies={actionMoviesList}
                         size="small"
                         orientation="landscape"
@@ -93,7 +96,7 @@ function MoviesCategorySlider() {
                     </Box>
                 )}
                 {!familyMovies.loading && !familyMovies.error && (
-                    <MoviesSlider
+                    <MoviesHome
                         movies={familyMoviesList}
                         size="small"
                         orientation="landscape"

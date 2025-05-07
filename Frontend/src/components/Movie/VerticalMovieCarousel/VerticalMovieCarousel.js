@@ -3,7 +3,8 @@ import { Box, Typography } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useNavigate } from 'react-router-dom';
-function MoviesHome({ movies = [], size = 'large', orientation = 'portrait', title = '' }) {
+import { color } from 'framer-motion';
+function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'portrait', title = '' }) {
 
     const scrollRef = React.useRef(null);
     const [isDragging, setIsDragging] = React.useState(false);
@@ -72,23 +73,8 @@ function MoviesHome({ movies = [], size = 'large', orientation = 'portrait', tit
 
     // Styles
     const styles = {
-        movieSlider: {
-            position: 'relative',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '30px',
-            overflow: 'hidden',
-            width: '100%',
-        },
-        title: {
-            background:
-                'linear-gradient(to right, var(--primary), #f59e0b, rgb(228, 185, 112), rgb(214, 216, 80), rgb(240, 236, 233))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            flexShrink: 0,
-            maxWidth: '150px',
-            lineHeight: '1.5',
-            fontSize: '28px',
+        movieSlider: {   
+            margin: 'var(--margin-left-right)',
         },
         sliderContainer: {
             position: 'relative',
@@ -144,7 +130,7 @@ function MoviesHome({ movies = [], size = 'large', orientation = 'portrait', tit
     return (
         <Box sx={styles.movieSlider}>
             {title && (
-                <Typography fontWeight={'bold'} variant="body" sx={styles.title}>
+                <Typography fontWeight={'bold'} variant="body" color='white' fontSize={24}>
                     {title}
                 </Typography>
             )}
@@ -178,15 +164,6 @@ function MoviesHome({ movies = [], size = 'large', orientation = 'portrait', tit
                                  onClick={() => navigate(`/media/${movie.mediaId}`)} // Sửa ở đây
                             />
                             <Box sx={styles.movieInfo}>
-                                {/* Dòng 1: Tiêu đề */}
-                                <Typography
-                                    variant={size === 'large' ? 'h6' : 'body'}
-                                    sx={{ fontWeight: 'bold', marginBottom: '4px' }}
-                                >
-                                    {movie.title}
-                                </Typography>
-
-                                {/* Dòng 2: Mô tả */}
                                 <Typography
                                     variant={size === 'large' ? 'body2' : 'body1'}
                                     sx={{
@@ -215,6 +192,6 @@ function MoviesHome({ movies = [], size = 'large', orientation = 'portrait', tit
     );
 }
 
-export default MoviesHome;
+export default VerticalMovieCarousel;
 
 

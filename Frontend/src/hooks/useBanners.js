@@ -39,7 +39,7 @@ export const useBanners = () => {
         return () => {
             isMounted = false; // Cleanup khi component unmount
         };
-    }, []); // Dependency array rỗng để chỉ chạy một lần khi mount
+    }, [state.banners.length, state.loading]); // Dependency array bao gồm các trạng thái để chạy lại khi chúng thay đổi
 
     return state;
 };
