@@ -42,11 +42,12 @@ function Header() {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const menuItems = [
-        { text: 'Trang chủ', path: '/' },
+        { text: 'Thể loại', path: '/phim-moi' },
         { text: 'Phim mới', path: '/phim-moi' },
         { text: 'Phim bộ', path: '/phim-bo' },
         { text: 'Phim lẻ', path: '/phim-le' },
         { text: 'Anime', path: '/anime' },
+        { text: 'Đạo diễn', path: '/daodien' },
     ];
 
     const handleOpenUserMenu = (event) => {

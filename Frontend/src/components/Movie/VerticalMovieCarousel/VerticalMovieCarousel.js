@@ -3,9 +3,7 @@ import { Box, Typography } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useNavigate } from 'react-router-dom';
-import { color } from 'framer-motion';
 function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'portrait', title = '' }) {
-
     const scrollRef = React.useRef(null);
     const [isDragging, setIsDragging] = React.useState(false);
     const [startX, setStartX] = React.useState(0);
@@ -63,6 +61,12 @@ function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'por
         setIsDragging(false);
     };
 
+    const handleMovieClick = (mediaId) => {
+        navigate(`/media/${mediaId}`);
+        // Scroll to top immediately
+        window.scrollTo(0, 0);
+    };
+
     if (!movies || movies.length === 0) {
         return (
             <Box sx={{ padding: '20px', textAlign: 'center' }}>
@@ -73,7 +77,7 @@ function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'por
 
     // Styles
     const styles = {
-        movieSlider: {   
+        movieSlider: {
             margin: 'var(--margin-left-right)',
         },
         sliderContainer: {
@@ -130,7 +134,7 @@ function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'por
     return (
         <Box sx={styles.movieSlider}>
             {title && (
-                <Typography fontWeight={'bold'} variant="body" color='white' fontSize={24}>
+                <Typography fontWeight={'bold'} variant="body" color="white" fontSize={24}>
                     {title}
                 </Typography>
             )}
@@ -161,22 +165,68 @@ function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'por
                                     height: '100%',
                                     objectFit: 'cover',
                                 }}
-                                 onClick={() => navigate(`/media/${movie.mediaId}`)} // Sửa ở đây
+                                onClick={() => handleMovieClick(movie.mediaId)}
                             />
-                            <Box sx={styles.movieInfo}>
-                                <Typography
-                                    variant={size === 'large' ? 'body2' : 'body1'}
+                            <Box sx={styles.movieInfo}>                        
+                                {/* Dòng 2: Mô tả */}
+                                <Box
                                     sx={{
-                                        color: 'var(--primary)',
-                                        lineHeight: '1.5',
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        left: 0,
-                                        padding: '10px',
+                                        display: 'flex',
+                                        gap: '6px',
+                                        alignItems: 'center',
+                                        marginTop: '4px',
                                     }}
                                 >
-                                    {movie.description}
-                                </Typography>
+                                    {/* Khung cho Release Year */}
+                                    <Box
+                                        sx={{
+                                            background:
+                                                'linear-gradient(135deg, rgba(255, 165, 0, 0.7), rgba(255, 140, 0, 0.5))',
+                                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                                            borderRadius: '6px',
+                                            padding: '0px 8px',
+                                            backdropFilter: 'blur(8px)',
+                                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                                        }}
+                                    >
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                color: 'white',
+                                                fontSize: '11px',
+                                                fontWeight: '600',
+                                                textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                                            }}
+                                        >
+                                            {movie.releaseYear}
+                                        </Typography>
+                                    </Box>
+
+                                    {/* Khung cho Duration */}
+                                    <Box
+                                        sx={{
+                                            background:
+                                                'linear-gradient(135deg, rgba(249, 115, 22, 0.8), rgba(245, 158, 11, 0.6))',
+                                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                                            borderRadius: '6px',
+                                            padding: '0px 8px',
+                                            backdropFilter: 'blur(8px)',
+                                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                                        }}
+                                    >
+                                        <Typography
+                                            variant="caption"
+                                            sx={{
+                                                color: 'white',
+                                                fontSize: '11px',
+                                                fontWeight: '600',
+                                                textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                                            }}
+                                        >
+                                            {movie.duration} min
+                                        </Typography>
+                                    </Box>
+                                </Box>
                             </Box>
                         </Box>
                     ))}
@@ -193,5 +243,3 @@ function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'por
 }
 
 export default VerticalMovieCarousel;
-
-

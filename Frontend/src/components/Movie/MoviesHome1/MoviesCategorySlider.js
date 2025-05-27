@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, CircularProgress, Typography, Button } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
 import MoviesHome from './MoviesHome'; // Đường dẫn tới MoviesHome
 import useFetch from '@/hooks/useFetch'; // Đường dẫn tới useFetch hook
 
@@ -24,7 +24,8 @@ function MoviesCategorySlider() {
             mediaId: item.mediaId,
             image: item.posterURL || 'https://via.placeholder.com/300x169', // Lấy posterURL
             title: item.title || 'Không có tiêu đề',
-            description: `${item.releaseYear || 'N/A'} • ${item.duration || 'N/A'} phút`,
+            releaseYear: item.releaseYear || 'N/A',
+            duration: item.duration || 'N/A',
         }));
     };
 
@@ -42,9 +43,8 @@ function MoviesCategorySlider() {
                 borderRadius: '20px',
             }}
         >
-            {/* Phim hài mới */}
+            {/* Phim hài */}
             <Box sx={{ marginBottom: '40px' }}>
-                {comedyMovies.loading && <CircularProgress />}
                 {comedyMovies.error && (
                     <Box sx={{ textAlign: 'center' }}>
                         <Typography color="error">Lỗi khi lấy phim hài: {comedyMovies.error.message}</Typography>
@@ -53,7 +53,7 @@ function MoviesCategorySlider() {
                         </Button>
                     </Box>
                 )}
-                {!comedyMovies.loading && !comedyMovies.error && (
+                {!comedyMovies.error && comedyMoviesList.length > 0 && (
                     <MoviesHome
                         movies={comedyMoviesList}
                         size="small"
@@ -63,9 +63,8 @@ function MoviesCategorySlider() {
                 )}
             </Box>
 
-            {/* Phim hành động mới */}
+            {/* Phim hành động */}
             <Box sx={{ marginBottom: '40px' }}>
-                {actionMovies.loading && <CircularProgress />}
                 {actionMovies.error && (
                     <Box sx={{ textAlign: 'center' }}>
                         <Typography color="error">Lỗi khi lấy phim hành động: {actionMovies.error.message}</Typography>
@@ -74,7 +73,7 @@ function MoviesCategorySlider() {
                         </Button>
                     </Box>
                 )}
-                {!actionMovies.loading && !actionMovies.error && (
+                {!actionMovies.error && actionMoviesList.length > 0 && (
                     <MoviesHome
                         movies={actionMoviesList}
                         size="small"
@@ -84,9 +83,8 @@ function MoviesCategorySlider() {
                 )}
             </Box>
 
-            {/* Phim gia đình mới */}
+            {/* Phim gia đình */}
             <Box>
-                {familyMovies.loading && <CircularProgress />}
                 {familyMovies.error && (
                     <Box sx={{ textAlign: 'center' }}>
                         <Typography color="error">Lỗi khi lấy phim gia đình: {familyMovies.error.message}</Typography>
@@ -95,7 +93,7 @@ function MoviesCategorySlider() {
                         </Button>
                     </Box>
                 )}
-                {!familyMovies.loading && !familyMovies.error && (
+                {!familyMovies.error && familyMoviesList.length > 0 && (
                     <MoviesHome
                         movies={familyMoviesList}
                         size="small"
