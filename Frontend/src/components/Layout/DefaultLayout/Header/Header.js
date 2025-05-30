@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames/bind';
 import styles from '@/components/Layout/DefaultLayout/Header/Header.module.scss';
-import { AppBar, Toolbar, Button, IconButton, Box, Badge, Drawer, List, ListItem, ListItemText, useMediaQuery, useTheme } from '@mui/material';
+import {
+    AppBar,
+    Toolbar,
+    Button,
+    IconButton,
+    Box,
+    Badge,
+    Drawer,
+    List,
+    ListItem,
+    ListItemText,
+    useMediaQuery,
+    useTheme,
+    Popper,
+    Paper,
+    MenuList,
+    MenuItem as MuiMenuItem,
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -22,15 +39,48 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+
 const cx = classNames.bind(styles);
 const options = ['Option 1', 'Option 2'];
- const settings = [
-     { text: 'Favorite', icon: <FavoriteBorderIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
-     { text: 'Playlist', icon: <LibraryBooksIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
-     { text: 'Keep watching', icon: <VisibilityIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
-     { text: 'Profile', icon: <PersonOutlineIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
-     { text: 'Logout', icon: <ExitToAppIcon sx={{ fontSize: '20px', color: 'var(--primary)' }} /> },
- ];
+
+const settings = [
+    { text: 'Favorite', icon: <FavoriteBorderIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+    { text: 'Playlist', icon: <LibraryBooksIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+    { text: 'Keep watching', icon: <VisibilityIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+    { text: 'Profile', icon: <PersonOutlineIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+    { text: 'Logout', icon: <ExitToAppIcon sx={{ fontSize: '20px', color: 'var(--primary)' }} /> },
+];
+
+const genres = [
+    'Action & Adventure',
+    'Adventure',
+    'Animation',
+    'Comedy',
+    'Crime',
+    'Documentary',
+    'Drama',
+    'Family',
+    'Fantasy',
+    'History',
+    'Horror',
+    'Kids',
+    'Music',
+    'Mystery',
+    'News',
+    'Reality',
+    'Romance',
+    'Sci-Fi & Fantasy',
+    'Science Fiction',
+    'Soap',
+    'Talk',
+    'Thriller',
+    'TV Movie',
+    'War',
+    'War & Politics',
+    'Western',
+];
+
 function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
     const { isAuthenticated, loading, token } = useSelector((state) => state.auth);
@@ -38,17 +88,44 @@ function Header() {
     const navigate = useNavigate();
     const [anchorElUser, setAnchorElUser] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [genreMenuOpen, setGenreMenuOpen] = useState(false);
+    const [genreAnchorEl, setGenreAnchorEl] = useState(null);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const menuItems = [
-        { text: 'Thể loại', path: '/phim-moi' },
+        { text: 'Thể loại', path: '/the-loai', hasDropdown: true },
         { text: 'Phim mới', path: '/phim-moi' },
         { text: 'Phim bộ', path: '/phim-bo' },
         { text: 'Phim lẻ', path: '/phim-le' },
         { text: 'Anime', path: '/anime' },
         { text: 'Đạo diễn', path: '/daodien' },
     ];
+
+    const handleGenreMouseEnter = (event) => {
+        setGenreAnchorEl(event.currentTarget);
+        setGenreMenuOpen(true);
+    };
+
+    const handleGenreMouseLeave = () => {
+        setGenreMenuOpen(false);
+        setGenreAnchorEl(null);
+    };
+
+    const handleGenreClick = (genre) => {
+        setGenreMenuOpen(false);
+        setGenreAnchorEl(null);
+
+        // Format genre name for URL - remove special characters and convert to lowercase
+        const formattedGenre = genre
+            .toLowerCase()
+            .replace(/&/g, 'and')
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9\-]/g, '');
+
+        // Navigate to genre page
+        navigate(`/genre/${formattedGenre}`);
+    };
 
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
@@ -97,7 +174,15 @@ function Header() {
             sx={{ boxShadow: 'none' }}
         >
             <Toolbar className={cx('header-toolbar')}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '10px',
+                        width: '100%',
+                    }}
+                >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Button component={Link} to="/">
                             <img src={images.logo} alt="Logo" className={cx('logo')} />
@@ -155,15 +240,36 @@ function Header() {
                     {!isMobile && (
                         <div className={cx('menu-items')}>
                             {menuItems.map((item) => (
-                                <Button
+                                <Box
                                     key={item.text}
-                                    color="inherit"
-                                    className={cx('menu-item')}
-                                    component={Link}
-                                    to={item.path}
+                                    sx={{ position: 'relative' }}
+                                    onMouseEnter={item.hasDropdown ? handleGenreMouseEnter : undefined}
+                                    onMouseLeave={item.hasDropdown ? handleGenreMouseLeave : undefined}
                                 >
-                                    {item.text}
-                                </Button>
+                                    <Button
+                                        color="inherit"
+                                        className={cx('menu-item')}
+                                        component={item.hasDropdown ? 'div' : Link}
+                                        to={item.hasDropdown ? undefined : item.path}
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        {item.text}
+                                        {item.hasDropdown && (
+                                            <KeyboardArrowDownIcon
+                                                sx={{
+                                                    fontSize: '16px',
+                                                    transform: genreMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                    transition: 'transform 0.2s ease',
+                                                }}
+                                            />
+                                        )}
+                                    </Button>
+                                </Box>
                             ))}
                         </div>
                     )}
@@ -207,6 +313,61 @@ function Header() {
                     </div>
                 </Box>
             </Toolbar>
+
+            {/* Genre Dropdown Menu */}
+            <Popper
+                open={genreMenuOpen}
+                anchorEl={genreAnchorEl}
+                placement="bottom-start"
+                sx={{ zIndex: 1300 }}
+                onMouseEnter={() => setGenreMenuOpen(true)}
+                onMouseLeave={handleGenreMouseLeave}
+            >
+                <Paper
+                    sx={{
+                        backgroundColor: 'var(--black)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
+                        mt: 1,
+                        maxHeight: '400px',
+                        overflowY: 'auto',
+                        minWidth: '250px',
+                        '&::-webkit-scrollbar': {
+                            width: '6px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            borderRadius: '3px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: 'var(--primary)',
+                            borderRadius: '3px',
+                        },
+                    }}
+                >
+                    <MenuList>
+                        {genres.map((genre) => (
+                            <MuiMenuItem
+                                key={genre}
+                                onClick={() => handleGenreClick(genre)}
+                                sx={{
+                                    color: 'var(--white)',
+                                    padding: '12px 20px',
+                                    fontSize: '14px',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                                        color: 'var(--primary)',
+                                    },
+                                    transition: 'all 0.2s ease',
+                                }}
+                            >
+                                {genre}
+                            </MuiMenuItem>
+                        ))}
+                    </MenuList>
+                </Paper>
+            </Popper>
 
             {/* Mobile Menu Drawer */}
             <Drawer
@@ -274,9 +435,7 @@ function Header() {
                         pointerEvents: 'none', // Disable clicking on header
                     }}
                 >
-                    <Typography sx={{ color: 'var(--white)', fontWeight: 'bold' }}>
-                        Chào, thinhnocode
-                    </Typography>
+                    <Typography sx={{ color: 'var(--white)', fontWeight: 'bold' }}>Chào, thinhnocode</Typography>
                 </MenuItem>
 
                 {/* Menu items */}
@@ -296,9 +455,7 @@ function Header() {
                         }}
                     >
                         {setting.icon}
-                        <Typography sx={{ color: 'var(--white)', fontSize: '16px' }}>
-                            {setting.text}
-                        </Typography>
+                        <Typography sx={{ color: 'var(--white)', fontSize: '16px' }}>{setting.text}</Typography>
                     </MenuItem>
                 ))}
             </Menu>

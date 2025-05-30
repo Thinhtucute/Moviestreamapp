@@ -9,6 +9,82 @@
     --text-color: rgba(255, 255, 255, 0.8);
     --margin-left-right: 40px;
     --default-layout-header-height: 50px;
+    
+    /* Responsive Variables */
+    --container-padding-xs: 8px;
+    --container-padding-sm: 16px;
+    --container-padding-md: 24px;
+    --container-padding-lg: 32px;
+    
+    --card-width-xs: 160px;
+    --card-width-sm: 180px;
+    --card-width-md: 200px;
+    --card-width-lg: 220px;
+    
+    --card-height-xs: 280px;
+    --card-height-sm: 290px;
+    --card-height-md: 300px;
+    --card-height-lg: 320px;
+    
+    --grid-gap-xs: 12px;
+    --grid-gap-sm: 16px;
+    --grid-gap-md: 20px;
+    --grid-gap-lg: 24px;
+    
+    --font-size-xs: 0.7rem;
+    --font-size-sm: 0.8rem;
+    --font-size-md: 0.9rem;
+    --font-size-lg: 1rem;
+    
+    --badge-font-xs: 9px;
+    --badge-font-sm: 10px;
+    --badge-font-md: 11px;
+    --badge-font-lg: 12px;
+}
+
+/* Breakpoints */
+@media (max-width: 599px) {
+    :root {
+        --current-container-padding: var(--container-padding-xs);
+        --current-card-width: var(--card-width-xs);
+        --current-card-height: var(--card-height-xs);
+        --current-grid-gap: var(--grid-gap-xs);
+        --current-font-size: var(--font-size-xs);
+        --current-badge-font: var(--badge-font-xs);
+    }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+    :root {
+        --current-container-padding: var(--container-padding-sm);
+        --current-card-width: var(--card-width-sm);
+        --current-card-height: var(--card-height-sm);
+        --current-grid-gap: var(--grid-gap-sm);
+        --current-font-size: var(--font-size-sm);
+        --current-badge-font: var(--badge-font-sm);
+    }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+    :root {
+        --current-container-padding: var(--container-padding-md);
+        --current-card-width: var(--card-width-md);
+        --current-card-height: var(--card-height-md);
+        --current-grid-gap: var(--grid-gap-md);
+        --current-font-size: var(--font-size-md);
+        --current-badge-font: var(--badge-font-md);
+    }
+}
+
+@media (min-width: 1200px) {
+    :root {
+        --current-container-padding: var(--container-padding-lg);
+        --current-card-width: var(--card-width-lg);
+        --current-card-height: var(--card-height-lg);
+        --current-grid-gap: var(--grid-gap-lg);
+        --current-font-size: var(--font-size-lg);
+        --current-badge-font: var(--badge-font-lg);
+    }
 }
 
 html {
@@ -17,7 +93,6 @@ html {
 
 * {
     box-sizing: border-box;
-
 }
 
 body {
@@ -26,10 +101,58 @@ body {
     line-height: 1.5;
     text-rendering: optimizeSpeed;
     max-width: 100%;
-
     background-color: #191b24;
-    overflow-x: hidden; // Ẩn thanh cuộn ngang
-    // display: flex;
-    // flex-direction: column;
-    // margin: var(--margin-full-page);
+    overflow-x: hidden;
+}
+
+/* Movie Card Responsive Classes */
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--current-card-width));
+    gap: var(--current-grid-gap);
+    justify-content: center;
+    width: 100%;
+    padding: 0 var(--current-container-padding);
+}
+
+.movie-card {
+    position: relative;
+    width: var(--current-card-width);
+    height: var(--current-card-height);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.movie-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
+.movie-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.7) 50%, transparent 100%);
+    padding: var(--current-container-padding);
+    color: white;
+}
+
+.movie-badge {
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.7), rgba(255, 140, 0, 0.5));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    padding: 2px 8px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.movie-badge-text {
+    color: white;
+    font-size: var(--current-badge-font);
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
