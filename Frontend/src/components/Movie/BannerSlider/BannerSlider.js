@@ -1,7 +1,7 @@
 import React, { useReducer, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Button, Typography } from '@mui/material';
-import { PlayArrow, FavoriteBorder, Share } from '@mui/icons-material';
+import { PlayArrow, FavoriteBorder, Add } from '@mui/icons-material';
 import classNames from 'classnames/bind';
 import styles from './BannerSlider.module.scss';
 import { useBanners } from '@/hooks/useBanners';
@@ -373,7 +373,7 @@ function BannerSlider() {
                                     '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
                                 }}
                             >
-                                <Share fontSize="large" />
+                                <Add fontSize="large" />
                             </Button>
                         </Box>
                     </motion.div>

@@ -104,7 +104,7 @@ function Header() {
         { text: 'Phim mới', path: '/new-movies' },
         { text: 'Phim bộ', path: '/series' },
         { text: 'Phim lẻ', path: '/movies' },
-        { text: 'Anime', path: '/animee' },
+        { text: 'Animation', path: '/animation' },
         { text: 'Đạo diễn', path: '/daodien' },
     ];
 

@@ -7,6 +7,7 @@ import Register from '@/pages/Auth/Register';
 import NewMovies from '@/pages/MediaType/NewMovies';
 import Movie from '@/pages/MediaType/Movie';
 import Series from '@/pages/MediaType/Series';
+import Animation from '@/pages/MediaType/Animation';
 import { useDispatch, useSelector } from 'react-redux';
 import { introspect } from '@/redux/features/auth/authSlice';
 import { compose } from '@reduxjs/toolkit';
@@ -21,6 +22,7 @@ const publicRoutes = [
     { path: '/new-movies', component: NewMovies },
     { path: '/movies', component: Movie },
     { path: '/series', component: Series },
+    { path: '/animation', component: Animation },
 
 ];
 // const ProtectedRoute = ({ children }) => {
