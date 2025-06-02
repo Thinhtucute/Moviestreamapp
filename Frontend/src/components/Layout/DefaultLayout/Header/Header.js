@@ -40,9 +40,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import axios from 'axios';
 
 const cx = classNames.bind(styles);
-const options = ['Option 1', 'Option 2'];
 
 const settings = [
     { text: 'Favorite', icon: <FavoriteBorderIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
@@ -90,18 +90,88 @@ function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [genreMenuOpen, setGenreMenuOpen] = useState(false);
     const [genreAnchorEl, setGenreAnchorEl] = useState(null);
+
+    // Search states
+    const [searchValue, setSearchValue] = useState('');
+    const [searchOptions, setSearchOptions] = useState([]);
+    const [searchLoading, setSearchLoading] = useState(false);
+
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const menuItems = [
         { text: 'Thể loại', path: '/the-loai', hasDropdown: true },
-        { text: 'Phim mới', path: '/phim-moi' },
-        { text: 'Phim bộ', path: '/phim-bo' },
-        { text: 'Phim lẻ', path: '/phim-le' },
-        { text: 'Anime', path: '/anime' },
+        { text: 'Phim mới', path: '/new-movies' },
+        { text: 'Phim bộ', path: '/series' },
+        { text: 'Phim lẻ', path: '/movies' },
+        { text: 'Anime', path: '/animee' },
         { text: 'Đạo diễn', path: '/daodien' },
     ];
 
+    // Search functionality
+    const fetchSearchSuggestions = async (query) => {
+        if (!query || query.length < 2) {
+            setSearchOptions([]);
+            return;
+        }
+
+        try {
+            setSearchLoading(true);
+            const response = await axios.get(
+                `http://localhost:8080/search?page=0&size=5&title=${encodeURIComponent(query)}`,
+            );
+
+            if (response.data && response.data.result && response.data.result.content) {
+                const suggestions = response.data.result.content.map((item) => ({
+                    label: item.title,
+                    value: item.title,
+                    mediaId: item.mediaId,
+                    mediaType: item.mediaType,
+                    posterURL: item.posterURL,
+                    releaseYear: item.releaseYear,
+                }));
+                setSearchOptions(suggestions);
+            } else {
+                setSearchOptions([]);
+            }
+        } catch (error) {
+            console.error('Error fetching search suggestions:', error);
+            setSearchOptions([]);
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
+    const handleSearchInputChange = (event, newValue, reason) => {
+        if (reason === 'input') {
+            setSearchValue(newValue);
+            fetchSearchSuggestions(newValue);
+        }
+    };
+
+    const handleSearchSelect = (event, value) => {
+        if (value) {
+            if (typeof value === 'string') {
+                // User typed something and pressed enter
+                navigate(`/search?q=${encodeURIComponent(value)}`);
+            } else if (value.mediaId) {
+                // User selected a suggestion - go directly to media page
+                navigate(`/media/${value.mediaId}`);
+            }
+            setSearchValue('');
+            setSearchOptions([]);
+        }
+    };
+
+    const handleSearchKeyPress = (event) => {
+        if (event.key === 'Enter' && searchValue.trim()) {
+            navigate(`/search?q=${encodeURIComponent(searchValue.trim())}`);
+            setSearchValue('');
+            setSearchOptions([]);
+        }
+    };
+
+    // Existing handlers...
     const handleGenreMouseEnter = (event) => {
         setGenreAnchorEl(event.currentTarget);
         setGenreMenuOpen(true);
@@ -116,14 +186,12 @@ function Header() {
         setGenreMenuOpen(false);
         setGenreAnchorEl(null);
 
-        // Format genre name for URL - remove special characters and convert to lowercase
         const formattedGenre = genre
             .toLowerCase()
             .replace(/&/g, 'and')
             .replace(/\s+/g, '-')
             .replace(/[^a-z0-9\-]/g, '');
 
-        // Navigate to genre page
         navigate(`/genre/${formattedGenre}`);
     };
 
@@ -190,8 +258,50 @@ function Header() {
 
                         {!isMobile && (
                             <Autocomplete
-                                id="custom-input-demo"
-                                options={options}
+                                freeSolo
+                                options={searchOptions}
+                                inputValue={searchValue}
+                                onInputChange={handleSearchInputChange}
+                                onChange={handleSearchSelect}
+                                loading={searchLoading}
+                                getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+                                renderOption={(props, option) => (
+                                    <Box
+                                        component="li"
+                                        {...props}
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 2,
+                                            p: 1,
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                                            },
+                                        }}
+                                    >
+                                        <img
+                                            src={option.posterURL || '/placeholder-movie.jpg'}
+                                            alt={option.label}
+                                            style={{
+                                                width: 40,
+                                                height: 60,
+                                                objectFit: 'cover',
+                                                borderRadius: 4,
+                                            }}
+                                            onError={(e) => {
+                                                e.target.src = '/placeholder-movie.jpg';
+                                            }}
+                                        />
+                                        <Box>
+                                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 'bold' }}>
+                                                {option.label}
+                                            </Typography>
+                                            <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                                                {option.mediaType} • {option.releaseYear}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                )}
                                 sx={{
                                     display: 'inline-block',
                                     width: 300,
@@ -217,11 +327,16 @@ function Header() {
                                     '& .MuiAutocomplete-endAdornment': {
                                         display: 'none',
                                     },
+                                    '& .MuiAutocomplete-paper': {
+                                        backgroundColor: 'var(--black)',
+                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    },
                                 }}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
-                                        placeholder="Tìm kiếm"
+                                        placeholder="Search movies, TV shows..."
+                                        onKeyPress={handleSearchKeyPress}
                                         InputProps={{
                                             ...params.InputProps,
                                             startAdornment: (
@@ -237,6 +352,7 @@ function Header() {
                         )}
                     </Box>
 
+                    {/* Rest of the header remains the same... */}
                     {!isMobile && (
                         <div className={cx('menu-items')}>
                             {menuItems.map((item) => (
@@ -314,6 +430,7 @@ function Header() {
                 </Box>
             </Toolbar>
 
+            {/* All existing menus and drawers remain the same... */}
             {/* Genre Dropdown Menu */}
             <Popper
                 open={genreMenuOpen}
@@ -426,19 +543,17 @@ function Header() {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
             >
-                {/* Header with user greeting */}
                 <MenuItem
                     sx={{
                         backgroundColor: 'var(--black)',
                         justifyContent: 'center',
                         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                        pointerEvents: 'none', // Disable clicking on header
+                        pointerEvents: 'none',
                     }}
                 >
                     <Typography sx={{ color: 'var(--white)', fontWeight: 'bold' }}>Chào, thinhnocode</Typography>
                 </MenuItem>
 
-                {/* Menu items */}
                 {settings.map((setting) => (
                     <MenuItem
                         key={setting.text}
@@ -451,7 +566,7 @@ function Header() {
                                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                             },
                             display: 'flex',
-                            gap: '10px', // Space between icon and text
+                            gap: '10px',
                         }}
                     >
                         {setting.icon}

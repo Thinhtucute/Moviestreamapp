@@ -1,58 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Typography, Pagination, CircularProgress, Container, Button, Chip } from '@mui/material';
-import { PlayArrow, Star, Clear } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { Box, Typography, Pagination, CircularProgress, Container, Button } from '@mui/material';
+import { PlayArrow, Star } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 
-function Search() {
-    const location = useLocation();
+function NewMovies() {
     const navigate = useNavigate();
-    const [searchResults, setSearchResults] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [movies, setMovies] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
-    const [searchQuery, setSearchQuery] = useState('');
     const pageSize = 15;
+    const currentYear = new Date().getFullYear(); // 2025
 
-    // Get search params from URL
+    // Scroll to top when component mounts
     useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const query = params.get('q');
-        if (query) {
-            setSearchQuery(query);
-            setCurrentPage(0);
-            performSearch(query, 0);
-        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, [location.search]);
+        fetchNewMovies(0);
+    }, []);
 
-    const performSearch = async (query, page) => {
-        if (!query) return;
+    useEffect(() => {
+        fetchNewMovies(currentPage);
+    }, [currentPage]);
 
+    const fetchNewMovies = async (page) => {
         try {
             setLoading(true);
-            console.log('Searching for:', query);
+            console.log('Fetching new movies for year:', currentYear);
 
             const response = await axios.get(
-                `http://localhost:8080/search?page=${page}&size=${pageSize}&title=${encodeURIComponent(query)}`,
+                `http://localhost:8080/api/media/search?page=${page}&size=${pageSize}&releaseYear=${currentYear}`,
             );
 
-            console.log('Search Response:', response.data);
+            console.log('API Response:', response.data);
 
             if (response.data && response.data.result && response.data.result.content) {
-                setSearchResults(response.data.result.content || []);
+                setMovies(response.data.result.content || []);
                 setTotalPages(response.data.result.totalPages || 0);
                 setTotalElements(response.data.result.totalElements || 0);
             } else {
-                setSearchResults([]);
+                console.log('No movies found or unexpected response structure');
+                setMovies([]);
                 setTotalPages(0);
                 setTotalElements(0);
             }
         } catch (error) {
-            console.error('Error searching:', error);
-            setSearchResults([]);
+            console.error('Error fetching new movies:', error);
+            setMovies([]);
             setTotalPages(0);
             setTotalElements(0);
         } finally {
@@ -62,17 +58,13 @@ function Search() {
 
     const handlePageChange = (event, value) => {
         setCurrentPage(value - 1);
-        performSearch(searchQuery, value - 1);
+        // Scroll to top of the grid when changing pages
         window.scrollTo({ top: 200, behavior: 'smooth' });
     };
 
     const handleMovieClick = (mediaId) => {
         navigate(`/media/${mediaId}`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const clearSearch = () => {
-        navigate('/');
     };
 
     const containerVariants = {
@@ -122,80 +114,8 @@ function Search() {
                         },
                     }}
                 >
-                    Search Results
+                    New Movies
                 </Typography>
-
-                {/* Search Query Display */}
-                {searchQuery && (
-                    <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                color: 'rgba(255, 255, 255, 0.7)',
-                                fontSize: 'var(--current-font-size)',
-                            }}
-                        >
-                            Search for:
-                        </Typography>
-                        <Chip
-                            label={`"${searchQuery}"`}
-                            onDelete={clearSearch}
-                            deleteIcon={<Clear sx={{ color: 'white !important' }} />}
-                            sx={{
-                                backgroundColor: 'var(--primary)',
-                                color: 'white',
-                                fontSize: 'var(--current-font-size)',
-                                '& .MuiChip-deleteIcon': {
-                                    color: 'white',
-                                },
-                            }}
-                        />
-                    </Box>
-                )}
-
-                {/* Breadcrumb navigation */}
-                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: 'var(--current-font-size)',
-                            cursor: 'pointer',
-                            '&:hover': { color: 'var(--primary)' },
-                        }}
-                        onClick={() => {
-                            navigate('/');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                    >
-                        Home
-                    </Typography>
-                    <Typography sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>/</Typography>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: 'var(--primary)',
-                            fontSize: 'var(--current-font-size)',
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        Search
-                    </Typography>
-                </Box>
-
-                {/* Results count */}
-                {!loading && searchQuery && (
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            fontSize: 'var(--current-font-size)',
-                            mt: 1,
-                        }}
-                    >
-                        Found {totalElements} results
-                    </Typography>
-                )}
             </Box>
 
             {/* Loading State */}
@@ -205,17 +125,17 @@ function Search() {
                 </Box>
             ) : (
                 <>
-                    {/* Search Results Grid */}
-                    {searchResults.length > 0 ? (
+                    {/* Movies Grid */}
+                    {movies.length > 0 ? (
                         <motion.div variants={containerVariants} initial="hidden" animate="visible">
                             <div className="movie-grid">
-                                {searchResults.map((item, index) => (
-                                    <motion.div variants={itemVariants} key={item.mediaId || index}>
-                                        <div className="movie-card" onClick={() => handleMovieClick(item.mediaId)}>
+                                {movies.map((movie, index) => (
+                                    <motion.div variants={itemVariants} key={movie.mediaId || index}>
+                                        <div className="movie-card" onClick={() => handleMovieClick(movie.mediaId)}>
                                             {/* Movie Image */}
                                             <img
-                                                src={item.posterURL || '/placeholder-movie.jpg'}
-                                                alt={item.title}
+                                                src={movie.posterURL || '/placeholder-movie.jpg'}
+                                                alt={movie.title}
                                                 onDragStart={(e) => e.preventDefault()}
                                                 style={{
                                                     width: '100%',
@@ -227,49 +147,32 @@ function Search() {
                                                 }}
                                             />
 
-                                            {/* Media Type Badge */}
+                                            {/* New Movie Badge */}
                                             <Box
                                                 sx={{
                                                     position: 'absolute',
                                                     top: 8,
                                                     left: 8,
-                                                    background:
-                                                        item.mediaType === 'Movie'
-                                                            ? 'linear-gradient(135deg, #2563eb, #3b82f6)'
-                                                            : 'linear-gradient(135deg, #7c3aed, #a855f7)',
+                                                    background: 'linear-gradient(135deg, #ff6b35, #f7931e)',
                                                     color: 'white',
                                                     padding: '4px 8px',
                                                     borderRadius: '8px',
                                                     fontSize: 'var(--current-badge-font)',
                                                     fontWeight: 'bold',
                                                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                                                    animation: 'pulse 2s infinite',
+                                                    '@keyframes pulse': {
+                                                        '0%': { transform: 'scale(1)' },
+                                                        '50%': { transform: 'scale(1.05)' },
+                                                        '100%': { transform: 'scale(1)' },
+                                                    },
                                                 }}
                                             >
-                                                {item.mediaType?.toUpperCase() || 'MEDIA'}
+                                                NEW
                                             </Box>
 
                                             {/* Movie Info Overlay */}
-                                            <div className="movie-info-overlay">
-                                                {/* Movie Title */}
-                                                <Typography
-                                                    variant="h6"
-                                                    sx={{
-                                                        color: 'white',
-                                                        fontWeight: 'bold',
-                                                        fontSize: 'var(--current-font-size)',
-                                                        lineHeight: 1.2,
-                                                        display: '-webkit-box',
-                                                        WebkitBoxOrient: 'vertical',
-                                                        WebkitLineClamp: 2,
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        mb: 1,
-                                                        textShadow: '0 2px 4px rgba(0, 0, 0, 0.8)',
-                                                    }}
-                                                >
-                                                    {item.title}
-                                                </Typography>
-
+                                            <div className="movie-info-overlay">        
                                                 {/* Movie Details */}
                                                 <Box
                                                     sx={{
@@ -278,31 +181,20 @@ function Search() {
                                                         alignItems: 'center',
                                                         marginTop: '4px',
                                                         flexWrap: 'wrap',
+                                                        
                                                     }}
                                                 >
                                                     {/* Release Year Badge */}
-                                                    {item.releaseYear && (
+                                                    {movie.releaseYear && (
                                                         <div className="movie-badge">
-                                                            <span className="movie-badge-text">{item.releaseYear}</span>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Duration/Episodes Badge */}
-                                                    {item.mediaType === 'Movie' && item.duration && (
-                                                        <div
-                                                            className="movie-badge"
-                                                            style={{
-                                                                background:
-                                                                    'linear-gradient(135deg, rgba(249, 115, 22, 0.8), rgba(245, 158, 11, 0.6))',
-                                                            }}
-                                                        >
                                                             <span className="movie-badge-text">
-                                                                {item.duration} min
+                                                                {movie.releaseYear}
                                                             </span>
                                                         </div>
                                                     )}
 
-                                                    {item.mediaType === 'Series' && item.totalEpisodes && (
+                                                    {/* Duration Badge */}
+                                                    {movie.duration && (
                                                         <div
                                                             className="movie-badge"
                                                             style={{
@@ -311,13 +203,13 @@ function Search() {
                                                             }}
                                                         >
                                                             <span className="movie-badge-text">
-                                                                {item.totalEpisodes} eps
+                                                                {movie.duration} min
                                                             </span>
                                                         </div>
                                                     )}
 
                                                     {/* Rating Badge */}
-                                                    {item.rating && (
+                                                    {movie.rating && (
                                                         <div
                                                             className="movie-badge"
                                                             style={{
@@ -335,7 +227,7 @@ function Search() {
                                                                 }}
                                                             />
                                                             <span className="movie-badge-text">
-                                                                {item.rating.toFixed(1)}
+                                                                {movie.rating.toFixed(1)}
                                                             </span>
                                                         </div>
                                                     )}
@@ -373,7 +265,7 @@ function Search() {
                                                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                                                     }}
                                                 >
-                                                    Watch Now
+                                                    Xem ngay
                                                 </Button>
                                             </Box>
                                         </div>
@@ -381,7 +273,7 @@ function Search() {
                                 ))}
                             </div>
                         </motion.div>
-                    ) : searchQuery && !loading ? (
+                    ) : (
                         // Empty State
                         <Box
                             sx={{
@@ -397,7 +289,7 @@ function Search() {
                         >
                             <img
                                 src="/no-movies.png"
-                                alt="No results"
+                                alt="No movies"
                                 style={{
                                     maxWidth: '200px',
                                     width: '100%',
@@ -413,7 +305,7 @@ function Search() {
                                     fontSize: 'calc(var(--current-font-size) * 1.5)',
                                 }}
                             >
-                                No results found
+                                Chưa có phim mới nào
                             </Typography>
                             <Typography
                                 variant="body1"
@@ -424,8 +316,7 @@ function Search() {
                                     fontSize: 'var(--current-font-size)',
                                 }}
                             >
-                                Sorry, we couldn't find any results for "{searchQuery}". Try searching with different
-                                keywords.
+                                Hiện tại chưa có phim mới nào cho năm {currentYear}. Hãy quay lại sau!
                             </Typography>
                             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
                                 <Button
@@ -438,11 +329,11 @@ function Search() {
                                         '&:hover': { backgroundColor: '#e55b00' },
                                     }}
                                 >
-                                    Back to Home
+                                    Quay về trang chủ
                                 </Button>
                                 <Button
                                     variant="outlined"
-                                    onClick={() => navigate('/movies')}
+                                    onClick={() => navigate('/genres')}
                                     sx={{
                                         color: 'white',
                                         borderColor: 'var(--primary)',
@@ -453,11 +344,11 @@ function Search() {
                                         },
                                     }}
                                 >
-                                    Browse Movies
+                                    Xem theo thể loại
                                 </Button>
                             </Box>
                         </Box>
-                    ) : null}
+                    )}
 
                     {/* Pagination */}
                     {totalPages > 1 && (
@@ -492,4 +383,4 @@ function Search() {
     );
 }
 
-export default Search;
+export default NewMovies;
