@@ -36,7 +36,9 @@ function Search() {
             console.log('Searching for:', query);
 
             const response = await axios.get(
-                `http://localhost:8080/search?page=${page}&size=${pageSize}&title=${encodeURIComponent(query)}`,
+                `http://localhost:8080/api/media/search?page=${page}&size=${pageSize}&title=${encodeURIComponent(
+                    query,
+                )}`,
             );
 
             console.log('Search Response:', response.data);
@@ -322,16 +324,19 @@ function Search() {
                                                             className="movie-badge"
                                                             style={{
                                                                 background:
-                                                                    'linear-gradient(135deg, rgba(34, 197, 94, 0.8), rgba(16, 185, 129, 0.6))',
+                                                                    'linear-gradient(135deg, var(--primary), #e55b00)',
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 gap: '2px',
+                                                                border: '1px solid rgba(255, 165, 0, 0.3)',
+                                                                boxShadow: '0 2px 8px rgba(255, 165, 0, 0.2)',
                                                             }}
                                                         >
                                                             <Star
                                                                 sx={{
                                                                     fontSize: 'var(--current-badge-font)',
                                                                     color: '#ffd700',
+                                                                    filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5))',
                                                                 }}
                                                             />
                                                             <span className="movie-badge-text">

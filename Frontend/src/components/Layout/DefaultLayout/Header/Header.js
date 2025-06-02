@@ -118,7 +118,7 @@ function Header() {
         try {
             setSearchLoading(true);
             const response = await axios.get(
-                `http://localhost:8080/search?page=0&size=5&title=${encodeURIComponent(query)}`,
+                `http://localhost:8080/api/media/search?page=0&size=5&title=${encodeURIComponent(query)}`,
             );
 
             if (response.data && response.data.result && response.data.result.content) {
@@ -273,31 +273,96 @@ function Header() {
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: 2,
-                                            p: 1,
+                                            p: 1.5,
+                                            borderBottom: '1px solid rgba(255, 165, 0, 0.1)',
                                             '&:hover': {
-                                                backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                                                backgroundColor: 'rgba(255, 165, 0, 0.15)',
+                                                borderLeft: '3px solid var(--primary)',
                                             },
+                                            '&:last-child': {
+                                                borderBottom: 'none',
+                                            },
+                                            transition: 'all 0.2s ease',
                                         }}
                                     >
-                                        <img
-                                            src={option.posterURL || '/placeholder-movie.jpg'}
-                                            alt={option.label}
-                                            style={{
-                                                width: 40,
-                                                height: 60,
-                                                objectFit: 'cover',
-                                                borderRadius: 4,
+                                        <Box
+                                            sx={{
+                                                position: 'relative',
+                                                borderRadius: '6px',
+                                                overflow: 'hidden',
+                                                border: '1px solid rgba(255, 165, 0, 0.2)',
+                                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
                                             }}
-                                            onError={(e) => {
-                                                e.target.src = '/placeholder-movie.jpg';
-                                            }}
-                                        />
-                                        <Box>
-                                            <Typography variant="body2" sx={{ color: 'white', fontWeight: 'bold' }}>
+                                        >
+                                            <img
+                                                src={option.posterURL || '/placeholder-movie.jpg'}
+                                                alt={option.label}
+                                                style={{
+                                                    width: 40,
+                                                    height: 60,
+                                                    objectFit: 'cover',
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.src = '/placeholder-movie.jpg';
+                                                }}
+                                            />
+                                            {/* Media type badge */}
+                                            <Box
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: 2,
+                                                    right: 2,
+                                                    backgroundColor:
+                                                        option.mediaType === 'Movie'
+                                                            ? 'rgba(37, 99, 235, 0.9)'
+                                                            : 'rgba(124, 58, 237, 0.9)',
+                                                    color: 'white',
+                                                    fontSize: '8px',
+                                                    fontWeight: 'bold',
+                                                    padding: '1px 4px',
+                                                    borderRadius: '3px',
+                                                }}
+                                            >
+                                                {option.mediaType?.charAt(0) || 'M'}
+                                            </Box>
+                                        </Box>
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    color: 'white',
+                                                    fontWeight: 'bold',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    fontSize: '14px',
+                                                }}
+                                            >
                                                 {option.label}
                                             </Typography>
-                                            <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                                                {option.mediaType} • {option.releaseYear}
+                                            <Typography
+                                                variant="caption"
+                                                sx={{
+                                                    color: 'rgba(255, 255, 255, 0.7)',
+                                                    fontSize: '12px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px',
+                                                }}
+                                            >
+                                                <Box
+                                                    component="span"
+                                                    sx={{
+                                                        color: 'var(--primary)',
+                                                        fontWeight: 'bold',
+                                                    }}
+                                                >
+                                                    {option.mediaType}
+                                                </Box>
+                                                <Box component="span" sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                                                    •
+                                                </Box>
+                                                <Box component="span">{option.releaseYear}</Box>
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -306,30 +371,83 @@ function Header() {
                                     display: 'inline-block',
                                     width: 300,
                                     '& .MuiInputBase-root': {
-                                        bgcolor: 'rgb(49,51,61,0.6)',
+                                        bgcolor: 'rgba(49, 51, 61, 0.8)',
                                         color: 'white',
                                         height: 36,
                                         paddingLeft: '8px',
-                                        borderRadius: '4px',
-                                        transition: 'border 0.2s ease-in-out',
+                                        borderRadius: '8px',
+                                        border: '1px solid rgba(255, 165, 0, 0.2)',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            borderColor: 'rgba(255, 165, 0, 0.4)',
+                                            backgroundColor: 'rgba(49, 51, 61, 0.9)',
+                                        },
                                     },
                                     '& .MuiOutlinedInput-notchedOutline': {
                                         border: 'none',
                                     },
                                     '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                        border: '1px solid var(--white)',
+                                        border: 'none',
+                                    },
+                                    '& .Mui-focused .MuiInputBase-root': {
+                                        borderColor: 'var(--primary)',
+                                        boxShadow: '0 0 0 2px rgba(255, 165, 0, 0.2)',
                                     },
                                     '& input::placeholder': {
-                                        color: 'white',
+                                        color: 'rgba(255, 255, 255, 0.7)',
                                         opacity: 1,
                                         fontSize: '12px',
                                     },
                                     '& .MuiAutocomplete-endAdornment': {
                                         display: 'none',
                                     },
+                                    // Đây là phần quan trọng - thay đổi màu background của dropdown
+                                    '& .MuiPaper-root': {
+                                        backgroundColor: 'var(--black) !important',
+                                        border: '1px solid rgba(255, 165, 0, 0.3)',
+                                        borderRadius: '12px',
+                                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8)',
+                                        marginTop: '4px',
+                                        maxHeight: '400px',
+                                        '&::-webkit-scrollbar': {
+                                            width: '6px',
+                                        },
+                                        '&::-webkit-scrollbar-track': {
+                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                            borderRadius: '3px',
+                                        },
+                                        '&::-webkit-scrollbar-thumb': {
+                                            backgroundColor: 'var(--primary)',
+                                            borderRadius: '3px',
+                                            '&:hover': {
+                                                backgroundColor: '#e55b00',
+                                            },
+                                        },
+                                    },
                                     '& .MuiAutocomplete-paper': {
+                                        backgroundColor: 'var(--black) !important',
+                                        border: '1px solid rgba(255, 165, 0, 0.3)',
+                                        borderRadius: '12px',
+                                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8)',
+                                        marginTop: '4px',
+                                        maxHeight: '400px',
+                                    },
+                                    '& .MuiAutocomplete-listbox': {
+                                        padding: '8px 0',
                                         backgroundColor: 'var(--black)',
-                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    },
+                                    '& .MuiAutocomplete-loading': {
+                                        color: 'var(--primary)',
+                                        padding: '16px',
+                                        textAlign: 'center',
+                                        backgroundColor: 'var(--black)',
+                                    },
+                                    '& .MuiAutocomplete-noOptions': {
+                                        color: 'rgba(255, 255, 255, 0.7)',
+                                        padding: '16px',
+                                        textAlign: 'center',
+                                        fontSize: '14px',
+                                        backgroundColor: 'var(--black)',
                                     },
                                 }}
                                 renderInput={(params) => (
@@ -341,7 +459,13 @@ function Header() {
                                             ...params.InputProps,
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <SearchIcon sx={{ color: 'white', fontSize: '18px' }} />
+                                                    <SearchIcon
+                                                        sx={{
+                                                            color: 'rgba(255, 255, 255, 0.7)',
+                                                            fontSize: '18px',
+                                                            transition: 'color 0.2s ease',
+                                                        }}
+                                                    />
                                                 </InputAdornment>
                                             ),
                                         }}
