@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { data } from 'react-router-dom';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 export const login = async (credential) => {
     const response = await axios.post(`${API_URL}/auth/token`, credential);
