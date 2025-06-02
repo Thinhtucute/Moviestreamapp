@@ -143,10 +143,10 @@ public class MediaService {
     }
 
     public PaginatedResponse<MediaResponse> searchMedia(
-            Integer page, Integer size, String title, String mediaType, Integer releaseYear, Integer genreId) {
+            Integer page, Integer size, String title, String mediaType, Integer releaseYear, Integer genreId, String genreName) {
         Pageable pageable = PageRequest.of(page, size);
         MediaType type = mediaType != null ? MediaType.valueOf(mediaType) : null;
-        Page<Media> mediaPage = mediaRepository.searchMedia(title, type, releaseYear, genreId, pageable);
+        Page<Media> mediaPage = mediaRepository.searchMedia(title, type, releaseYear, genreId, genreName, pageable);
 
         List<MediaResponse> mediaResponses = mediaPage.getContent().stream()
                 .map(mediaMapper::toMediaResponse)

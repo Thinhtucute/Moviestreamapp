@@ -18,8 +18,8 @@ public class UserCreationRequest {
     @Email(message = "Invalid email")
     String email;
     @Size(min = 8, message = "Password must be at least 8 characters")
-     String passwordHash;
-     String avatarURL;
-     SubscriptionPlan subscriptionPlan;
-     AccountStatus accountStatus;
+    String passwordHash;
+    String avatarURL;
+    SubscriptionPlan subscriptionPlan;
+    AccountStatus accountStatus;
 }
