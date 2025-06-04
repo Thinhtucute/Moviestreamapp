@@ -23,7 +23,6 @@ import {
 } from '@mui/material';
 import { Person, Lock, Visibility, VisibilityOff, Style } from '@mui/icons-material';
 
-
 export default function Login() {
     const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
@@ -45,16 +44,22 @@ export default function Login() {
         const result = await dispatch(login(credentials));
         if (login.fulfilled.match(result)) {
             showNotification('Đăng ký nhập thành công!', 'success'); // Hiển thị thông bá0
-            setTimeout(() => {
-                navigate('/'); // Chuyển hướng sau 1 giây để người dùng thấy thông báo
-            }, 3000);
+            // setTimeout(() => {
+            //     navigate('/'); // Chuyển hướng sau 1 giây để người dùng thấy thông báo
+            // }, 3000);
         }
     };
 
     // Chuyển hướng nếu đã đăng nhập
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/');
+            const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+            if (redirectPath) {
+                sessionStorage.removeItem('redirectAfterLogin');
+                navigate(redirectPath);
+            } else {
+                navigate('/');
+            }
         }
     }, [isAuthenticated, navigate]);
 

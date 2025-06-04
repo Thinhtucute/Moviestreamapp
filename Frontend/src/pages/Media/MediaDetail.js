@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { checkToken } from '@/redux/features/auth/authSlice';
 import axios from 'axios';
 import classNames from 'classnames/bind';
 import styles from './MediaDetail.module.scss';
-import { Box, Typography, Button, Chip, Rating, CircularProgress, Container } from '@mui/material';
+import {
+    Box,
+    Typography,
+    Button,
+    Chip,
+    Rating,
+    CircularProgress,
+    Container,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Alert,
+} from '@mui/material';
 import {
     PlayArrow,
     FavoriteBorder,
@@ -14,23 +29,36 @@ import {
     ErrorOutline,
     ArrowBack,
     Share,
+    Lock,
+    Login,
 } from '@mui/icons-material';
+
+// Import EpisodesSection component
+import EpisodesSection from '@/pages/Media/EpisodesSection';
 
 const cx = classNames.bind(styles);
 
 function MediaDetail() {
     const { mediaId } = useParams();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Redux state
+    const { isAuthenticated, loading: authLoading, user } = useSelector((state) => state.auth);
+
     const [media, setMedia] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [showLoginDialog, setShowLoginDialog] = useState(false); // Dialog state
 
     useEffect(() => {
+        // Check token when component mounts
+        dispatch(checkToken());
+
         const fetchMediaDetails = async () => {
             try {
                 setLoading(true);
-                // Use environment variable or fallback to localhost
                 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
                 const response = await axios.get(`${apiUrl}/api/media/${mediaId}`);
 
@@ -48,30 +76,57 @@ function MediaDetail() {
             }
         };
 
-        // Scroll to top when component mounts
         window.scrollTo({ top: 0, behavior: 'smooth' });
         fetchMediaDetails();
-    }, [mediaId]);
+    }, [mediaId, dispatch]);
 
     // Function to create YouTube embed URL from trailer link
     const getYouTubeEmbedUrl = (url) => {
         if (!url) return null;
-
-        // Extract video ID from different YouTube URL formats
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
         const match = url.match(regExp);
-
         return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}?autoplay=0&rel=0` : null;
     };
 
+    // Enhanced handleWatchNow with authentication check
     const handleWatchNow = () => {
-        // Implement watch functionality
-        console.log('Watch now clicked');
+        // Check if user is authenticated
+        if (!isAuthenticated) {
+            setShowLoginDialog(true);
+            return;
+        }
+
+        // Check media access level
+        // if (media.accessLevel === 'PREMIUM' && (!user || user.subscription === 'FREE')) {
+        //     // Show premium required dialog
+        //     setShowPremiumDialog(true);
+        //     return;
+        // }
+
+        // User is authenticated and has access - navigate to watch page
+        console.log('Navigating to watch page for media:', mediaId);
+        // navigate(`/watch/${mediaId}`); // Uncomment when watch page is ready
+
+        // For now, just show success message
+        navigate(`/watch/${mediaId}`);
+    };
+
+    const handleLoginRedirect = () => {
+        setShowLoginDialog(false);
+        // Save current page to redirect back after login
+        sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+        navigate('/login');
     };
 
     const handleAddToList = () => {
+        if (!isAuthenticated) {
+            setShowLoginDialog(true);
+            return;
+        }
+
         setIsFavorite(!isFavorite);
         console.log('Add to list clicked');
+        // Implement add to list functionality
     };
 
     const handleShare = () => {
@@ -96,7 +151,97 @@ function MediaDetail() {
         navigate(`/genre/${formattedGenre}`);
     };
 
-    if (loading) {
+    // Add this function here
+    const handleLoginRequired = () => {
+        setShowLoginDialog(true);
+    };
+
+    // Login Required Dialog Component
+    const LoginRequiredDialog = () => (
+        <Dialog
+            open={showLoginDialog}
+            onClose={() => setShowLoginDialog(false)}
+            PaperProps={{
+                sx: {
+                    backgroundColor: 'var(--black)',
+                    border: '1px solid rgba(255, 165, 0, 0.3)',
+                    borderRadius: '12px',
+                    minWidth: '400px',
+                },
+            }}
+        >
+            <DialogTitle
+                sx={{
+                    color: 'white',
+                    textAlign: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1,
+                }}
+            >
+                <Lock sx={{ color: 'var(--primary)' }} />
+                Login Required
+            </DialogTitle>
+            <DialogContent>
+                <Alert
+                    severity="info"
+                    sx={{
+                        backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                        border: '1px solid rgba(255, 165, 0, 0.3)',
+                        color: 'white',
+                        mb: 2,
+                        '& .MuiAlert-icon': {
+                            color: 'var(--primary)',
+                        },
+                    }}
+                >
+                    You need to be logged in to watch movies and add them to your list.
+                </Alert>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        textAlign: 'center',
+                        mb: 2,
+                    }}
+                >
+                    Please log in to continue watching <strong>{media?.title}</strong>
+                </Typography>
+            </DialogContent>
+            <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+                <Button
+                    onClick={() => setShowLoginDialog(false)}
+                    sx={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        '&:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        },
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    variant="contained"
+                    startIcon={<Login />}
+                    onClick={handleLoginRedirect}
+                    sx={{
+                        backgroundColor: 'var(--primary)',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        px: 3,
+                        '&:hover': {
+                            backgroundColor: '#e55b00',
+                        },
+                    }}
+                >
+                    Login Now
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+
+    if (loading || authLoading) {
         return (
             <Box className={cx('loading-container')}>
                 <CircularProgress size={60} sx={{ color: 'var(--primary)', mb: 2 }} />
@@ -233,23 +378,22 @@ function MediaDetail() {
                                 </Typography>
                             </Box>
 
-                            {media.duration && (
+                            {/* Hiển thị Duration cho Movie hoặc Total Episodes cho Series */}
+                            {media.mediaType === 'Movie' && media.duration ? (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                                     <AccessTime fontSize="medium" sx={{ color: 'var(--primary)' }} />
                                     <Typography variant="h5" sx={{ color: 'var(--white)' }}>
                                         {media.duration} min
                                     </Typography>
                                 </Box>
-                            )}
-
-                            {media.totalEpisodes && (
+                            ) : media.mediaType === 'Series' && media.episodes ? (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                                     <AccessTime fontSize="medium" sx={{ color: 'var(--primary)' }} />
                                     <Typography variant="h5" sx={{ color: 'var(--white)' }}>
-                                        {media.totalEpisodes} episodes
+                                        {media.episodes.length} episodes
                                     </Typography>
                                 </Box>
-                            )}
+                            ) : null}
 
                             {media.language && (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
@@ -313,11 +457,11 @@ function MediaDetail() {
                                 ))}
                         </Box>
 
-                        {/* Action Buttons - Same style as BannerSlider */}
+                        {/* Action Buttons - Enhanced with authentication check */}
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 1, mb: 4 }}>
                             <Button
                                 variant="contained"
-                                startIcon={<PlayArrow />}
+                                startIcon={isAuthenticated ? <PlayArrow /> : <Lock />}
                                 onClick={handleWatchNow}
                                 sx={{
                                     backgroundColor: 'var(--primary)',
@@ -329,7 +473,7 @@ function MediaDetail() {
                                     '&:hover': { backgroundColor: '#e55b00' },
                                 }}
                             >
-                                Watch Now
+                                {isAuthenticated ? 'Watch Now' : 'Login to Watch'}
                             </Button>
                             <Button
                                 onClick={handleAddToList}
@@ -362,6 +506,40 @@ function MediaDetail() {
                                 <Add fontSize="large" />
                             </Button>
                         </Box>
+
+                        {/* Authentication Status Indicator */}
+                        {!isAuthenticated && (
+                            <Alert
+                                severity="info"
+                                sx={{
+                                    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                                    border: '1px solid rgba(255, 165, 0, 0.3)',
+                                    width: '36%',
+                                    color: 'white',
+                                    mb: 3,
+                                    '& .MuiAlert-icon': {
+                                        color: 'var(--primary)',
+                                    },
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                Please{' '}
+                                <Button
+                                    variant="text"
+                                    onClick={() => setShowLoginDialog(true)}
+                                    sx={{
+                                        color: 'var(--primary)',
+                                        textDecoration: 'underline',
+                                        p: 0,
+                                        minWidth: 'auto',
+                                    }}
+                                >
+                                    login
+                                </Button>{' '}
+                                to watch this content and add it to your list.
+                            </Alert>
+                        )}
 
                         {/* Additional Info */}
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
@@ -396,6 +574,9 @@ function MediaDetail() {
                     </Box>
                 </Box>
             </Box>
+
+            {/* Login Required Dialog */}
+            <LoginRequiredDialog />
 
             {/* Trailer section */}
             {youtubeEmbedUrl && (
@@ -473,49 +654,16 @@ function MediaDetail() {
                 </Container>
             )}
 
-            {/* Episodes section for Series */}
-            {(media.mediaType === 'Series' || media.mediaType === 'TV_SHOW') &&
-                media.seasons &&
-                media.seasons.length > 0 && (
-                    <Container maxWidth={false} className={cx('episodes-section')}>
-                        <Typography variant="h4" component="h2" className={cx('section-title')}>
-                            Episodes
-                        </Typography>
-                        {media.seasons.map((season) => (
-                            <Box key={season.seasonId} className={cx('season')}>
-                                <Typography variant="h5" component="h3" sx={{ color: 'white', mb: 2 }}>
-                                    Season {season.seasonNumber}
-                                </Typography>
-                                <Box className={cx('episodes-list')}>
-                                    {season.episodes.map((episode) => (
-                                        <Box key={episode.episodeId} className={cx('episode-card')}>
-                                            <Box className={cx('episode-number')}>{episode.episodeNumber}</Box>
-                                            <Box className={cx('episode-info')}>
-                                                <Typography variant="h6" component="h4" sx={{ color: 'white' }}>
-                                                    {episode.title}
-                                                </Typography>
-                                                <Typography
-                                                    variant="body2"
-                                                    sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 1 }}
-                                                >
-                                                    {episode.description}
-                                                </Typography>
-                                                <Box className={cx('episode-meta')}>
-                                                    <Typography
-                                                        variant="caption"
-                                                        sx={{ color: 'rgba(255, 255, 255, 0.5)' }}
-                                                    >
-                                                        {episode.duration} min
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
-                                        </Box>
-                                    ))}
-                                </Box>
-                            </Box>
-                        ))}
-                    </Container>
-                )}
+            {/* Episodes section for Series - sử dụng component riêng */}
+            {media.mediaType === 'Series' && media.episodes && media.episodes.length > 0 && (
+                    <EpisodesSection
+                        episodes={media.episodes}
+                        mediaId={mediaId}
+                        isAuthenticated={isAuthenticated}
+                        onLoginRequired={handleLoginRequired}
+                        maxEpisodesToShow={12}
+                    />
+            )}
         </Box>
     );
 }

@@ -155,51 +155,7 @@ function Search() {
                     </Box>
                 )}
 
-                {/* Breadcrumb navigation */}
-                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            fontSize: 'var(--current-font-size)',
-                            cursor: 'pointer',
-                            '&:hover': { color: 'var(--primary)' },
-                        }}
-                        onClick={() => {
-                            navigate('/');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                    >
-                        Home
-                    </Typography>
-                    <Typography sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>/</Typography>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: 'var(--primary)',
-                            fontSize: 'var(--current-font-size)',
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        Search
-                    </Typography>
-                </Box>
-
-                {/* Results count */}
-                {!loading && searchQuery && (
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            fontSize: 'var(--current-font-size)',
-                            mt: 1,
-                        }}
-                    >
-                        Found {totalElements} results
-                    </Typography>
-                )}
             </Box>
-
             {/* Loading State */}
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
