@@ -31,8 +31,17 @@ export const logout = async (token) => {
         {
             headers: {
                 'Content-Type': 'application/json',
-            },
+            },    
         },
     );
+    return response.data;
+};
+
+export const getUserInfo = async (token) => {
+    const response = await axios.get(`${API_URL}/users/info`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
     return response.data;
 };
