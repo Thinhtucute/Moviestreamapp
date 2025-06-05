@@ -58,6 +58,35 @@ function MediaDetail() {
 
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
+    // Extract fetchRecommendations as a separate function so it can be reused
+    const fetchRecommendations = async () => {
+        if (!isAuthenticated) return;
+
+        try {
+            setLoadingRecommendations(true);
+            // Get auth token from localStorage
+            const token = localStorage.getItem('token');
+
+            console.log('Fetching recommendations for user...');
+            const response = await axios.get(`${apiUrl}/api/favorites/recommendations`, {
+                withCredentials: true,
+                headers: {
+                    Authorization: `Bearer ${token}`, // Add authorization header
+                },
+            });
+
+            if (response.data && response.data.result) {
+                setRecommendations(response.data.result);
+                console.log('Received recommendations:', response.data.result.length);
+            }
+
+            setLoadingRecommendations(false);
+        } catch (err) {
+            console.error('Failed to fetch recommendations:', err);
+            setLoadingRecommendations(false);
+        }
+    };
+
     useEffect(() => {
         // Check token when component mounts
         dispatch(checkToken());
@@ -83,7 +112,7 @@ function MediaDetail() {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
         fetchMediaDetails();
-    }, [mediaId, dispatch, apiUrl]); // ← Chỉ 1 closing bracket
+    }, [mediaId, dispatch, apiUrl]);
 
     // Check if the current media is in favorites
     useEffect(() => {
@@ -113,42 +142,9 @@ function MediaDetail() {
 
     // Fetch recommendations based on user favorites
     useEffect(() => {
-        const fetchRecommendations = async () => {
-            if (!isAuthenticated) return;
-
-            try {
-                setLoadingRecommendations(true);
-                // Get auth token from localStorage
-                const token = localStorage.getItem('token');
-
-                const response = await axios.get(`${apiUrl}/api/favorites/recommendations`, {
-                    withCredentials: true,
-                    headers: {
-                        Authorization: `Bearer ${token}`, // Add authorization header
-                    },
-                });
-
-                if (response.data && response.data.result) {
-                    setRecommendations(response.data.result);
-                }
-
-                // Move the console.log statements inside the try block
-                console.log('Authenticated:', isAuthenticated);
-                console.log('API response for recommendations:', response.data);
-                console.log('Processed recommendations:', response.data.result); // Use response.data.result instead
-
-                setLoadingRecommendations(false);
-            } catch (err) {
-                console.error('Failed to fetch recommendations:', err);
-                setLoadingRecommendations(false);
-
-                // Still log authentication status in case of error
-                console.log('Authenticated:', isAuthenticated);
-                console.log('Failed to get recommendations data');
-            }
-        };
-
-        fetchRecommendations();
+        if (isAuthenticated) {
+            fetchRecommendations();
+        }
     }, [isAuthenticated, apiUrl]);
 
     // Function to create YouTube embed URL from trailer link
@@ -167,18 +163,8 @@ function MediaDetail() {
             return;
         }
 
-        // Check media access level
-        // if (media.accessLevel === 'PREMIUM' && (!user || user.subscription === 'FREE')) {
-        //     // Show premium required dialog
-        //     setShowPremiumDialog(true);
-        //     return;
-        // }
-
         // User is authenticated and has access - navigate to watch page
         console.log('Navigating to watch page for media:', mediaId);
-        // navigate(`/watch/${mediaId}`); // Uncomment when watch page is ready
-
-        // For now, just show success message
         navigate(`/watch/${mediaId}`);
     };
 
@@ -215,6 +201,10 @@ function MediaDetail() {
             if (response.data) {
                 setIsFavorite(!isFavorite);
                 showNotification(isFavorite ? 'Removed from favorites' : 'Added to favorites', 'success');
+                
+                // Re-fetch recommendations after favorite changes
+                console.log('Favorite changed, refreshing recommendations...');
+                fetchRecommendations();
             }
         } catch (err) {
             console.error('Failed to update favorites:', err);
