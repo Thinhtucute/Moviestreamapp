@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { checkToken } from '@/redux/features/auth/authSlice';
-import { useSelector } from 'react-redux';
 import axios from 'axios';
 import classNames from 'classnames/bind';
 import styles from './MediaDetail.module.scss';
@@ -45,17 +44,16 @@ function MediaDetail() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // Redux state
+    // Redux state - chỉ khai báo 1 lần
     const { isAuthenticated, loading: authLoading, user } = useSelector((state) => state.auth);
 
     const [media, setMedia] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isFavorite, setIsFavorite] = useState(false);
-    const [showLoginDialog, setShowLoginDialog] = useState(false); // Dialog state
+    const [showLoginDialog, setShowLoginDialog] = useState(false);
     const [recommendations, setRecommendations] = useState([]);
     const [loadingRecommendations, setLoadingRecommendations] = useState(false);
-    const { isAuthenticated } = useSelector((state) => state.auth);
     const { showNotification } = useNotification();
 
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
@@ -67,7 +65,6 @@ function MediaDetail() {
         const fetchMediaDetails = async () => {
             try {
                 setLoading(true);
-                const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
                 const response = await axios.get(`${apiUrl}/api/media/${mediaId}`);
 
                 if (response.data && response.data.result) {
@@ -86,8 +83,7 @@ function MediaDetail() {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
         fetchMediaDetails();
-    }, [mediaId, dispatch]);
-    }, [mediaId, apiUrl]);
+    }, [mediaId, dispatch, apiUrl]); // ← Chỉ 1 closing bracket
 
     // Check if the current media is in favorites
     useEffect(() => {
@@ -95,14 +91,13 @@ function MediaDetail() {
             if (!isAuthenticated || !mediaId) return;
 
             try {
-                // Get auth token from localStorage
-                const token = localStorage.getItem('token'); // or wherever your token is stored
+                const token = localStorage.getItem('token');
 
                 const response = await axios.get(`${apiUrl}/api/favorites/status/${mediaId}`, {
                     withCredentials: true,
                     headers: {
-                        Authorization: `Bearer ${token}`  // Add authorization header
-                    }
+                        Authorization: `Bearer ${token}`,
+                    },
                 });
 
                 if (response.data && response.data.result !== undefined) {
@@ -129,8 +124,8 @@ function MediaDetail() {
                 const response = await axios.get(`${apiUrl}/api/favorites/recommendations`, {
                     withCredentials: true,
                     headers: {
-                        Authorization: `Bearer ${token}`  // Add authorization header
-                    }
+                        Authorization: `Bearer ${token}`, // Add authorization header
+                    },
                 });
 
                 if (response.data && response.data.result) {
@@ -212,17 +207,14 @@ function MediaDetail() {
                 {
                     withCredentials: true,
                     headers: {
-                        Authorization: `Bearer ${token}`  // Add authorization header
-                    }
-                }
+                        Authorization: `Bearer ${token}`, // Add authorization header
+                    },
+                },
             );
 
             if (response.data) {
                 setIsFavorite(!isFavorite);
-                showNotification(
-                    isFavorite ? 'Removed from favorites' : 'Added to favorites',
-                    'success'
-                );
+                showNotification(isFavorite ? 'Removed from favorites' : 'Added to favorites', 'success');
             }
         } catch (err) {
             console.error('Failed to update favorites:', err);
@@ -439,8 +431,8 @@ function MediaDetail() {
                                     media.mediaType === 'Movie'
                                         ? '#2563eb'
                                         : media.mediaType === 'Series'
-                                            ? '#7c3aed'
-                                            : '#ec4899',
+                                        ? '#7c3aed'
+                                        : '#ec4899',
                                 color: 'white',
                                 fontWeight: 'bold',
                                 fontSize: '0.75rem',
@@ -692,16 +684,30 @@ function MediaDetail() {
             <LoginRequiredDialog />
 
             {/* Recommendations section */}
-            {isAuthenticated && recommendations.length > 0 && (
+            {isAuthenticated && (
                 <Container maxWidth={false} className={cx('recommendations-section')}>
                     <Typography variant="h4" component="h2" className={cx('section-title')}>
                         Recommended For You
                     </Typography>
+
                     {loadingRecommendations ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                            <CircularProgress size={40} sx={{ color: 'var(--primary)' }} />
+                        <Box className={cx('recommendations-loading')}>
+                            <Box className={cx('loading-content')}>
+                                <CircularProgress
+                                    size={50}
+                                    sx={{
+                                        color: 'var(--primary)',
+                                        '& .MuiCircularProgress-circle': {
+                                            strokeLinecap: 'round',
+                                        },
+                                    }}
+                                />
+                                <Typography variant="body1" className={cx('loading-text')}>
+                                    Finding perfect recommendations for you...
+                                </Typography>
+                            </Box>
                         </Box>
-                    ) : (
+                    ) : recommendations.length > 0 ? (
                         <Box className={cx('recommendations-grid')}>
                             {recommendations.slice(0, 6).map((item) => (
                                 <Box
@@ -711,10 +717,14 @@ function MediaDetail() {
                                 >
                                     <Box className={cx('movie-image')}>
                                         <img
-                                            src={item.posterURL || 'https://via.placeholder.com/300x450?text=No+Image'}
+                                            src={
+                                                item.posterURL ||
+                                                'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image'
+                                            }
                                             alt={item.title}
                                             onError={(e) => {
-                                                e.target.src = 'https://via.placeholder.com/300x450?text=No+Image';
+                                                e.target.src =
+                                                    'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image';
                                             }}
                                         />
                                     </Box>
@@ -727,9 +737,79 @@ function MediaDetail() {
                                                 {item.releaseYear}
                                             </Typography>
                                         )}
+                                        {item.rating && (
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 0.5,
+                                                    mt: 0.5,
+                                                }}
+                                            >
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        color: '#ffd700',
+                                                        fontSize: 'calc(var(--current-font-size) * 0.75)',
+                                                        fontWeight: 'bold',
+                                                    }}
+                                                >
+                                                    ⭐ {item.rating.toFixed(1)}
+                                                </Typography>
+                                            </Box>
+                                        )}
                                     </Box>
                                 </Box>
                             ))}
+                        </Box>
+                    ) : (
+                        <Box className={cx('recommendations-empty')}>
+                            <Box className={cx('empty-icon')}>🎬</Box>
+                            <Typography variant="h6" className={cx('empty-title')}>
+                                No Recommendations Yet
+                            </Typography>
+                            <Typography variant="body2" className={cx('empty-description')}>
+                                Add some movies to your favorites to get personalized recommendations!
+                            </Typography>
+                        </Box>
+                    )}
+
+                    {/* View More Button */}
+                    {recommendations.length > 6 && (
+                        <Box
+                            sx={{
+                                textAlign: 'center',
+                                mt: 4,
+                                pt: 3,
+                                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                            }}
+                        >
+                            <Button
+                                variant="outlined"
+                                onClick={() => navigate('/recommendations')}
+                                sx={{
+                                    color: 'white',
+                                    borderColor: 'var(--primary)',
+                                    borderWidth: '2px',
+                                    borderRadius: 3,
+                                    px: 4,
+                                    py: 1.5,
+                                    fontSize: 'calc(var(--current-font-size) * 0.9)',
+                                    fontWeight: 'bold',
+                                    textTransform: 'none',
+                                    background:
+                                        'linear-gradient(45deg, rgba(255, 165, 0, 0.1), rgba(255, 165, 0, 0.05))',
+                                    '&:hover': {
+                                        borderColor: '#e55b00',
+                                        backgroundColor: 'rgba(255, 165, 0, 0.15)',
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 8px 25px rgba(255, 165, 0, 0.3)',
+                                    },
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                }}
+                            >
+                                View All Recommendations
+                            </Button>
                         </Box>
                     )}
                 </Container>
@@ -813,13 +893,13 @@ function MediaDetail() {
 
             {/* Episodes section for Series - sử dụng component riêng */}
             {media.mediaType === 'Series' && media.episodes && media.episodes.length > 0 && (
-                    <EpisodesSection
-                        episodes={media.episodes}
-                        mediaId={mediaId}
-                        isAuthenticated={isAuthenticated}
-                        onLoginRequired={handleLoginRequired}
-                        maxEpisodesToShow={12}
-                    />
+                <EpisodesSection
+                    episodes={media.episodes}
+                    mediaId={mediaId}
+                    isAuthenticated={isAuthenticated}
+                    onLoginRequired={handleLoginRequired}
+                    maxEpisodesToShow={12}
+                />
             )}
         </Box>
     );
