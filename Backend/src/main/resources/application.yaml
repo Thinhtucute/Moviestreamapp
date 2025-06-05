@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/MOVIE_STREAMING_APP?useSSL=false&serverTimezone=UTC
     username: root
-    password: 1
+    password: thinh3012004
   jpa:
     hibernate:
       ddl-auto: update
