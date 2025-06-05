@@ -1,20 +1,27 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/MOVIE_STREAMING_APP?useSSL=false&serverTimezone=UTC
-    username: root
-    password: thinh3012004
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:MOVIE_STREAMING_APP}?useSSL=false&serverTimezone=UTC
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:thinh3012004}
   jpa:
     hibernate:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true
+    show-sql: ${JPA_SHOW_SQL:true}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 jwt:
-  signerKey: "Nn+SxidQSS72KF1eLyV9UMzBco/U/zauCadj15iEEStFO3uTePbAlkssV7sfPqvp"
-  valid-duration: 36000
-  refreshable-duration: 360000
+  signerKey: ${JWT_SIGNER_KEY:Nn+SxidQSS72KF1eLyV9UMzBco/U/zauCadj15iEEStFO3uTePbAlkssV7sfPqvp}
+  valid-duration: ${JWT_VALID_DURATION:36000}
+  refreshable-duration: ${JWT_REFRESHABLE_DURATION:360000}
+
+recommendation:
+  model:
+    path: ${MODEL_BASE_PATH:classpath:models/}gcn_model_scripted.pt
+  cache:
+    enabled: ${RECOMMENDATION_CACHE_ENABLED:true}
+    size: ${RECOMMENDATION_CACHE_SIZE:1000}
 
