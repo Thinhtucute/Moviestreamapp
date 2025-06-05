@@ -97,7 +97,7 @@
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
-<!--		nimbus jwt-->
+		<!--nimbus jwt-->
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
@@ -110,7 +110,27 @@
 			<version>2.44.3</version>
 		</dependency>
 
-
+		<!--AI model-->
+		<dependency>
+        	<groupId>ai.djl</groupId>
+        	<artifactId>api</artifactId>
+        	<version>0.20.0</version>
+    	</dependency>
+		<dependency>
+        	<groupId>ai.djl.pytorch</groupId>
+        	<artifactId>pytorch-engine</artifactId>
+        	<version>0.20.0</version>
+    	</dependency>
+    	<dependency>
+        	<groupId>ai.djl.pytorch</groupId>
+        	<artifactId>pytorch-model-zoo</artifactId>
+        	<version>0.20.0</version>
+    	</dependency>
+    	<dependency>
+        	<groupId>ai.djl.pytorch</groupId>
+        	<artifactId>pytorch-native-cpu</artifactId>
+        	<version>1.13.0</version>
+    	</dependency>
 	</dependencies>
 
 	<build>

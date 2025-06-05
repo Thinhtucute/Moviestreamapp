@@ -23,7 +23,6 @@ import com.group8.Backend.entity.Role;
 import java.util.HashSet;
 import java.util.List;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +31,11 @@ public class UserService {
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS));
+    }
 
     public UserResponse createUser(UserCreationRequest request) {
 
@@ -52,9 +56,9 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public UserResponse updateUser(int userId, UserUpdateRequest request){
+    public UserResponse updateUser(int userId, UserUpdateRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTS));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS));
 
         userMapper.updateUser(user, request);
         user.setPasswordHash(passwordEncoder.encode(request.getPasswordHash()));
@@ -62,28 +66,30 @@ public class UserService {
         user.setRoles(new HashSet<>(roles));
         return userMapper.toUserResponse(userRepository.save(user));
     }
-    public void deleteUser(int userId){
+
+    public void deleteUser(int userId) {
         userRepository.deleteById(userId);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")// kiemr tra role admin truoc khi goi duoc ham
-    public List<UserResponse> getAllUsers(){
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // kiemr tra role admin truoc khi goi duoc ham
+    public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
-    @PostAuthorize("returnObject.username == authentication.name") // se goi ham truoc nhung se check kets qua tra ve neu username trung voi authen thi success
-    public UserResponse getUser(int userId){
-        return  userMapper.toUserResponse(userRepository.findById(userId)
-                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTS)));
+    @PostAuthorize("returnObject.username == authentication.name") // se goi ham truoc nhung se check kets qua tra ve
+                                                                   // neu username trung voi authen thi success
+    public UserResponse getUser(int userId) {
+        return userMapper.toUserResponse(userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS)));
     }
 
     // lay thong tin sau khi dang nhap khong can truong tham so
-    public UserResponse getMyInfo(){
+    public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
 
-       User user =  userRepository.findByUsername(username).
-               orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTS));
-       return userMapper.toUserResponse(user);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS));
+        return userMapper.toUserResponse(user);
     }
 }
