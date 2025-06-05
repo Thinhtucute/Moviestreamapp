@@ -7,11 +7,11 @@
     transition: background-color 0.3s ease;
 
     &.transparent {
-        background-color: transparent; // Màu trong suốt
+        background-color: transparent;
     }
 
     &.scrolled {
-        background-color: black; // Màu hiện tại khi cuộn xuống
+        background-color: black;
     }
 
     .header-toolbar {
@@ -47,7 +47,8 @@
             align-items: center;
             gap: 10px;
 
-            .buy-package-btn, .login-btn {
+            .buy-package-btn,
+            .login-btn {
                 background-color: var(--primary);
                 color: var(--white);
                 font-size: 12px;
@@ -56,4 +57,88 @@
             }
         }
     }
+}
+
+// Thêm CSS riêng cho search dropdown
+:global(.MuiAutocomplete-paper) {
+    background-color: var(--black) !important;
+    border: 1px solid rgba(255, 165, 0, 0.3) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+    margin-top: 4px !important;
+
+    .MuiAutocomplete-listbox {
+        background-color: var(--black) !important;
+        padding: 8px 0 !important;
+    }
+
+    .MuiAutocomplete-option {
+        background-color: var(--black) !important;
+
+        &:hover {
+            background-color: rgba(255, 165, 0, 0.15) !important;
+        }
+    }
+
+    .MuiAutocomplete-loading {
+        background-color: var(--black) !important;
+        color: var(--primary) !important;
+    }
+
+    .MuiAutocomplete-noOptions {
+        background-color: var(--black) !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+}
+
+// Thêm CSS cho scrollbar
+:global(.MuiAutocomplete-paper::-webkit-scrollbar) {
+    width: 6px;
+}
+
+:global(.MuiAutocomplete-paper::-webkit-scrollbar-track) {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+:global(.MuiAutocomplete-paper::-webkit-scrollbar-thumb) {
+    background-color: var(--primary);
+    border-radius: 3px;
+
+    &:hover {
+        background-color: #e55b00;
+    }
+}
+
+// Loại bỏ border focus effect của search input
+:global(.MuiOutlinedInput-notchedOutline) {
+    border: none !important;
+    border-color: transparent !important;
+}
+
+:global(.MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+    border: none !important;
+    border-color: transparent !important;
+}
+
+:global(.MuiInputBase-root:hover .MuiOutlinedInput-notchedOutline) {
+    border: none !important;
+    border-color: transparent !important;
+}
+
+// Loại bỏ focus ring mặc định
+:global(.MuiInputBase-input:focus) {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+// Đảm bảo input chỉ có border custom
+:global(.MuiAutocomplete-root .MuiInputBase-root) {
+    border: 1px solid rgba(255, 165, 0, 0.2) !important;
+    border-radius: 8px !important;
+
+    &:hover {
+        border-color: rgba(255, 165, 0, 0.4) !important;
+    }
+
 }

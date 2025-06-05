@@ -1,45 +1,86 @@
+import React, { Fragment } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { publicRoutes } from '@/routes/routes';
-import { DefaultLayout } from '@/components/Layout';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { checkToken } from '@/redux/features/auth/authSlice';
+import { publicRoutes, privateRoutes } from './routes/routes';
+import DefaultLayout from './components/Layout/DefaultLayout/DefaultLayout';
 
 function App() {
-    const dispatch = useDispatch();
-    const { token } = useSelector((state) => state.auth);
-
-    // Kiểm tra token khi ứng dụng khởi động
-    useEffect(() => {
-        if (token) {
-            dispatch(checkToken());
-        }
-    }, [dispatch, token]);
-
     return (
         <Router>
             <div className="App">
                 <Routes>
+                    {/* Public Routes */}
                     {publicRoutes.map((route, index) => {
-                        const Layout = route.layout || DefaultLayout;
                         const Page = route.component;
+                        let Layout = DefaultLayout;
+
+                        if (route.layout) {
+                            Layout = route.layout;
+                        } else if (route.layout === null) {
+                            Layout = Fragment;
+                        }
 
                         return (
                             <Route
                                 key={index}
                                 path={route.path}
                                 element={
-                                    route.layout === null ? (
+                                    <Layout>
                                         <Page />
-                                    ) : (
-                                        <Layout>
-                                            <Page />
-                                        </Layout>
-                                    )
+                                    </Layout>
                                 }
                             />
                         );
                     })}
+
+                    {/* Private Routes */}
+                    {privateRoutes.map((route, index) => {
+                        const Page = route.component;
+                        const ProtectedRoute = route.protectedRoute;
+                        let Layout = DefaultLayout;
+
+                        if (route.layout) {
+                            Layout = route.layout;
+                        } else if (route.layout === null) {
+                            Layout = Fragment;
+                        }
+
+                        return (
+                            <Route
+                                key={`private-${index}`}
+                                path={route.path}
+                                element={
+                                    <ProtectedRoute>
+                                        <Layout>
+                                            <Page />
+                                        </Layout>
+                                    </ProtectedRoute>
+                                }
+                            />
+                        );
+                    })}
+
+                    {/* 404 Route */}
+                    <Route
+                        path="*"
+                        element={
+                            <DefaultLayout>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        minHeight: '80vh',
+                                        color: 'white',
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    <h1>404 - Page Not Found</h1>
+                                    <p>The page you are looking for does not exist.</p>
+                                </div>
+                            </DefaultLayout>
+                        }
+                    />
                 </Routes>
             </div>
         </Router>

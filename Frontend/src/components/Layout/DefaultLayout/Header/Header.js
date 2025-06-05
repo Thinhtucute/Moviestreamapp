@@ -306,7 +306,6 @@ function Header() {
                                                     e.target.src = '/placeholder-movie.jpg';
                                                 }}
                                             />
-                                            {/* Media type badge */}
                                             <Box
                                                 sx={{
                                                     position: 'absolute',
@@ -382,16 +381,47 @@ function Header() {
                                             borderColor: 'rgba(255, 165, 0, 0.4)',
                                             backgroundColor: 'rgba(49, 51, 61, 0.9)',
                                         },
-                                    },
-                                    '& .MuiOutlinedInput-notchedOutline': {
-                                        border: 'none',
-                                    },
-                                    '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                        border: 'none',
+                                        // Chỉ áp dụng viền cam khi searchValue không rỗng
+                                        ...(searchValue && {
+                                            '&.Mui-focused': {
+                                                borderColor: 'var(--primary)',
+                                                boxShadow: '0 0 0 2px rgba(255, 165, 0, 0.2)',
+                                            },
+                                        }),
                                     },
                                     '& .Mui-focused .MuiInputBase-root': {
-                                        borderColor: 'var(--primary)',
-                                        boxShadow: '0 0 0 2px rgba(255, 165, 0, 0.2)',
+                                        // Chỉ áp dụng khi searchValue không rỗng
+                                        ...(searchValue && {
+                                            borderColor: 'var(--primary)',
+                                            boxShadow: '0 0 0 2px rgba(255, 165, 0, 0.2)',
+                                        }),
+                                        '& .MuiOutlinedInput-notchedOutline': {
+                                            border: 'none !important',
+                                        },
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            border: 'none !important',
+                                        },
+                                        '&:hover fieldset': {
+                                            border: 'none !important',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            border: 'none !important',
+                                        },
+                                    },
+                                    '& .MuiTextField-root': {
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                border: 'none !important',
+                                            },
+                                            '&:hover fieldset': {
+                                                border: 'none !important',
+                                            },
+                                            '&.Mui-focused fieldset': {
+                                                border: 'none !important',
+                                            },
+                                        },
                                     },
                                     '& input::placeholder': {
                                         color: 'rgba(255, 255, 255, 0.7)',
@@ -401,7 +431,6 @@ function Header() {
                                     '& .MuiAutocomplete-endAdornment': {
                                         display: 'none',
                                     },
-                                    // Đây là phần quan trọng - thay đổi màu background của dropdown
                                     '& .MuiPaper-root': {
                                         backgroundColor: 'var(--black) !important',
                                         border: '1px solid rgba(255, 165, 0, 0.3)',
@@ -476,7 +505,6 @@ function Header() {
                         )}
                     </Box>
 
-                    {/* Rest of the header remains the same... */}
                     {!isMobile && (
                         <div className={cx('menu-items')}>
                             {menuItems.map((item) => (
@@ -520,7 +548,19 @@ function Header() {
                         ) : isAuthenticated ? (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 {!isMobile && (
-                                    <Button size="large" className={cx('buy-package-btn')}>
+                                    <Button
+                                        size="large"
+                                        className={cx('buy-package-btn')}
+                                        component={Link}
+                                        to="/subscription"
+                                        sx={{
+                                            '&:hover': {
+                                                backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                                                transform: 'translateY(-1px)',
+                                                transition: 'all 0.2s ease',
+                                            },
+                                        }}
+                                    >
                                         Mua gói
                                     </Button>
                                 )}
@@ -554,8 +594,6 @@ function Header() {
                 </Box>
             </Toolbar>
 
-            {/* All existing menus and drawers remain the same... */}
-            {/* Genre Dropdown Menu */}
             <Popper
                 open={genreMenuOpen}
                 anchorEl={genreAnchorEl}
@@ -610,7 +648,6 @@ function Header() {
                 </Paper>
             </Popper>
 
-            {/* Mobile Menu Drawer */}
             <Drawer
                 anchor="right"
                 open={mobileMenuOpen}
@@ -642,7 +679,6 @@ function Header() {
                 </List>
             </Drawer>
 
-            {/* User Menu */}
             <Menu
                 sx={{
                     mt: '45px',

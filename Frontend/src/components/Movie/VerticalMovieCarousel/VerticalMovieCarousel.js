@@ -93,7 +93,7 @@ function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'por
             scrollbarWidth: 'none',
             '&::-webkit-scrollbar': { display: 'none' },
             gap: '16px',
-            padding: '10px 0',
+            paddingTop: '30px',
             position: 'relative',
             maskImage:
                 'linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,1) 10%, rgba(0,0,0,1) 90%, rgba(0,0,0,0.8))',
