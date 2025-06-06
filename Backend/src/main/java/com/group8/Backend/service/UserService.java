@@ -3,8 +3,11 @@ package com.group8.Backend.service;
 import com.group8.Backend.constant.PredefinedRole;
 import com.group8.Backend.dto.request.UserCreationRequest;
 import com.group8.Backend.dto.request.UserUpdateRequest;
+import com.group8.Backend.dto.request.PasswordUpdateRequest;
+import com.group8.Backend.dto.request.SubscriptionUpdateRequest;
 import com.group8.Backend.dto.response.UserResponse;
 import com.group8.Backend.entity.User;
+import com.group8.Backend.entity.SubscriptionPlan;
 import com.group8.Backend.exception.AppException;
 import com.group8.Backend.exception.ErrorCode;
 import com.group8.Backend.mapper.UserMapper;
@@ -20,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.group8.Backend.entity.Role;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
@@ -91,5 +95,65 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS));
         return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse updateMyPassword(PasswordUpdateRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS));
+
+        // Verify current password
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        // Update password
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user = userRepository.save(user);
+
+        return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse updateMySubscription(SubscriptionUpdateRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS));
+
+        // Set subscription plan
+        user.setSubscriptionPlan(request.getSubscriptionPlan());
+        
+        // Set subscription expiry to 1 month from now
+        user.setSubscriptionExpiry(LocalDate.now().plusMonths(1));
+        
+        user = userRepository.save(user);
+        return userMapper.toUserResponse(user);
+    }
+
+    public boolean canAccessMedia(User user, String mediaAccessLevel) {
+        if (user == null || user.getSubscriptionExpiry() == null) {
+            return false;
+        }
+
+        // Check if subscription has expired
+        if (user.getSubscriptionExpiry().isBefore(LocalDate.now())) {
+            return false;
+        }
+
+        // VIP can access all content
+        if (user.getSubscriptionPlan() == SubscriptionPlan.VIP) {
+            return true;
+        }
+
+        // Premium can access Free and Premium content
+        if (user.getSubscriptionPlan() == SubscriptionPlan.Premium) {
+            return mediaAccessLevel.equals("FREE") || mediaAccessLevel.equals("PREMIUM");
+        }
+
+        // Free can only access Free content
+        return mediaAccessLevel.equals("FREE");
     }
 }

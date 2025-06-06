@@ -22,6 +22,7 @@ public enum ErrorCode
     DIRECTOR_NOT_FOUND(1012, "Director not found",  HttpStatus.NOT_FOUND),
     TOKEN_EXPIRED(1013,  "Token is expired", HttpStatus.UNAUTHORIZED),
     TOKEN_ALREADY_INVALIDATED(1014,  "Token is already invalidated", HttpStatus.UNAUTHORIZED),
+    INVALID_PASSWORD(1015,  "Invalid password", HttpStatus.UNAUTHORIZED),
     ;
 
 

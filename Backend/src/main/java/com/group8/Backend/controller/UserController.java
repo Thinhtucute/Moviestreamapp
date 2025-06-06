@@ -6,6 +6,8 @@ import com.group8.Backend.dto.response.UserResponse;
 import com.group8.Backend.entity.User;
 import com.group8.Backend.service.UserService;
 import com.group8.Backend.dto.request.UserCreationRequest;
+import com.group8.Backend.dto.request.PasswordUpdateRequest;
+import com.group8.Backend.dto.request.SubscriptionUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,4 +73,19 @@ public class UserController {
         }
     }
 
+    @PutMapping("/myInfo/password")
+    ApiResponse<UserResponse> updateMyPassword(@RequestBody @Valid PasswordUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userService.updateMyPassword(request))
+                .build();
+    }
+
+    @PutMapping("/myInfo/subscription")
+    ApiResponse<UserResponse> updateMySubscription(@RequestBody @Valid SubscriptionUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userService.updateMySubscription(request))
+                .build();
+    }
 }
