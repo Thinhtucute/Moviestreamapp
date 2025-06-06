@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as authApi from '@/services/authServices';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 
 // Async thunks
 export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
@@ -112,16 +113,51 @@ export const checkToken = createAsyncThunk('auth/checkToken', async (_, { getSta
     }
 });
 
+// Add new thunk to fetch current user info
+export const fetchCurrentUser = createAsyncThunk('auth/fetchCurrentUser', async (_, { rejectWithValue }) => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            return rejectWithValue({ message: 'No token found' });
+        }
+
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+        const response = await axios.get(`${apiUrl}/users/myInfo`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+        });
+
+        if (response.data && response.data.code === 1000) {
+            return response.data.result;
+        }
+        return rejectWithValue(response.data);
+    } catch (error) {
+        return rejectWithValue(error.response?.data || { message: 'Failed to fetch user info' });
+    }
+});
+
 // Fix: Initial state với proper initialization
 const getInitialState = () => {
     const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
+    const userStr = localStorage.getItem('user');
+    let user = null;
+    
+    try {
+        if (userStr) {
+            user = JSON.parse(userStr);
+        }
+    } catch (error) {
+        console.error('Error parsing user from localStorage:', error);
+        localStorage.removeItem('user'); // Xóa dữ liệu không hợp lệ
+    }
 
     return {
         token: token || null,
-        isAuthenticated: !!token, // Fix: Set true nếu có token
-        user: user ? JSON.parse(user) : null, // Fix: Parse user từ localStorage
-        loading: !!token, // Fix: Set loading true nếu có token để verify
+        isAuthenticated: false,
+        user: user,
+        loading: false,
         error: null,
     };
 };
@@ -145,6 +181,11 @@ const authSlice = createSlice({
             state.user = action.payload;
             localStorage.setItem('user', JSON.stringify(action.payload));
         },
+        // Add updateUser action
+        updateUser: (state, action) => {
+            state.user = action.payload;
+            localStorage.setItem('user', JSON.stringify(action.payload));
+        },
         // Fix: Thêm action để clear error
         clearError: (state) => {
             state.error = null;
@@ -160,13 +201,11 @@ const authSlice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
                 state.loading = false;
                 state.token = action.payload.token;
-                state.isAuthenticated = action.payload.authenticated;
-                state.user = action.payload.user || null; // Fix: Set user từ response
+                state.isAuthenticated = true;
+                state.user = action.payload.user;
                 state.error = null;
                 localStorage.setItem('token', action.payload.token);
-                if (action.payload.user) {
-                    localStorage.setItem('user', JSON.stringify(action.payload.user));
-                }
+                localStorage.setItem('user', JSON.stringify(action.payload.user));
             })
             .addCase(login.rejected, (state, action) => {
                 state.loading = false;
@@ -305,8 +344,26 @@ const authSlice = createSlice({
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
             });
+
+        // Fetch Current User
+        builder
+            .addCase(fetchCurrentUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+                state.error = null;
+                localStorage.setItem('user', JSON.stringify(action.payload));
+            })
+            .addCase(fetchCurrentUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Failed to fetch user info';
+            });
     },
 });
 
-export const { clearAuthState, setUser, clearError } = authSlice.actions;
+export const { clearAuthState, setUser, clearError, updateUser } = authSlice.actions;
 export default authSlice.reducer;
+

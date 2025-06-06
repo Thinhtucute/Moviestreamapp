@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { checkToken } from '@/redux/features/auth/authSlice';
+import { checkToken, updateUser } from '@/redux/features/auth/authSlice';
 import axios from 'axios';
 import classNames from 'classnames/bind';
 import styles from './MediaDetail.module.scss';
@@ -30,6 +30,7 @@ import {
     Share,
     Lock,
     Login,
+    Star,
 } from '@mui/icons-material';
 
 // Import EpisodesSection component
@@ -55,116 +56,118 @@ function MediaDetail() {
     const [recommendations, setRecommendations] = useState([]);
     const [loadingRecommendations, setLoadingRecommendations] = useState(false);
     const { showNotification } = useNotification();
+    const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
 
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-    // Extract fetchRecommendations as a separate function so it can be reused
-    const fetchRecommendations = async () => {
+    // Function to fetch current user info
+    const fetchCurrentUserInfo = async () => {
         if (!isAuthenticated) return;
 
         try {
-            setLoadingRecommendations(true);
-            // Get auth token from localStorage
             const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No token found');
+                return;
+            }
 
-            console.log('Fetching recommendations for user...');
-            const response = await axios.get(`${apiUrl}/api/favorites/recommendations`, {
-                withCredentials: true,
+            console.log('Fetching user info...');
+            const response = await axios.get(`${apiUrl}/users/myInfo`, {
                 headers: {
-                    Authorization: `Bearer ${token}`, // Add authorization header
+                    Authorization: `Bearer ${token}`,
                 },
+                withCredentials: true,
             });
 
-            if (response.data && response.data.result) {
-                setRecommendations(response.data.result);
-                console.log('Received recommendations:', response.data.result.length);
-            }
+            console.log('User info response:', response.data);
 
-            setLoadingRecommendations(false);
+            if (response.data && response.data.code === 0) {  // Changed from 1000 to 0
+                setCurrentUser(response.data.result);
+                dispatch(updateUser(response.data.result));
+            } else {
+                console.error('Invalid response format:', response.data);
+            }
         } catch (err) {
-            console.error('Failed to fetch recommendations:', err);
-            setLoadingRecommendations(false);
+            console.error('Failed to fetch user info:', err);
+            if (err.response) {
+                console.error('Error response:', err.response.data);
+            }
         }
     };
 
-    useEffect(() => {
-        // Check token when component mounts
-        dispatch(checkToken());
-
-        const fetchMediaDetails = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(`${apiUrl}/api/media/${mediaId}`);
-
-                if (response.data && response.data.result) {
-                    setMedia(response.data.result);
-                } else {
-                    throw new Error('Invalid response format');
-                }
-
-                setLoading(false);
-            } catch (err) {
-                console.error('Error fetching media details:', err);
-                setError('Failed to load media details. Please try again later.');
-                setLoading(false);
-            }
-        };
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        fetchMediaDetails();
-    }, [mediaId, dispatch, apiUrl]);
-
-    // Check if the current media is in favorites
-    useEffect(() => {
-        const checkFavoriteStatus = async () => {
-            if (!isAuthenticated || !mediaId) return;
-
-            try {
-                const token = localStorage.getItem('token');
-
-                const response = await axios.get(`${apiUrl}/api/favorites/status/${mediaId}`, {
-                    withCredentials: true,
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (response.data && response.data.result !== undefined) {
-                    setIsFavorite(response.data.result);
-                }
-            } catch (err) {
-                console.error('Failed to check favorite status:', err);
-            }
-        };
-
-        checkFavoriteStatus();
-    }, [mediaId, isAuthenticated, apiUrl]);
-
-    // Fetch recommendations based on user favorites
+    // Fetch user info when component mounts
     useEffect(() => {
         if (isAuthenticated) {
-            fetchRecommendations();
+            fetchCurrentUserInfo();
         }
-    }, [isAuthenticated, apiUrl]);
+    }, [isAuthenticated]);
 
-    // Function to create YouTube embed URL from trailer link
-    const getYouTubeEmbedUrl = (url) => {
-        if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-        const match = url.match(regExp);
-        return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}?autoplay=0&rel=0` : null;
+    // Function to check if user can access the media
+    const canAccessMedia = () => {
+        console.log('Current user:', currentUser);
+        console.log('Media access level:', media?.accessLevel);
+
+        if (!currentUser || !currentUser.subscriptionPlan) {
+            console.log('Missing user info or subscription details');
+            return false;
+        }
+
+        // Check if subscription has expired
+        if (currentUser.subscriptionExpiry) {
+            const expiryDate = new Date(currentUser.subscriptionExpiry);
+            if (expiryDate < new Date()) {
+                console.log('Subscription has expired');
+                return false;
+            }
+        }
+
+        // Get and normalize subscription plan and media access level
+        const userPlan = currentUser.subscriptionPlan?.trim();
+        const mediaAccess = media?.accessLevel?.trim();
+
+        console.log('User plan:', userPlan);
+        console.log('Media access:', mediaAccess);
+
+        if (!mediaAccess) {
+            console.log('No media access level defined');
+            return false;
+        }
+
+        // VIP can access all content
+        if (userPlan === 'VIP') {
+            console.log('VIP user - can access all content');
+            return true;
+        }
+
+        // Premium can access Free and Premium content
+        if (userPlan === 'Premium') {
+            const canAccess = mediaAccess === 'Free' || mediaAccess === 'Premium';
+            console.log('Premium user - can access:', canAccess);
+            return canAccess;
+        }
+
+        // Free can only access Free content
+        const canAccess = mediaAccess === 'Free';
+        console.log('Free user - can access:', canAccess, 'because media access is:', mediaAccess);
+        return canAccess;
     };
 
-    // Enhanced handleWatchNow with authentication check
-    const handleWatchNow = () => {
-        // Check if user is authenticated
+    // Enhanced handleWatchNow with subscription check
+    const handleWatchNow = async () => {
         if (!isAuthenticated) {
             setShowLoginDialog(true);
             return;
         }
 
-        // User is authenticated and has access - navigate to watch page
-        console.log('Navigating to watch page for media:', mediaId);
+        // Fetch latest user info before checking access
+        await fetchCurrentUserInfo();
+
+        if (!canAccessMedia()) {
+            setShowUpgradeDialog(true);
+            return;
+        }
+
         navigate(`/watch/${mediaId}`);
     };
 
@@ -335,6 +338,189 @@ function MediaDetail() {
             </DialogActions>
         </Dialog>
     );
+
+    // Upgrade Required Dialog Component
+    const UpgradeRequiredDialog = () => (
+        <Dialog
+            open={showUpgradeDialog}
+            onClose={() => setShowUpgradeDialog(false)}
+            PaperProps={{
+                sx: {
+                    backgroundColor: 'var(--black)',
+                    border: '1px solid rgba(255, 165, 0, 0.3)',
+                    borderRadius: '12px',
+                    minWidth: '400px',
+                },
+            }}
+        >
+            <DialogTitle
+                sx={{
+                    color: 'white',
+                    textAlign: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1,
+                }}
+            >
+                <Star sx={{ color: 'var(--primary)' }} />
+                Upgrade Required
+            </DialogTitle>
+            <DialogContent>
+                <Alert
+                    severity="info"
+                    sx={{
+                        backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                        border: '1px solid rgba(255, 165, 0, 0.3)',
+                        color: 'white',
+                        mb: 2,
+                        '& .MuiAlert-icon': {
+                            color: 'var(--primary)',
+                        },
+                    }}
+                >
+                    This content requires a higher subscription level.
+                </Alert>
+                <Typography
+                    variant="body1"
+                    sx={{
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        textAlign: 'center',
+                        mb: 2,
+                    }}
+                >
+                    Upgrade your subscription to watch <strong>{media?.title}</strong>
+                </Typography>
+            </DialogContent>
+            <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+                <Button
+                    onClick={() => setShowUpgradeDialog(false)}
+                    sx={{
+                        color: 'rgba(255, 255, 255, 0.7)',
+                        '&:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        },
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    variant="contained"
+                    onClick={() => navigate('/subscription')}
+                    sx={{
+                        backgroundColor: 'var(--primary)',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        px: 3,
+                        '&:hover': {
+                            backgroundColor: '#e55b00',
+                        },
+                    }}
+                >
+                    Upgrade Now
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+
+    // Extract fetchRecommendations as a separate function so it can be reused
+    const fetchRecommendations = async () => {
+        if (!isAuthenticated) return;
+
+        try {
+            setLoadingRecommendations(true);
+            // Get auth token from localStorage
+            const token = localStorage.getItem('token');
+
+            console.log('Fetching recommendations for user...');
+            const response = await axios.get(`${apiUrl}/api/favorites/recommendations`, {
+                withCredentials: true,
+                headers: {
+                    Authorization: `Bearer ${token}`, // Add authorization header
+                },
+            });
+
+            if (response.data && response.data.result) {
+                setRecommendations(response.data.result);
+                console.log('Received recommendations:', response.data.result.length);
+            }
+
+            setLoadingRecommendations(false);
+        } catch (err) {
+            console.error('Failed to fetch recommendations:', err);
+            setLoadingRecommendations(false);
+        }
+    };
+
+    useEffect(() => {
+        // Check token when component mounts
+        dispatch(checkToken());
+
+        const fetchMediaDetails = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(`${apiUrl}/api/media/${mediaId}`);
+
+                if (response.data && response.data.result) {
+                    console.log('Media data received:', response.data.result);
+                    console.log('Media access level:', response.data.result.accessLevel);
+                    setMedia(response.data.result);
+                } else {
+                    throw new Error('Invalid response format');
+                }
+
+                setLoading(false);
+            } catch (err) {
+                console.error('Error fetching media details:', err);
+                setError('Failed to load media details. Please try again later.');
+                setLoading(false);
+            }
+        };
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        fetchMediaDetails();
+    }, [mediaId, dispatch, apiUrl]);
+
+    // Check if the current media is in favorites
+    useEffect(() => {
+        const checkFavoriteStatus = async () => {
+            if (!isAuthenticated || !mediaId) return;
+
+            try {
+                const token = localStorage.getItem('token');
+
+                const response = await axios.get(`${apiUrl}/api/favorites/status/${mediaId}`, {
+                    withCredentials: true,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (response.data && response.data.result !== undefined) {
+                    setIsFavorite(response.data.result);
+                }
+            } catch (err) {
+                console.error('Failed to check favorite status:', err);
+            }
+        };
+
+        checkFavoriteStatus();
+    }, [mediaId, isAuthenticated, apiUrl]);
+
+    // Fetch recommendations based on user favorites
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchRecommendations();
+        }
+    }, [isAuthenticated, apiUrl]);
+
+    // Function to create YouTube embed URL from trailer link
+    const getYouTubeEmbedUrl = (url) => {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        const match = url.match(regExp);
+        return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}?autoplay=0&rel=0` : null;
+    };
 
     if (loading || authLoading) {
         return (
@@ -645,7 +831,7 @@ function MediaDetail() {
                                         label={media.accessLevel}
                                         size="small"
                                         sx={{
-                                            backgroundColor: media.accessLevel === 'FREE' ? '#4caf50' : '#ff9800',
+                                            backgroundColor: media.accessLevel === 'Free' ? '#4caf50' : '#ff9800',
                                             color: 'white',
                                             fontWeight: 'bold',
                                         }}
@@ -659,6 +845,9 @@ function MediaDetail() {
 
             {/* Login Required Dialog */}
             <LoginRequiredDialog />
+
+            {/* Upgrade Required Dialog */}
+            <UpgradeRequiredDialog />
 
             {/* Trailer section */}
             {youtubeEmbedUrl && (

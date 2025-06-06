@@ -182,7 +182,7 @@ function MoviesCategorySlider() {
                     <ErrorComponent
                         error={comedyMovies.error}
                         onRetry={() => window.location.reload()}
-                        categoryName="phim hài"
+                        categoryName="comedy movies"
                     />
                 ) : comedyMoviesList.length > 0 ? (
                     <MoviesHome
@@ -200,7 +200,7 @@ function MoviesCategorySlider() {
                                 fontStyle: 'italic',
                             }}
                         >
-                            Không có phim hài nào để hiển thị
+                            No comedy movies to display
                         </Typography>
                     </Box>
                 )}
@@ -214,7 +214,7 @@ function MoviesCategorySlider() {
                     <ErrorComponent
                         error={actionMovies.error}
                         onRetry={() => window.location.reload()}
-                        categoryName="phim hành động"
+                        categoryName="action movies"
                     />
                 ) : actionMoviesList.length > 0 ? (
                     <MoviesHome
@@ -232,7 +232,7 @@ function MoviesCategorySlider() {
                                 fontStyle: 'italic',
                             }}
                         >
-                            Không có phim hành động nào để hiển thị
+                            No action movies to display
                         </Typography>
                     </Box>
                 )}
@@ -246,7 +246,7 @@ function MoviesCategorySlider() {
                     <ErrorComponent
                         error={familyMovies.error}
                         onRetry={() => window.location.reload()}
-                        categoryName="phim gia đình"
+                        categoryName="family movies"
                     />
                 ) : familyMoviesList.length > 0 ? (
                     <MoviesHome
@@ -264,7 +264,7 @@ function MoviesCategorySlider() {
                                 fontStyle: 'italic',
                             }}
                         >
-                            Không có phim gia đình nào để hiển thị
+                            No family movies to display
                         </Typography>
                     </Box>
                 )}

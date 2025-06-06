@@ -14,19 +14,19 @@ function Footer() {
                     <img src={images.logo} alt="FPT Play Logo" className={cx('logo')} />
                 </Box>
 
-                {/* Liên kết nhanh */}
+                {/* Quick Links */}
                 <Box className={cx('footer-links')}>
                     <Typography variant="h6" className={cx('footer-title')}>
-                        Liên kết nhanh
+                        Quick Links
                     </Typography>
                     <Link href="#" className={cx('footer-link')}>
-                        Trang chủ
+                        Home
                     </Link>
                     <Link href="#" className={cx('footer-link')}>
-                        Truyền hình
+                        TV Shows
                     </Link>
                     <Link href="#" className={cx('footer-link')}>
-                        Phim bộ
+                        Movies
                     </Link>
                     <Link href="#" className={cx('footer-link')}>
                         V-League
@@ -36,18 +36,18 @@ function Footer() {
                     </Link>
                 </Box>
 
-                {/* Thông tin liên hệ */}
+                {/* Contact Information */}
                 <Box className={cx('footer-contact')}>
                     <Typography variant="h6" className={cx('footer-title')}>
-                        Liên hệ
+                        Contact
                     </Typography>
                     <Typography className={cx('footer-text')}>Email: support@fptplay.vn</Typography>
-                    <Typography className={cx('footer-text')}>Số điện thoại: 1900 1234</Typography>
-                    <Typography className={cx('footer-text')}>Địa chỉ: 123 Đường FPT, Quận 1, TP.HCM</Typography>
+                    <Typography className={cx('footer-text')}>Phone: 1900 1234</Typography>
+                    <Typography className={cx('footer-text')}>Address: 123 FPT Street, District 1, HCMC</Typography>
                 </Box>
             </Box>
 
-            {/* Bản quyền */}
+            {/* Copyright */}
             <Box className={cx('footer-copyright')}>
                 <Typography className={cx('footer-text')}>© 2025 FPT Play. All rights reserved.</Typography>
             </Box>

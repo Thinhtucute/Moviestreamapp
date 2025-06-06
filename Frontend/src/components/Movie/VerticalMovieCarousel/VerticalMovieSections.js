@@ -6,22 +6,22 @@ import VerticalMovieCarousel from '../VerticalMovieCarousel/VerticalMovieCarouse
 import useFetch from '@/hooks/useFetch';
 
 function VerticalMovieSections({ onLoad }) {
-    // Thêm onLoad vào props
+    // Add onLoad to props
     const dramaMovies = useFetch(`${process.env.REACT_APP_API_URL}/api/media/search?genreName=Drama`);
     const documentaryMovies = useFetch(`${process.env.REACT_APP_API_URL}/api/media/search?genreName=Documentary`);
     const historyMovies = useFetch(`${process.env.REACT_APP_API_URL}/api/media/search?genreName=History`);
 
-    // Hàm ánh xạ dữ liệu API sang định dạng MoviesHome
+    // Function to map API data to MoviesHome format
     const mapMovies = (data) => {
         if (!data || !data.result || !Array.isArray(data.result.content)) {
-            console.warn('Dữ liệu API không hợp lệ:', data);
+            console.warn('Invalid API data:', data);
             return [];
         }
 
         return data.result.content.map((item) => ({
             mediaId: item.mediaId,
             image: item.posterURL || 'https://via.placeholder.com/300x169',
-            title: item.title || 'Không có tiêu đề',
+            title: item.title || 'No title',
             releaseYear: item.releaseYear || 'N/A',
             duration: item.duration || 'N/A',
             rating: item.rating || null,
@@ -29,7 +29,7 @@ function VerticalMovieSections({ onLoad }) {
         }));
     };
 
-    // Kiểm tra loading state và gọi onLoad callback
+    // Check loading state and call onLoad callback
     useEffect(() => {
         const allLoaded = !dramaMovies.loading && !documentaryMovies.loading && !historyMovies.loading;
         if (allLoaded && onLoad) {
@@ -37,12 +37,12 @@ function VerticalMovieSections({ onLoad }) {
         }
     }, [dramaMovies.loading, documentaryMovies.loading, historyMovies.loading, onLoad]);
 
-    // Ánh xạ dữ liệu cho từng danh sách
+    // Map data for each list
     const dramaMoviesList = mapMovies(dramaMovies.data);
     const documentaryMoviesList = mapMovies(documentaryMovies.data);
     const historyMoviesList = mapMovies(historyMovies.data);
 
-    // Loading skeleton component - giống MoviesCategorySlider
+    // Loading skeleton component - similar to MoviesCategorySlider
     const LoadingSkeleton = () => (
         <Box sx={{ marginBottom: '40px' }}>
             <Skeleton
@@ -75,7 +75,7 @@ function VerticalMovieSections({ onLoad }) {
         </Box>
     );
 
-    // Error component - giống MoviesCategorySlider
+    // Error component - similar to MoviesCategorySlider
     const ErrorComponent = ({ error, onRetry, categoryName }) => (
         <Box
             sx={{
@@ -103,7 +103,7 @@ function VerticalMovieSections({ onLoad }) {
                     fontWeight: 'bold',
                 }}
             >
-                Không thể tải {categoryName}
+                Unable to load {categoryName}
             </Typography>
             <Typography
                 variant="body2"
@@ -112,7 +112,7 @@ function VerticalMovieSections({ onLoad }) {
                     mb: 3,
                 }}
             >
-                {error?.message || 'Đã xảy ra lỗi khi tải dữ liệu'}
+                {error?.message || 'An error occurred while loading data'}
             </Typography>
             <Button
                 variant="contained"
@@ -125,12 +125,12 @@ function VerticalMovieSections({ onLoad }) {
                     },
                 }}
             >
-                Thử lại
+                Try Again
             </Button>
         </Box>
     );
 
-    // Main loading state - nếu tất cả đều đang loading (giống MoviesCategorySlider)
+    // Main loading state - if all are loading (similar to MoviesCategorySlider)
     const isAllLoading = dramaMovies.loading && documentaryMovies.loading && historyMovies.loading;
 
     if (isAllLoading) {
@@ -158,7 +158,7 @@ function VerticalMovieSections({ onLoad }) {
                             fontSize: 'calc(var(--current-font-size) * 1.2)',
                         }}
                     >
-                        Đang tải thêm nội dung...
+                        Loading more content...
                     </Typography>
                 </Box>
                 <LoadingSkeleton />
@@ -172,7 +172,7 @@ function VerticalMovieSections({ onLoad }) {
         <Box
             sx={{
                 marginTop: '40px',
-           }}
+            }}
         >
             {/* Drama Section */}
             <Box sx={{ marginBottom: '40px' }}>
@@ -182,7 +182,7 @@ function VerticalMovieSections({ onLoad }) {
                     <ErrorComponent
                         error={dramaMovies.error}
                         onRetry={() => window.location.reload()}
-                        categoryName="phim chính kịch"
+                        categoryName="drama movies"
                     />
                 ) : dramaMoviesList.length > 0 ? (
                     <VerticalMovieCarousel title="Drama" movies={dramaMoviesList} isLoading={false} error={null} />
@@ -195,7 +195,7 @@ function VerticalMovieSections({ onLoad }) {
                                 fontStyle: 'italic',
                             }}
                         >
-                            Không có phim chính kịch nào để hiển thị
+                            No drama movies to display
                         </Typography>
                     </Box>
                 )}
@@ -209,7 +209,7 @@ function VerticalMovieSections({ onLoad }) {
                     <ErrorComponent
                         error={documentaryMovies.error}
                         onRetry={() => window.location.reload()}
-                        categoryName="phim tài liệu"
+                        categoryName="documentary movies"
                     />
                 ) : documentaryMoviesList.length > 0 ? (
                     <VerticalMovieCarousel
@@ -227,21 +227,21 @@ function VerticalMovieSections({ onLoad }) {
                                 fontStyle: 'italic',
                             }}
                         >
-                            Không có phim tài liệu nào để hiển thị
+                            No documentary movies to display
                         </Typography>
                     </Box>
                 )}
             </Box>
 
             {/* History Section */}
-            <Box>
+            <Box sx={{ marginBottom: '40px' }}>
                 {historyMovies.loading ? (
                     <LoadingSkeleton />
                 ) : historyMovies.error ? (
                     <ErrorComponent
                         error={historyMovies.error}
                         onRetry={() => window.location.reload()}
-                        categoryName="phim lịch sử"
+                        categoryName="history movies"
                     />
                 ) : historyMoviesList.length > 0 ? (
                     <VerticalMovieCarousel title="History" movies={historyMoviesList} isLoading={false} error={null} />
@@ -254,7 +254,7 @@ function VerticalMovieSections({ onLoad }) {
                                 fontStyle: 'italic',
                             }}
                         >
-                            Không có phim lịch sử nào để hiển thị
+                            No history movies to display
                         </Typography>
                     </Box>
                 )}

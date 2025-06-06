@@ -324,7 +324,7 @@ function GenreDetail() {
                                     fontSize: 'calc(var(--current-font-size) * 1.5)',
                                 }}
                             >
-                                Không tìm thấy phim nào
+                                No movies found
                             </Typography>
                             <Typography
                                 variant="body1"
@@ -335,8 +335,7 @@ function GenreDetail() {
                                     fontSize: 'var(--current-font-size)',
                                 }}
                             >
-                                Hiện tại chưa có phim nào thuộc thể loại "{displayGenreName}". Hãy thử khám phá các thể
-                                loại khác!
+                                There are currently no movies in the "{displayGenreName}" genre. Try exploring other genres!
                             </Typography>
                             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
                                 <Button
@@ -349,7 +348,7 @@ function GenreDetail() {
                                         '&:hover': { backgroundColor: '#e55b00' },
                                     }}
                                 >
-                                    Quay về trang chủ
+                                    Return to Home
                                 </Button>
                                 <Button
                                     variant="outlined"

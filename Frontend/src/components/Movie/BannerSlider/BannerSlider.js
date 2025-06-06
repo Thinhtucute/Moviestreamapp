@@ -450,7 +450,7 @@ function BannerSlider() {
                     >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <Typography variant="h2" sx={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
-                                {currentBanner.title || 'Không có tiêu đề'}
+                                {currentBanner.title || 'No title'}
                             </Typography>
                         </Box>
 

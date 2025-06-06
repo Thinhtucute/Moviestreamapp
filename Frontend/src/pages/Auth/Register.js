@@ -43,7 +43,7 @@ export default function Register() {
         e.preventDefault();
         const result = await dispatch(register(userData));
         if (register.fulfilled.match(result)) {
-            showNotification('Đăng ký thành công! Vui lòng đăng nhập.', 'success'); // Hiển thị thông báo
+            showNotification('Registration successful! Please log in.', 'success'); // Hiển thị thông báo
             setTimeout(() => {
                 navigate('/login'); // Chuyển hướng sau 1 giây để người dùng thấy thông báo
             }, 3000);
@@ -92,7 +92,7 @@ export default function Register() {
                     }}
                 >
                     <Typography variant="h3" align="center" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                        Đăng Ký
+                        Register
                     </Typography>
 
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
@@ -101,7 +101,7 @@ export default function Register() {
                             required
                             fullWidth
                             id="username"
-                            label="Tên đăng nhập"
+                            label="Username"
                             name="username"
                             autoComplete="username"
                             variant="outlined"
@@ -171,7 +171,7 @@ export default function Register() {
                             required
                             fullWidth
                             name="passwordHash"
-                            label="Mật khẩu"
+                            label="Password"
                             type={showpasswordHash ? 'text' : 'passwordHash'}
                             id="passwordHash"
                             autoComplete="current-passwordHash"
@@ -238,7 +238,7 @@ export default function Register() {
                                 },
                             }}
                         >
-                            {loading ? 'Đang đăng ký...' : 'Đăng ký'}
+                            {loading ? 'Registering...' : 'Register'}
                         </Button>
 
                         <Box sx={{ textAlign: 'center', mt: 0 }}>
@@ -254,7 +254,7 @@ export default function Register() {
                                     },
                                 }}
                             >
-                                Đăng nhập
+                                Login
                             </Link>
                         </Box>
                     </Box>

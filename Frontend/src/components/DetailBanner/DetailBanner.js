@@ -147,7 +147,7 @@ function DetailBanner({ movie, isVisible, position }) {
                                 lineHeight: 1.5,
                             }}
                         >
-                            {movie.description || 'Không có mô tả'}
+                            {movie.description || 'No description available'}
                         </Typography>
 
                         {/* Genres */}

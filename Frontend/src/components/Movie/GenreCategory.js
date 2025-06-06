@@ -4,9 +4,9 @@ const categories = [
     { id: 1, name: 'Marvel', gradient: 'linear-gradient(to right, #3b82f6, #6366f1)' },
     { id: 2, name: '4K', gradient: 'linear-gradient(to right, #a78bfa, #6366f1)' },
     { id: 3, name: 'Sitcom', gradient: 'linear-gradient(to right, #34d399, #14b8a6)' },
-    { id: 4, name: 'Lồng Tiếng Cực Mạnh', gradient: 'linear-gradient(to right, #8b5cf6, #7c3aed)' },
-    { id: 5, name: 'Xuyên Không', gradient: 'linear-gradient(to right, #f97316, #f59e0b)' },
-    { id: 6, name: '+4 chủ đề', gradient: 'linear-gradient(to right, #94a3b8, #6b7280)', noViewText: true },
+    { id: 4, name: 'Strong Dubbing', gradient: 'linear-gradient(to right, #8b5cf6, #7c3aed)' },
+    { id: 5, name: 'Time Travel', gradient: 'linear-gradient(to right, #f97316, #f59e0b)' },
+    { id: 6, name: '+4 topics', gradient: 'linear-gradient(to right, #94a3b8, #6b7280)', noViewText: true },
 ];
 
 export default function CategoryScroll() {
@@ -20,7 +20,7 @@ export default function CategoryScroll() {
             }}
         >
             <Typography variant="h3" color="white" sx={{ mb: 2 }}>
-                Bạn đang quan tâm gì?
+                What are you interested in?
             </Typography>
 
             <Box sx={{ position: 'relative', '&:hover .scroll-button': { opacity: 1 } }}>
@@ -68,7 +68,7 @@ export default function CategoryScroll() {
                             </Typography>
                             {!cat.noViewText && (
                                 <Box display="flex" alignItems="center" sx={{ opacity: 0.9 }} gap={'2px'}>
-                                    <Typography variant="body">Xem chủ đề</Typography>
+                                    <Typography variant="body">View topic</Typography>
                                     <ChevronRight variant="medium" />
                                 </Box>
                             )}

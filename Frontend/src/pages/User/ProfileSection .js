@@ -13,6 +13,11 @@ import {
     Alert,
     Chip,
     CircularProgress,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    IconButton,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
@@ -22,6 +27,9 @@ import SaveIcon from '@mui/icons-material/Save';
 import StarIcon from '@mui/icons-material/Star';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import LockIcon from '@mui/icons-material/Lock';
+import CloseIcon from '@mui/icons-material/Close';
 import avatar from '@/assets/images/avatar.jpg';
 
 function ProfileSection({ userInfo }) {
@@ -38,6 +46,15 @@ function ProfileSection({ userInfo }) {
     const [updateLoading, setUpdateLoading] = useState(false);
     const [updateSuccess, setUpdateSuccess] = useState(false);
     const [error, setError] = useState(null);
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    });
+    const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [passwordError, setPasswordError] = useState(null);
+    const [passwordSuccess, setPasswordSuccess] = useState(false);
 
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
@@ -138,6 +155,83 @@ function ProfileSection({ userInfo }) {
     };
 
     const subscriptionColors = getSubscriptionColor(userInfo?.subscriptionPlan);
+
+    const handlePasswordChange = (field) => (event) => {
+        setPasswordData((prev) => ({
+            ...prev,
+            [field]: event.target.value,
+        }));
+    };
+
+    const handlePasswordSubmit = async () => {
+        try {
+            setPasswordError(null);
+            setPasswordSuccess(false);
+
+            if (passwordData.newPassword !== passwordData.confirmPassword) {
+                setPasswordError('New passwords do not match');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await axios.put(
+                `${apiUrl}/users/myInfo/password`,
+                {
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                }
+            );
+
+            if (response.data && response.data.code === 1000) {
+                setPasswordSuccess(true);
+                setPasswordDialogOpen(false);
+                setPasswordData({
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: '',
+                });
+            } else {
+                throw new Error(response.data?.message || 'Failed to update password');
+            }
+        } catch (err) {
+            console.error('Failed to update password:', err);
+            setPasswordError(err.response?.data?.message || err.message || 'Failed to update password');
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await axios.delete(`${apiUrl}/users/${userInfo.userID}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                withCredentials: true,
+            });
+
+            if (response.status === 200) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        } catch (err) {
+            console.error('Failed to delete account:', err);
+            setError(err.response?.data?.message || err.message || 'Failed to delete account');
+        }
+    };
 
     return (
         <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, md: 4 }, color: 'white' }}>
@@ -575,6 +669,43 @@ function ProfileSection({ userInfo }) {
 
                         <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)', my: 3 }} />
 
+                        {/* Security Settings */}
+                        <Typography variant="h6" sx={{ color: 'white', mb: 2, fontWeight: 'bold' }}>
+                            Security Settings
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                            <Button
+                                variant="outlined"
+                                startIcon={<LockIcon />}
+                                onClick={() => setPasswordDialogOpen(true)}
+                                sx={{
+                                    borderColor: '#ff9800',
+                                    color: '#ff9800',
+                                    '&:hover': {
+                                        borderColor: '#ff9800',
+                                        bgcolor: 'rgba(255, 152, 0, 0.1)',
+                                    },
+                                }}
+                            >
+                                Change Password
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                startIcon={<DeleteForeverIcon />}
+                                onClick={() => setDeleteDialogOpen(true)}
+                                sx={{
+                                    borderColor: '#f44336',
+                                    color: '#f44336',
+                                    '&:hover': {
+                                        borderColor: '#f44336',
+                                        bgcolor: 'rgba(244, 67, 54, 0.1)',
+                                    },
+                                }}
+                            >
+                                Delete Account
+                            </Button>
+                        </Box>
+
                         {/* Notification Settings */}
                         <Typography variant="h6" sx={{ color: 'white', mb: 2, fontWeight: 'bold' }}>
                             Notification Preferences
@@ -659,6 +790,162 @@ function ProfileSection({ userInfo }) {
                     </Paper>
                 </Grid>
             </Grid>
+
+            {/* Password Change Dialog */}
+            <Dialog
+                open={passwordDialogOpen}
+                onClose={() => setPasswordDialogOpen(false)}
+                PaperProps={{
+                    sx: {
+                        bgcolor: '#1a1a1a',
+                        color: 'white',
+                        minWidth: '400px',
+                    },
+                }}
+            >
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    Change Password
+                    <IconButton
+                        onClick={() => setPasswordDialogOpen(false)}
+                        sx={{ color: 'white' }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    {passwordError && (
+                        <Alert severity="error" sx={{ mb: 2, bgcolor: 'rgba(244, 67, 54, 0.1)', color: 'white' }}>
+                            {passwordError}
+                        </Alert>
+                    )}
+                    {passwordSuccess && (
+                        <Alert severity="success" sx={{ mb: 2, bgcolor: 'rgba(76, 175, 80, 0.1)' }}>
+                            Password updated successfully!
+                        </Alert>
+                    )}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                        <TextField
+                            fullWidth
+                            type="password"
+                            label="Current Password"
+                            value={passwordData.currentPassword}
+                            onChange={handlePasswordChange('currentPassword')}
+                            InputProps={{ style: { color: 'white' } }}
+                            InputLabelProps={{ style: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                                    '&:hover fieldset': { borderColor: '#ff9800' },
+                                    '&.Mui-focused fieldset': { borderColor: '#ff9800' },
+                                },
+                            }}
+                        />
+                        <TextField
+                            fullWidth
+                            type="password"
+                            label="New Password"
+                            value={passwordData.newPassword}
+                            onChange={handlePasswordChange('newPassword')}
+                            InputProps={{ style: { color: 'white' } }}
+                            InputLabelProps={{ style: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                                    '&:hover fieldset': { borderColor: '#ff9800' },
+                                    '&.Mui-focused fieldset': { borderColor: '#ff9800' },
+                                },
+                            }}
+                        />
+                        <TextField
+                            fullWidth
+                            type="password"
+                            label="Confirm New Password"
+                            value={passwordData.confirmPassword}
+                            onChange={handlePasswordChange('confirmPassword')}
+                            InputProps={{ style: { color: 'white' } }}
+                            InputLabelProps={{ style: { color: 'rgba(255, 255, 255, 0.7)' } }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                                    '&:hover fieldset': { borderColor: '#ff9800' },
+                                    '&.Mui-focused fieldset': { borderColor: '#ff9800' },
+                                },
+                            }}
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button
+                        onClick={() => setPasswordDialogOpen(false)}
+                        sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handlePasswordSubmit}
+                        variant="contained"
+                        sx={{
+                            bgcolor: '#ff9800',
+                            color: 'white',
+                            '&:hover': { bgcolor: '#e68900' },
+                        }}
+                    >
+                        Update Password
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Delete Account Dialog */}
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={() => setDeleteDialogOpen(false)}
+                PaperProps={{
+                    sx: {
+                        bgcolor: '#1a1a1a',
+                        color: 'white',
+                        minWidth: '400px',
+                    },
+                }}
+            >
+                <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    Delete Account
+                    <IconButton
+                        onClick={() => setDeleteDialogOpen(false)}
+                        sx={{ color: 'white' }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography sx={{ mb: 2 }}>
+                        Are you sure you want to delete your account? This action cannot be undone.
+                    </Typography>
+                    {error && (
+                        <Alert severity="error" sx={{ mb: 2, bgcolor: 'rgba(244, 67, 54, 0.1)' }}>
+                            {error}
+                        </Alert>
+                    )}
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button
+                        onClick={() => setDeleteDialogOpen(false)}
+                        sx={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleDeleteAccount}
+                        variant="contained"
+                        sx={{
+                            bgcolor: '#f44336',
+                            color: 'white',
+                            '&:hover': { bgcolor: '#d32f2f' },
+                        }}
+                    >
+                        Delete Account
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }

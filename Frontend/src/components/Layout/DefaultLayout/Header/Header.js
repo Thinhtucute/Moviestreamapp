@@ -99,12 +99,12 @@ function Header() {
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const menuItems = [
-        { text: 'Thể loại', path: '/the-loai', hasDropdown: true },
-        { text: 'Phim mới', path: '/new-movies' },
-        { text: 'Phim bộ', path: '/series' },
-        { text: 'Phim lẻ', path: '/movies' },
+        { text: 'Genres', path: '/the-loai', hasDropdown: true },
+        { text: 'New Movies', path: '/new-movies' },
+        { text: 'TV Series', path: '/series' },
+        { text: 'Movies', path: '/movies' },
         { text: 'Animation', path: '/animation' },
-        { text: 'Đạo diễn', path: '/daodien' },
+        { text: 'Directors', path: '/daodien' },
     ];
 
     // Search functionality
@@ -566,7 +566,7 @@ function Header() {
                                             },
                                         }}
                                     >
-                                        Mua gói
+                                        Buy Package
                                     </Button>
                                 )}
                                 <IconButton size="large" aria-label="show 17 new notifications" color="inherit">

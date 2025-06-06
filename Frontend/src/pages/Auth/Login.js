@@ -43,7 +43,7 @@ export default function Login() {
         e.preventDefault();
         const result = await dispatch(login(credentials));
         if (login.fulfilled.match(result)) {
-            showNotification('Đăng ký nhập thành công!', 'success'); // Hiển thị thông bá0
+            showNotification('Login successful!', 'success'); // Hiển thị thông báo
             // setTimeout(() => {
             //     navigate('/'); // Chuyển hướng sau 1 giây để người dùng thấy thông báo
             // }, 3000);
@@ -98,7 +98,7 @@ export default function Login() {
                     }}
                 >
                     <Typography variant="h3" align="center" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                        Đăng Nhập
+                        Login
                     </Typography>
 
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
@@ -107,7 +107,7 @@ export default function Login() {
                             required
                             fullWidth
                             id="username"
-                            label="Tên đăng nhập"
+                            label="Username"
                             name="username"
                             autoComplete="username"
                             variant="outlined"
@@ -142,7 +142,7 @@ export default function Login() {
                             required
                             fullWidth
                             name="password"
-                            label="Mật khẩu"
+                            label="Password"
                             type={showPassword ? 'text' : 'password'}
                             id="password"
                             autoComplete="current-password"
@@ -200,7 +200,7 @@ export default function Login() {
                                             }}
                                         />
                                     }
-                                    label="Ghi nhớ đăng nhập"
+                                    label="Remember me"
                                     sx={{ fontSize: '1.1rem', color: 'rgba(255, 255, 255, 0.7)' }}
                                 />
                             </Grid>
@@ -217,7 +217,7 @@ export default function Login() {
                                         },
                                     }}
                                 >
-                                    Quên mật khẩu?
+                                    Forgot password?
                                 </Link>
                             </Grid>
                         </Grid>
@@ -246,12 +246,12 @@ export default function Login() {
                                 },
                             }}
                         >
-                            {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
+                            {loading ? 'Logging in...' : 'Login'}
                         </Button>
 
                         <Box sx={{ textAlign: 'center', mt: 1 }}>
                             <Typography variant="body2" sx={{ fontSize: '1.1rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                                Chưa có tài khoản?{' '}
+                                Don't have an account?{' '}
                                 <Link
                                     href="/register"
                                     variant="body2"
@@ -264,7 +264,7 @@ export default function Login() {
                                         },
                                     }}
                                 >
-                                    Đăng ký ngay
+                                    Register now
                                 </Link>
                             </Typography>
                         </Box>

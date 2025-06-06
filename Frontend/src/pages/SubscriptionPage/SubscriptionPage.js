@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
     Container,
     Typography,
@@ -14,12 +14,17 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
+    Alert,
+    CircularProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
 import DiamondIcon from '@mui/icons-material/Diamond';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
+import axios from 'axios';
+import { updateUser, fetchCurrentUser } from '@/redux/features/auth/authSlice';
+import useNotification from '@/hooks/useNotification';
 
 const plans = [
     {
@@ -101,9 +106,15 @@ const StyledCard = styled(Card)(({ plancolor, popular }) => ({
 
 const SubscriptionPage = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const { showNotification } = useNotification();
 
-    const handleSubscribe = (planId, planName) => {
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
+    const handleSubscribe = async (planId, planName) => {
         if (!isAuthenticated) {
             sessionStorage.setItem('intendedSubscription', planId);
             sessionStorage.setItem('redirectAfterLogin', '/subscription');
@@ -112,14 +123,52 @@ const SubscriptionPage = () => {
         }
 
         if (planId === 'free') {
-            alert('You are already using the Free plan!');
+            showNotification('You are already using the Free plan!', 'info');
             return;
         }
 
-        console.log(`Processing subscription for ${planName}`);
-        alert(`Redirecting to payment page for ${planName} plan!`);
+        try {
+            setLoading(true);
+            setError(null);
 
-        // navigate(`/payment?plan=${planId}`);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            // Map planId to SubscriptionPlan enum value
+            const subscriptionPlan = planId === 'vip' ? 'VIP' : 
+                                  planId === 'premium' ? 'Premium' : 
+                                  'Free';
+
+            const response = await axios.put(
+                `${apiUrl}/users/myInfo/subscription`,
+                {
+                    subscriptionPlan,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                }
+            );
+
+            if (response.data && response.data.code === 1000) {
+                // Fetch updated user info
+                await dispatch(fetchCurrentUser()).unwrap();
+                showNotification(`Successfully upgraded to ${planName} plan!`, 'success');
+                navigate('/profile');
+            } else {
+                throw new Error(response.data?.message || 'Failed to update subscription');
+            }
+        } catch (err) {
+            console.error('Failed to update subscription:', err);
+            setError(err.response?.data?.message || err.message || 'Failed to update subscription');
+            showNotification('Failed to update subscription', 'error');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -184,6 +233,25 @@ const SubscriptionPage = () => {
                         </Box>
                     )}
                 </Box>
+
+                {/* Error Alert */}
+                {error && (
+                    <Alert
+                        severity="error"
+                        sx={{
+                            maxWidth: '600px',
+                            mx: 'auto',
+                            mb: 4,
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            color: 'white',
+                            '& .MuiAlert-icon': {
+                                color: '#f44336',
+                            },
+                        }}
+                    >
+                        {error}
+                    </Alert>
+                )}
 
                 {/* Plans Grid */}
                 <Grid container spacing={4} justifyContent="center">
@@ -314,7 +382,7 @@ const SubscriptionPage = () => {
                                         fullWidth
                                         size="large"
                                         onClick={() => handleSubscribe(plan.id, plan.name)}
-                                        disabled={isAuthenticated && user?.subscription === plan.name.toUpperCase()}
+                                        disabled={loading || (isAuthenticated && user?.subscription === plan.name.toUpperCase())}
                                         sx={{
                                             backgroundColor: plan.color,
                                             color: 'white',
@@ -334,9 +402,13 @@ const SubscriptionPage = () => {
                                             },
                                         }}
                                     >
-                                        {isAuthenticated && user?.subscription === plan.name.toUpperCase()
-                                            ? 'Current Plan'
-                                            : plan.buttonText}
+                                        {loading ? (
+                                            <CircularProgress size={24} color="inherit" />
+                                        ) : isAuthenticated && user?.subscription === plan.name.toUpperCase() ? (
+                                            'Current Plan'
+                                        ) : (
+                                            plan.buttonText
+                                        )}
                                     </Button>
                                 </Box>
                             </StyledCard>
@@ -383,3 +455,4 @@ const SubscriptionPage = () => {
 };
 
 export default SubscriptionPage;
+

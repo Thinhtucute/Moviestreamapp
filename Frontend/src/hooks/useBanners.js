@@ -9,7 +9,7 @@ export const useBanners = () => {
     });
 
     useEffect(() => {
-        let isMounted = true; // Biến cờ để đảm bảo chỉ cập nhật state khi component còn tồn tại
+        let isMounted = true; // Flag to ensure state updates only when component is mounted
 
         async function fetchBanners() {
             try {
@@ -26,7 +26,7 @@ export const useBanners = () => {
                     setState({
                         banners: [],
                         loading: false,
-                        error: 'Không thể tải dữ liệu banner',
+                        error: 'Unable to load banner data',
                     });
                 }
             }
@@ -37,9 +37,9 @@ export const useBanners = () => {
         }
 
         return () => {
-            isMounted = false; // Cleanup khi component unmount
+            isMounted = false; // Cleanup when component unmounts
         };
-    }, [state.banners.length, state.loading]); // Dependency array bao gồm các trạng thái để chạy lại khi chúng thay đổi
+    }, [state.banners.length, state.loading]); // Dependency array includes states to re-run when they change
 
     return state;
 };

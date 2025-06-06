@@ -171,7 +171,7 @@ function SettingsSection() {
                             }}
                         >
                             <MenuItem value="en">English</MenuItem>
-                            <MenuItem value="vi">Tiếng Việt</MenuItem>
+                            <MenuItem value="vi">Vietnamese</MenuItem>
                             <MenuItem value="es">Español</MenuItem>
                             <MenuItem value="fr">Français</MenuItem>
                         </Select>

@@ -305,7 +305,7 @@ function NewMovies() {
                                     fontSize: 'calc(var(--current-font-size) * 1.5)',
                                 }}
                             >
-                                Chưa có phim mới nào
+                                No new movies available
                             </Typography>
                             <Typography
                                 variant="body1"
@@ -316,7 +316,7 @@ function NewMovies() {
                                     fontSize: 'var(--current-font-size)',
                                 }}
                             >
-                                Hiện tại chưa có phim mới nào cho năm {currentYear}. Hãy quay lại sau!
+                                There are currently no new movies for {currentYear}. Please check back later!
                             </Typography>
                             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
                                 <Button
@@ -329,7 +329,7 @@ function NewMovies() {
                                         '&:hover': { backgroundColor: '#e55b00' },
                                     }}
                                 >
-                                    Quay về trang chủ
+                                    Return to Home
                                 </Button>
                                 <Button
                                     variant="outlined"
@@ -344,7 +344,7 @@ function NewMovies() {
                                         },
                                     }}
                                 >
-                                    Xem theo thể loại
+                                    View by genre
                                 </Button>
                             </Box>
                         </Box>
