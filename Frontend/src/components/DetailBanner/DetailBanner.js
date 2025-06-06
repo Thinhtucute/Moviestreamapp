@@ -128,7 +128,7 @@ function DetailBanner({ movie, isVisible, position }) {
                             >
                                 <HourglassEmptyIcon fontSize="small" sx={{ color: 'var(--primary)' }} />
                                 <Typography variant="body2" sx={{ color: 'var(--white)' }}>
-                                    {movie.duration} phút
+                                    {movie.duration} min
                                 </Typography>
                             </Box>
                         </Box>

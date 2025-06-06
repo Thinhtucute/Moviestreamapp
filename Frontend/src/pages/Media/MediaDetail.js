@@ -597,19 +597,6 @@ function MediaDetail() {
                             >
                                 {isFavorite ? <Favorite fontSize="large" /> : <FavoriteBorder fontSize="large" />}
                             </Button>
-                            <Button
-                                onClick={handleAddToList}
-                                sx={{
-                                    color: 'white',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '50%',
-                                    minWidth: '48px',
-                                    height: '48px',
-                                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
-                                }}
-                            >
-                                <Add fontSize="large" />
-                            </Button>
                         </Box>
 
                         {/* Authentication Status Indicator */}
@@ -682,138 +669,6 @@ function MediaDetail() {
 
             {/* Login Required Dialog */}
             <LoginRequiredDialog />
-
-            {/* Recommendations section */}
-            {isAuthenticated && (
-                <Container maxWidth={false} className={cx('recommendations-section')}>
-                    <Typography variant="h4" component="h2" className={cx('section-title')}>
-                        Recommended For You
-                    </Typography>
-
-                    {loadingRecommendations ? (
-                        <Box className={cx('recommendations-loading')}>
-                            <Box className={cx('loading-content')}>
-                                <CircularProgress
-                                    size={50}
-                                    sx={{
-                                        color: 'var(--primary)',
-                                        '& .MuiCircularProgress-circle': {
-                                            strokeLinecap: 'round',
-                                        },
-                                    }}
-                                />
-                                <Typography variant="body1" className={cx('loading-text')}>
-                                    Finding perfect recommendations for you...
-                                </Typography>
-                            </Box>
-                        </Box>
-                    ) : recommendations.length > 0 ? (
-                        <Box className={cx('recommendations-grid')}>
-                            {recommendations.slice(0, 6).map((item) => (
-                                <Box
-                                    key={item.mediaId}
-                                    className={cx('recommendation-card')}
-                                    onClick={() => navigate(`/media/${item.mediaId}`)}
-                                >
-                                    <Box className={cx('movie-image')}>
-                                        <img
-                                            src={
-                                                item.posterURL ||
-                                                'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image'
-                                            }
-                                            alt={item.title}
-                                            onError={(e) => {
-                                                e.target.src =
-                                                    'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image';
-                                            }}
-                                        />
-                                    </Box>
-                                    <Box className={cx('movie-info')}>
-                                        <Typography variant="subtitle1" component="h4">
-                                            {item.title}
-                                        </Typography>
-                                        {item.releaseYear && (
-                                            <Typography variant="body2" className={cx('year')}>
-                                                {item.releaseYear}
-                                            </Typography>
-                                        )}
-                                        {item.rating && (
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: 0.5,
-                                                    mt: 0.5,
-                                                }}
-                                            >
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        color: '#ffd700',
-                                                        fontSize: 'calc(var(--current-font-size) * 0.75)',
-                                                        fontWeight: 'bold',
-                                                    }}
-                                                >
-                                                    ⭐ {item.rating.toFixed(1)}
-                                                </Typography>
-                                            </Box>
-                                        )}
-                                    </Box>
-                                </Box>
-                            ))}
-                        </Box>
-                    ) : (
-                        <Box className={cx('recommendations-empty')}>
-                            <Box className={cx('empty-icon')}>🎬</Box>
-                            <Typography variant="h6" className={cx('empty-title')}>
-                                No Recommendations Yet
-                            </Typography>
-                            <Typography variant="body2" className={cx('empty-description')}>
-                                Add some movies to your favorites to get personalized recommendations!
-                            </Typography>
-                        </Box>
-                    )}
-
-                    {/* View More Button */}
-                    {recommendations.length > 6 && (
-                        <Box
-                            sx={{
-                                textAlign: 'center',
-                                mt: 4,
-                                pt: 3,
-                                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                            }}
-                        >
-                            <Button
-                                variant="outlined"
-                                onClick={() => navigate('/recommendations')}
-                                sx={{
-                                    color: 'white',
-                                    borderColor: 'var(--primary)',
-                                    borderWidth: '2px',
-                                    borderRadius: 3,
-                                    px: 4,
-                                    py: 1.5,
-                                    fontSize: 'calc(var(--current-font-size) * 0.9)',
-                                    fontWeight: 'bold',
-                                    textTransform: 'none',
-                                    background:
-                                        'linear-gradient(45deg, rgba(255, 165, 0, 0.1), rgba(255, 165, 0, 0.05))',
-                                    '&:hover': {
-                                        borderColor: '#e55b00',
-                                        backgroundColor: 'rgba(255, 165, 0, 0.15)',
-                                        transform: 'translateY(-2px)',
-                                        boxShadow: '0 8px 25px rgba(255, 165, 0, 0.3)',
-                                    },
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                }}
-                            >
-                                View All Recommendations
-                            </Button>
-                        </Box>
-                    )}
-                </Container>
-            )}
 
             {/* Trailer section */}
             {youtubeEmbedUrl && (
@@ -900,6 +755,208 @@ function MediaDetail() {
                     onLoginRequired={handleLoginRequired}
                     maxEpisodesToShow={12}
                 />
+            )}
+            {/* Recommendations section */}
+            {isAuthenticated && (
+                <Container maxWidth={false} className={cx('recommendations-section')}>
+                    <Typography variant="h4" component="h2" className={cx('section-title')}>
+                        Recommended For You
+                    </Typography>
+
+                    {loadingRecommendations ? (
+                        <Box className={cx('recommendations-loading')}>
+                            <Box className={cx('loading-content')}>
+                                <CircularProgress
+                                    size={50}
+                                    sx={{
+                                        color: 'var(--primary)',
+                                        '& .MuiCircularProgress-circle': {
+                                            strokeLinecap: 'round',
+                                        },
+                                    }}
+                                />
+                                <Typography variant="body1" className={cx('loading-text')}>
+                                    Finding perfect recommendations for you...
+                                </Typography>
+                            </Box>
+                        </Box>
+                    ) : recommendations.length > 0 ? (
+                        <Box className={cx('recommendations-grid')}>
+                            {recommendations.slice(0, 6).map((item) => (
+                                <Box
+                                    key={item.mediaId}
+                                    className={cx('recommendation-card')}
+                                    onClick={() => navigate(`/media/${item.mediaId}`)}
+                                >
+                                    {/* Movie Image */}
+                                    <img
+                                        src={
+                                            item.posterURL ||
+                                            'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image'
+                                        }
+                                        alt={item.title}
+                                        onError={(e) => {
+                                            e.target.src =
+                                                'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image';
+                                        }}
+                                        onDragStart={(e) => e.preventDefault()}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+
+                                    {/* Movie Info Overlay - Giống VerticalMovieCarousel */}
+                                    <Box className={cx('movie-info-overlay')}>
+                                     
+                                        {/* Meta Info Row - Giống VerticalMovieCarousel */}
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                gap: '6px',
+                                                alignItems: 'center',
+                                                marginTop: '4px',
+                                            }}
+                                        >
+                                            {/* Release Year Box */}
+                                            {item.releaseYear && (
+                                                <Box
+                                                    sx={{
+                                                        background:
+                                                            'linear-gradient(135deg, rgba(255, 165, 0, 0.7), rgba(255, 140, 0, 0.5))',
+                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                        borderRadius: '6px',
+                                                        padding: '0px 8px',
+                                                        backdropFilter: 'blur(8px)',
+                                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            color: 'white',
+                                                            fontSize: '11px',
+                                                            fontWeight: '600',
+                                                            textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                                                        }}
+                                                    >
+                                                        {item.releaseYear}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+
+                                            {/* Rating Box */}
+                                            {item.rating && (
+                                                <Box
+                                                    sx={{
+                                                        background:
+                                                            'linear-gradient(135deg, rgba(249, 115, 22, 0.8), rgba(245, 158, 11, 0.6))',
+                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                        borderRadius: '6px',
+                                                        padding: '0px 8px',
+                                                        backdropFilter: 'blur(8px)',
+                                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            color: 'white',
+                                                            fontSize: '11px',
+                                                            fontWeight: '600',
+                                                            textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                                                        }}
+                                                    >
+                                                        ⭐ {item.rating.toFixed(1)}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+
+                                            {/* Duration Box (for Movies) */}
+                                            {item.duration && (
+                                                <Box
+                                                    sx={{
+                                                        background:
+                                                            'linear-gradient(135deg, rgba(139, 69, 19, 0.8), rgba(160, 82, 45, 0.6))',
+                                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                                        borderRadius: '6px',
+                                                        padding: '0px 8px',
+                                                        backdropFilter: 'blur(8px)',
+                                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            color: 'white',
+                                                            fontSize: '11px',
+                                                            fontWeight: '600',
+                                                            textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                                                        }}
+                                                    >
+                                                        {item.duration}min
+                                                    </Typography>
+                                                </Box>
+                                            )}
+
+                                            
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            ))}
+                        </Box>
+                    ) : (
+                        <Box className={cx('recommendations-empty')}>
+                            <Box className={cx('empty-icon')}>🎬</Box>
+                            <Typography variant="h6" className={cx('empty-title')}>
+                                No Recommendations Yet
+                            </Typography>
+                            <Typography variant="body2" className={cx('empty-description')}>
+                                Add some movies to your favorites to get personalized recommendations!
+                            </Typography>
+                        </Box>
+                    )}
+
+                    {/* View More Button */}
+                    {recommendations.length > 6 && (
+                        <Box
+                            sx={{
+                                textAlign: 'center',
+                                mt: 4,
+                                pt: 3,
+                                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                            }}
+                        >
+                            <Button
+                                variant="outlined"
+                                onClick={() => navigate('/recommendations')}
+                                sx={{
+                                    color: 'white',
+                                    borderColor: 'var(--primary)',
+                                    borderWidth: '2px',
+                                    borderRadius: 3,
+                                    px: 4,
+                                    py: 1.5,
+                                    fontSize: 'calc(var(--current-font-size) * 0.9)',
+                                    fontWeight: 'bold',
+                                    textTransform: 'none',
+                                    background:
+                                        'linear-gradient(45deg, rgba(255, 165, 0, 0.1), rgba(255, 165, 0, 0.05))',
+                                    '&:hover': {
+                                        borderColor: '#e55b00',
+                                        backgroundColor: 'rgba(255, 165, 0, 0.15)',
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 8px 25px rgba(255, 165, 0, 0.3)',
+                                    },
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                }}
+                            >
+                                View All Recommendations
+                            </Button>
+                        </Box>
+                    )}
+                </Container>
             )}
         </Box>
     );

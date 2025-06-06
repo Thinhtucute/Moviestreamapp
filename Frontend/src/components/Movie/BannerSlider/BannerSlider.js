@@ -1,7 +1,9 @@
-import React, { useReducer, useRef, useEffect, useCallback } from 'react';
+import React, { useReducer, useRef, useEffect, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Button, Typography } from '@mui/material';
-import { PlayArrow, FavoriteBorder, Add } from '@mui/icons-material';
+import { PlayArrow, FavoriteBorder, Favorite, Add } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
 import classNames from 'classnames/bind';
 import styles from './BannerSlider.module.scss';
 import { useBanners } from '@/hooks/useBanners';
@@ -9,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import GenreCategory from '@/components/Movie/GenreCategory';
+import useNotification from '@/hooks/useNotification';
 
 const cx = classNames.bind(styles);
 
@@ -84,6 +87,142 @@ function BannerSlider() {
     const { banners, loading, error } = useBanners();
     const sliderRef = useRef(null);
     const navigate = useNavigate();
+
+    // Redux state - thêm loading check
+    const { isAuthenticated, loading: authLoading } = useSelector((state) => state.auth);
+    const { showNotification } = useNotification();
+
+    // State cho favorites
+    const [favorites, setFavorites] = useState(new Set());
+    const [loadingFavorites, setLoadingFavorites] = useState({});
+    const [authInitialized, setAuthInitialized] = useState(false);
+
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
+    // Wait for auth to be initialized
+    useEffect(() => {
+        // Đợi auth loading complete (bao gồm cả verify token)
+        if (!authLoading) {
+            setAuthInitialized(true);
+        }
+    }, [authLoading]);
+
+    // Fetch favorite status - chỉ chạy khi auth đã initialized
+    useEffect(() => {
+        const fetchFavoriteStatuses = async () => {
+            // Kiểm tra auth đã initialized và user đã authenticated
+            if (!authInitialized || !isAuthenticated || !banners.length) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+
+                // Double check token exists
+                if (!token) {
+                    console.warn('No token found, skipping favorites fetch');
+                    return;
+                }
+
+                const favoritePromises = banners.map(async (banner) => {
+                    try {
+                        const response = await axios.get(`${apiUrl}/api/favorites/status/${banner.mediaId}`, {
+                            withCredentials: true,
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        });
+                        return { mediaId: banner.mediaId, isFavorite: response.data.result };
+                    } catch (error) {
+                        console.error(`Failed to check favorite status for ${banner.mediaId}:`, error);
+                        return { mediaId: banner.mediaId, isFavorite: false };
+                    }
+                });
+
+                const favoriteResults = await Promise.all(favoritePromises);
+                const newFavorites = new Set();
+
+                favoriteResults.forEach(({ mediaId, isFavorite }) => {
+                    if (isFavorite) {
+                        newFavorites.add(mediaId);
+                    }
+                });
+
+                setFavorites(newFavorites);
+            } catch (error) {
+                console.error('Failed to fetch favorite statuses:', error);
+            }
+        };
+
+        fetchFavoriteStatuses();
+    }, [authInitialized, isAuthenticated, banners, apiUrl]);
+
+    // Handle toggle favorite - cải thiện error handling
+    const handleToggleFavorite = async (mediaId, event) => {
+        event?.stopPropagation();
+
+        // Check auth state
+        if (!authInitialized) {
+            showNotification('Authentication still initializing, please wait...', 'info');
+            return;
+        }
+
+        if (!isAuthenticated) {
+            showNotification('Please login to add to favorites', 'warning');
+            navigate('/login');
+            return;
+        }
+
+        // Double check token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showNotification('Authentication error, please login again', 'error');
+            navigate('/login');
+            return;
+        }
+
+        setLoadingFavorites((prev) => ({ ...prev, [mediaId]: true }));
+
+        try {
+            const response = await axios.post(
+                `${apiUrl}/api/favorites/${mediaId}`,
+                {},
+                {
+                    withCredentials: true,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+
+            if (response.data) {
+                const newFavorites = new Set(favorites);
+                const isFavorite = favorites.has(mediaId);
+
+                if (isFavorite) {
+                    newFavorites.delete(mediaId);
+                    showNotification('Removed from favorites', 'success');
+                } else {
+                    newFavorites.add(mediaId);
+                    showNotification('Added to favorites', 'success');
+                }
+
+                setFavorites(newFavorites);
+            }
+        } catch (error) {
+            console.error('Failed to update favorites:', error);
+
+            // Check if it's an auth error
+            if (error.response?.status === 401) {
+                showNotification('Session expired, please login again', 'error');
+                navigate('/login');
+            } else {
+                showNotification('Failed to update favorites', 'error');
+            }
+        } finally {
+            setLoadingFavorites((prev) => ({ ...prev, [mediaId]: false }));
+        }
+    };
 
     const handleWatchNow = useCallback(() => {
         const currentBanner = banners[state.currentIndex];
@@ -173,14 +312,36 @@ function BannerSlider() {
         };
     }, [handleNext, handlePrev]);
 
+    // Render logic
     if (loading) return <Box>Đang tải...</Box>;
     if (error) return <Box>{error}</Box>;
     if (!banners || banners.length === 0) return <Box>Không có dữ liệu banner</Box>;
 
     const currentBanner = banners[state.currentIndex];
+    const isCurrentFavorite = favorites.has(currentBanner?.mediaId);
+    const isCurrentLoading = loadingFavorites[currentBanner?.mediaId];
 
     return (
         <Box className={cx('banner-slider')}>
+            {/* Show loading indicator if auth is still initializing */}
+            {!authInitialized && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        zIndex: 1000,
+                        background: 'rgba(0, 0, 0, 0.7)',
+                        borderRadius: 1,
+                        padding: '4px 8px',
+                    }}
+                >
+                    <Typography variant="caption" sx={{ color: 'white' }}>
+                        Loading...
+                    </Typography>
+                </Box>
+            )}
+
             <Box
                 ref={sliderRef}
                 className={cx('slider-container')}
@@ -209,7 +370,7 @@ function BannerSlider() {
                         style={{
                             position: 'absolute',
                             width: '100%',
-                            height: '100 THROUGH',
+                            height: '100%',
                             objectFit: 'cover',
                             cursor: 'grab',
                         }}
@@ -262,9 +423,9 @@ function BannerSlider() {
                 <AnimatePresence initial={false} custom={state.direction}>
                     <Box
                         sx={{
-                            position: 'absolute', // Cố định vị trí
-                            bottom: '0px', // Đặt phía dưới thumbnails
-                            zIndex: 10, // Đảm bảo hiển thị trên slide
+                            position: 'absolute',
+                            bottom: '0px',
+                            zIndex: 10,
                         }}
                     >
                         <GenreCategory />
@@ -292,6 +453,7 @@ function BannerSlider() {
                                 {currentBanner.title || 'Không có tiêu đề'}
                             </Typography>
                         </Box>
+
                         <Box sx={{ display: 'flex', gap: '10px' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                                 <EventAvailableIcon fontSize="medium" sx={{ color: 'var(--primary)' }} />
@@ -302,10 +464,11 @@ function BannerSlider() {
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                                 <HourglassEmptyIcon fontSize="medium" sx={{ color: 'var(--primary)' }} />
                                 <Typography variant="h5" sx={{ color: 'var(--white)' }}>
-                                    {currentBanner.duration > 0 ? `${currentBanner.duration} phút` : '90 phút'}
+                                    {currentBanner.duration > 0 ? `${currentBanner.duration} min` : '90 min'}
                                 </Typography>
                             </Box>
                         </Box>
+
                         <Typography
                             variant="h5"
                             sx={{
@@ -320,20 +483,29 @@ function BannerSlider() {
                         >
                             {currentBanner.description}
                         </Typography>
+
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            {currentBanner.genres.map((genre) => (
+                            {currentBanner.genres?.map((genre) => (
                                 <Button
                                     key={genre.genreId}
                                     variant="outlined"
                                     color="white"
                                     sx={{
                                         borderColor: 'var(--primary)',
+                                        color: 'white',
+                                        textTransform: 'none',
+                                        '&:hover': {
+                                            borderColor: '#e55b00',
+                                            backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                                        },
                                     }}
                                 >
                                     {genre.genreName}
                                 </Button>
                             ))}
                         </Box>
+
+                        {/* Updated Action Buttons with Favorite functionality */}
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 1, mb: 4 }}>
                             <Button
                                 variant="contained"
@@ -351,35 +523,57 @@ function BannerSlider() {
                             >
                                 Watch Now
                             </Button>
+
+                            {/* Favorite Button - disable khi auth chưa ready */}
                             <Button
+                                onClick={(event) => handleToggleFavorite(currentBanner.mediaId, event)}
+                                disabled={isCurrentLoading || !authInitialized}
                                 sx={{
                                     color: 'white',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    backgroundColor: isCurrentFavorite
+                                        ? 'rgba(255, 165, 0, 0.3)'
+                                        : 'rgba(255, 255, 255, 0.2)',
                                     borderRadius: '50%',
                                     minWidth: '48px',
                                     height: '48px',
-                                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
+                                    opacity: isCurrentLoading || !authInitialized ? 0.6 : 1,
+                                    '&:hover': {
+                                        backgroundColor: isCurrentFavorite
+                                            ? 'rgba(255, 165, 0, 0.4)'
+                                            : 'rgba(255, 255, 255, 0.3)',
+                                    },
+                                    '&:disabled': {
+                                        color: 'rgba(255, 255, 255, 0.5)',
+                                    },
+                                    transition: 'all 0.3s ease',
                                 }}
                             >
-                                <FavoriteBorder fontSize="large" />
-                            </Button>
-                            <Button
-                                sx={{
-                                    color: 'white',
-                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                    borderRadius: '50%',
-                                    minWidth: '48px',
-                                    height: '48px',
-                                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.3)' },
-                                }}
-                            >
-                                <Add fontSize="large" />
+                                {isCurrentLoading ? (
+                                    <Box
+                                        sx={{
+                                            width: 20,
+                                            height: 20,
+                                            border: '2px solid rgba(255,255,255,0.3)',
+                                            borderTop: '2px solid white',
+                                            borderRadius: '50%',
+                                            animation: 'spin 1s linear infinite',
+                                            '@keyframes spin': {
+                                                '0%': { transform: 'rotate(0deg)' },
+                                                '100%': { transform: 'rotate(360deg)' },
+                                            },
+                                        }}
+                                    />
+                                ) : isCurrentFavorite ? (
+                                    <Favorite fontSize="large" />
+                                ) : (
+                                    <FavoriteBorder fontSize="large" />
+                                )}
                             </Button>
                         </Box>
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Thumbnails Section */}
+                {/* Thumbnails Section với favorite indicators */}
                 <Box
                     className={cx('thumbnails')}
                     sx={{
@@ -403,6 +597,7 @@ function BannerSlider() {
                                 border: state.currentIndex === index ? '2px solid var(--primary)' : 'none',
                                 opacity: state.currentIndex === index ? 1 : 0.7,
                                 transition: 'opacity 0.3s ease',
+                                position: 'relative',
                                 '&:hover': {
                                     opacity: 1,
                                 },
@@ -417,6 +612,26 @@ function BannerSlider() {
                                     objectFit: 'cover',
                                 }}
                             />
+
+                            {/* Favorite indicator on thumbnail */}
+                            {favorites.has(banner.mediaId) && (
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 2,
+                                        right: 2,
+                                        backgroundColor: 'rgba(255, 165, 0, 0.9)',
+                                        borderRadius: '50%',
+                                        width: 16,
+                                        height: 16,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Favorite sx={{ fontSize: 10, color: 'white' }} />
+                                </Box>
+                            )}
                         </Box>
                     ))}
                 </Box>

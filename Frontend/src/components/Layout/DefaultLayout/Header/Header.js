@@ -46,7 +46,6 @@ const cx = classNames.bind(styles);
 
 const settings = [
     { text: 'Favorite', icon: <FavoriteBorderIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
-    { text: 'Playlist', icon: <LibraryBooksIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
     { text: 'Keep watching', icon: <VisibilityIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
     { text: 'Profile', icon: <PersonOutlineIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
     { text: 'Logout', icon: <ExitToAppIcon sx={{ fontSize: '20px', color: 'var(--primary)' }} /> },
@@ -212,6 +211,12 @@ function Header() {
             } catch (error) {
                 console.error('Logout failed:', error);
             }
+        } else if (setting === 'Favorite') {
+            navigate('/user/profile');
+        } else if (setting === 'Keep watching') {
+            navigate('/user/profile');
+        } else if (setting === 'Profile') {
+            navigate('/user/profile');
         }
     };
 
@@ -711,7 +716,7 @@ function Header() {
                         pointerEvents: 'none',
                     }}
                 >
-                    <Typography sx={{ color: 'var(--white)', fontWeight: 'bold' }}>Chào, thinhnocode</Typography>
+                    <Typography sx={{ color: 'var(--white)', fontWeight: 'bold' }}>Welcome to my website ! </Typography>
                 </MenuItem>
 
                 {settings.map((setting) => (

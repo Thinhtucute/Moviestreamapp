@@ -14,6 +14,7 @@ import Series from '@/pages/MediaType/Series';
 import Animation from '@/pages/MediaType/Animation';
 import MediaStream from '@/pages/MediaStream/MediaStream'; // Import MediaStream
 import SubscriptionPage from '@/pages/SubscriptionPage/SubscriptionPage';
+import UserProfile from '@/pages/User/UserProflie';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -80,6 +81,12 @@ const privateRoutes = [
         component: SubscriptionPage,
         protectedRoute: ProtectedRoute,
     },
+
+    {
+        path: '/user/profile',
+        component: UserProfile,
+        protectedRoute: ProtectedRoute,
+    }
 
     // Có thể thêm các trang khác cần đăng nhập ở đây
     // { path: '/profile', component: Profile, protectedRoute: ProtectedRoute },
