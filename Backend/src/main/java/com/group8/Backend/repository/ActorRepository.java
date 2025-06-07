@@ -9,3 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface ActorRepository extends JpaRepository<Actor,Integer> {
     
 }
+
+

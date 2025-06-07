@@ -20,7 +20,7 @@ jwt:
 
 recommendation:
   model:
-    path: ${MODEL_BASE_PATH:classpath:models/}gcn_model_scripted.pt
+    path: ${MODEL_BASE_PATH:D:/MAIN_WORKSPACE/Nam3/Hk2/Java/Moviestreamapp/Backend/src/main/resources/models/gcn_model_scripted.pt}
   cache:
     enabled: ${RECOMMENDATION_CACHE_ENABLED:true}
     size: ${RECOMMENDATION_CACHE_SIZE:1000}

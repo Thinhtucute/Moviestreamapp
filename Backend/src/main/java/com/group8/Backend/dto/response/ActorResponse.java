@@ -1,10 +1,10 @@
 package com.group8.Backend.dto.response;
 
+import com.group8.Backend.entity.Media;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
-
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -13,9 +13,9 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
 public class ActorResponse {
-    int actorId;
-    String actorName;
-    String bio;
-    LocalDate birthdate;
-    String profileImageURL;
+     int actorId;
+     String actorName;
+     String bio;
+     String birthdate;
+     String profileImageURL;
 }

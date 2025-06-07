@@ -26,11 +26,11 @@ import org.springframework.core.Ordered;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users", "/users/add", "/auth/token", "/auth/introspect", "/auth/refresh", "/auth/logout"
+            "/users", "/users/add", "/auth/token", "/auth/introspect", "/auth/refresh", "/auth/logout", 
     };
 
     private final String[] PUBLIC_MEDIA_ENDPOINTS = {
-            "/api/media", "/api/media/**", "/api/media/search"
+            "/api/media", "/api/media/**", "/api/media/search", "/api/actors", "/api/actors/**", "/api/actors/search"
     };
 
     @Autowired
