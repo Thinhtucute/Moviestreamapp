@@ -30,7 +30,7 @@ const plans = [
     {
         id: 'free',
         name: 'Free',
-        price: '0 VND',
+        price: '0 $',
         period: '/month',
         features: [
             'Limited content access',
@@ -48,7 +48,7 @@ const plans = [
     {
         id: 'premium',
         name: 'Premium',
-        price: '99,000 VND',
+        price: '99.000 $',
         period: '/month',
         features: [
             'All movies and shows',
@@ -67,7 +67,7 @@ const plans = [
     {
         id: 'vip',
         name: 'VIP',
-        price: '199,000 VND',
+        price: '199.000 $',
         period: '/month',
         features: [
             'All exclusive content',
@@ -123,7 +123,7 @@ const SubscriptionPage = () => {
         }
 
         if (planId === 'free') {
-            showNotification('You are already using the Free plan!', 'info');
+            showNotification('Bạn đang sử dụng gói Free!', 'info');
             return;
         }
 
@@ -133,7 +133,7 @@ const SubscriptionPage = () => {
 
             const token = localStorage.getItem('token');
             if (!token) {
-                throw new Error('No authentication token found');
+                throw new Error('Không tìm thấy token xác thực');
             }
 
             // Map planId to SubscriptionPlan enum value
@@ -155,17 +155,25 @@ const SubscriptionPage = () => {
             );
 
             if (response.data && response.data.code === 1000) {
-                // Fetch updated user info
-                await dispatch(fetchCurrentUser()).unwrap();
-                showNotification(`Successfully upgraded to ${planName} plan!`, 'success');
-                navigate('/profile');
+                // Update user info in Redux store
+                await dispatch(updateUser({ subscription: subscriptionPlan }));
+                showNotification({
+                    message: `Bạn đã mua gói ${planName} thành công!`,
+                    severity: 'success',
+                    duration: 2000
+                });
+                
+                // Add delay before reloading to show notification
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             } else {
-                throw new Error(response.data?.message || 'Failed to update subscription');
+                throw new Error(response.data?.message || 'Không thể cập nhật gói đăng ký');
             }
         } catch (err) {
             console.error('Failed to update subscription:', err);
-            setError(err.response?.data?.message || err.message || 'Failed to update subscription');
-            showNotification('Failed to update subscription', 'error');
+            setError(err.response?.data?.message || err.message || 'Không thể cập nhật gói đăng ký');
+            showNotification('Không thể cập nhật gói đăng ký', 'error');
         } finally {
             setLoading(false);
         }
@@ -274,6 +282,7 @@ const SubscriptionPage = () => {
                                             fontSize: '0.875rem',
                                             fontWeight: 'bold',
                                             zIndex: 1,
+                                            minWidth: 120,
                                         }}
                                     >
                                         MOST POPULAR

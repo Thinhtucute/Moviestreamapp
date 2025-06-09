@@ -15,6 +15,8 @@ import Animation from '@/pages/MediaType/Animation';
 import MediaStream from '@/pages/MediaStream/MediaStream'; // Import MediaStream
 import SubscriptionPage from '@/pages/SubscriptionPage/SubscriptionPage';
 import UserProfile from '@/pages/User/UserProflie';
+import DashboardPage from '@/pages/DashboardPage/DashboardPage';
+import ActorsPage from '@/pages/ActorsPage/ActorsPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -67,6 +69,8 @@ const publicRoutes = [
     { path: '/movies', component: Movie },
     { path: '/series', component: Series },
     { path: '/animation', component: Animation },
+    { path: '/dashboard', component: DashboardPage },
+    { path: '/actor', component: ActorsPage },
 ];
 
 // Private routes - cần đăng nhập
@@ -86,7 +90,12 @@ const privateRoutes = [
         path: '/user/profile',
         component: UserProfile,
         protectedRoute: ProtectedRoute,
-    }
+    },
+    // {
+    //     path: '/dashboard',
+    //     element: <DashboardPage />,
+    //     protectedRoute: ProtectedRoute,
+    // }
 
     // Có thể thêm các trang khác cần đăng nhập ở đây
     // { path: '/profile', component: Profile, protectedRoute: ProtectedRoute },

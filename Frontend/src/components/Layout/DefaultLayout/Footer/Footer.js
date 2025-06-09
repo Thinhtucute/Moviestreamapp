@@ -1,6 +1,5 @@
 import classNames from 'classnames/bind';
 import styles from './Footer.module.scss';
-import images from '@/assets/images';
 import { Box, Typography, Link } from '@mui/material';
 
 const cx = classNames.bind(styles);
@@ -11,7 +10,16 @@ function Footer() {
             <Box className={cx('footer-container')}>
                 {/* Logo */}
                 <Box className={cx('footer-logo')}>
-                    <img src={images.logo} alt="FPT Play Logo" className={cx('logo')} />
+                    <Typography
+                        sx={{
+                            fontSize: '30px',
+                            fontWeight: 'bold',
+                            color: 'var(--primary)',
+                            textTransform: 'none',
+                        }}
+                    >
+                        JAVA Play
+                    </Typography>
                 </Box>
 
                 {/* Quick Links */}
@@ -19,20 +27,26 @@ function Footer() {
                     <Typography variant="h6" className={cx('footer-title')}>
                         Quick Links
                     </Typography>
-                    <Link href="#" className={cx('footer-link')}>
+                    <Link href="/" className={cx('footer-link')}>
                         Home
                     </Link>
-                    <Link href="#" className={cx('footer-link')}>
-                        TV Shows
+                    <Link href="/the-loai" className={cx('footer-link')}>
+                        Genres
                     </Link>
-                    <Link href="#" className={cx('footer-link')}>
+                    <Link href="/new-movies" className={cx('footer-link')}>
+                        New Movies
+                    </Link>
+                    <Link href="/series" className={cx('footer-link')}>
+                        TV Series
+                    </Link>
+                    <Link href="/movies" className={cx('footer-link')}>
                         Movies
                     </Link>
-                    <Link href="#" className={cx('footer-link')}>
-                        V-League
+                    <Link href="/animation" className={cx('footer-link')}>
+                        Animation
                     </Link>
-                    <Link href="#" className={cx('footer-link')}>
-                        Anime
+                    <Link href="/actor" className={cx('footer-link')}>
+                        Actor
                     </Link>
                 </Box>
 
@@ -41,15 +55,15 @@ function Footer() {
                     <Typography variant="h6" className={cx('footer-title')}>
                         Contact
                     </Typography>
-                    <Typography className={cx('footer-text')}>Email: support@fptplay.vn</Typography>
+                    <Typography className={cx('footer-text')}>Email: support@javaplay.vn</Typography>
                     <Typography className={cx('footer-text')}>Phone: 1900 1234</Typography>
-                    <Typography className={cx('footer-text')}>Address: 123 FPT Street, District 1, HCMC</Typography>
+                    <Typography className={cx('footer-text')}>Address: 123 Java Street, District 1, HCMC</Typography>
                 </Box>
             </Box>
 
             {/* Copyright */}
             <Box className={cx('footer-copyright')}>
-                <Typography className={cx('footer-text')}>© 2025 FPT Play. All rights reserved.</Typography>
+                <Typography className={cx('footer-text')}>© 2025 JAVA Play. All rights reserved.</Typography>
             </Box>
         </Box>
     );

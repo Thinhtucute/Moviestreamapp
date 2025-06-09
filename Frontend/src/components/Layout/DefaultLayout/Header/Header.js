@@ -104,7 +104,7 @@ function Header() {
         { text: 'TV Series', path: '/series' },
         { text: 'Movies', path: '/movies' },
         { text: 'Animation', path: '/animation' },
-        { text: 'Directors', path: '/daodien' },
+        { text: 'Actor', path: '/actor' },
     ];
 
     // Search functionality
@@ -258,7 +258,19 @@ function Header() {
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <Button component={Link} to="/">
-                            <img src={images.logo} alt="Logo" className={cx('logo')} />
+                            <Typography
+                                sx={{
+                                    fontSize: '30px',
+                                    fontWeight: 'bold',
+                                    color: 'var(--primary)',
+                                    textTransform: 'none',
+                                    '&:hover': {
+                                        color: '#e55b00',
+                                    },
+                                }}
+                            >
+                                JAVA Play
+                            </Typography>
                         </Button>
 
                         {!isMobile && (

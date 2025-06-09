@@ -4,7 +4,7 @@ const Notification = ({ notification, closeNotification }) => {
     return (
         <Snackbar
             open={notification.open}
-            autoHideDuration={3000} // Tự động đóng sau 3 giây
+            autoHideDuration={notification.duration || 3000} // Sử dụng duration từ props hoặc mặc định là 3 giây
             onClose={closeNotification}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} // Hiển thị ở góc trái trên
             sx={{
