@@ -7,6 +7,7 @@ import com.group8.Backend.dto.response.PaginatedResponse;
 import com.group8.Backend.entity.*;
 import com.group8.Backend.exception.AppException;
 import com.group8.Backend.exception.ErrorCode;
+import com.group8.Backend.exception.ResourceNotFoundException;
 import com.group8.Backend.mapper.MediaMapper;
 import com.group8.Backend.repository.*;
 import lombok.AccessLevel;
@@ -70,7 +71,7 @@ public class MediaService {
         return mediaMapper.toMediaResponse(media);
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public MediaResponse updateMedia(int mediaId, MediaUpdateRequest request) {
         Media media = mediaRepository.findById(mediaId)
                 .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
@@ -108,14 +109,12 @@ public class MediaService {
         return mediaMapper.toMediaResponse(media);
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    // @PreAuthorize("hasRole('ADMIN')")
     public void deleteMedia(int mediaId) {
         Media media = mediaRepository.findById(mediaId)
                 .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
         mediaRepository.delete(media);
     }
-
-
 
     public PaginatedResponse<MediaResponse> getAllMedia(
             Integer page, Integer size, String mediaType, String accessLevel, Integer genreId) {
@@ -142,8 +141,20 @@ public class MediaService {
         return mediaMapper.toMediaResponse(media);
     }
 
+    public String getExternalUrl(Integer mediaId) {
+        Media media = mediaRepository.findById(mediaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Media not found with id: " + mediaId));
+
+        if (media.getStreamURL() == null || media.getStreamURL().isEmpty()) {
+            throw new IllegalStateException("No streaming URL available for media id: " + mediaId);
+        }
+
+        return media.getStreamURL();
+    }
+
     public PaginatedResponse<MediaResponse> searchMedia(
-            Integer page, Integer size, String title, String mediaType, Integer releaseYear, Integer genreId, String genreName) {
+            Integer page, Integer size, String title, String mediaType, Integer releaseYear, Integer genreId,
+            String genreName) {
         Pageable pageable = PageRequest.of(page, size);
         MediaType type = mediaType != null ? MediaType.valueOf(mediaType) : null;
         Page<Media> mediaPage = mediaRepository.searchMedia(title, type, releaseYear, genreId, genreName, pageable);

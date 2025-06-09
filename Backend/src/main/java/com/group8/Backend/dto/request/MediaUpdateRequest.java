@@ -20,6 +20,7 @@ public class MediaUpdateRequest {
     String ageRating;
     String posterURL;
     String trailerURL;
+    String streamURL;
     String accessLevel;
     MediaType mediaType;
     List<Integer> genreIds;
