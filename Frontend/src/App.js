@@ -5,6 +5,7 @@ import DefaultLayout from './components/Layout/DefaultLayout/DefaultLayout';
 import { useDispatch } from 'react-redux';
 import { verifyToken } from '@/redux/features/auth/authSlice'; // Import action to verify token
 
+
 function App() {
     const dispatch = useDispatch();
 

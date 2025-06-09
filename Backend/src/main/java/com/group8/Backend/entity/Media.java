@@ -45,6 +45,9 @@ public class Media {
     @Column(name = "TrailerURL")
     String trailerURL;
 
+    @Column(name = "StreamURL")
+    String streamURL;
+
     @Column(name = "AddedDate")
     LocalDateTime addedDate;
 

@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:MOVIE_STREAMING_APP}?useSSL=false&serverTimezone=UTC
     username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:thinh3012004}
+    password: ${MYSQL_PASSWORD:1}
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,7 +20,7 @@ jwt:
 
 recommendation:
   model:
-    path: ${MODEL_BASE_PATH:D:/MAIN_WORKSPACE/Nam3/Hk2/Java/Moviestreamapp/Backend/src/main/resources/models/gcn_model_scripted.pt}
+    path: D:/hacker/IE303 jav/Moviestreamapp/Backend/src/main/resources/models/gcn_model_scripted.pt
   cache:
     enabled: ${RECOMMENDATION_CACHE_ENABLED:true}
     size: ${RECOMMENDATION_CACHE_SIZE:1000}

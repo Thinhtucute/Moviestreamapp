@@ -314,11 +314,22 @@ public class RecommendationService {
         }
 
         // Get top scored recommendations
-        List<Integer> topRecommendedIds = recommendationScores.entrySet().stream()
+        List<Integer> recommendationCandidates = recommendationScores.entrySet().stream()
                 .sorted(Map.Entry.<Integer, Double>comparingByValue().reversed())
-                .limit(10)
+                .limit(30)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+
+        // Shuffle the recommendations
+        Collections.shuffle(recommendationCandidates);
+
+        // Take the first 10 after shuffling
+        List<Integer> topRecommendedIds = recommendationCandidates.stream()
+                .limit(10)
+                .collect(Collectors.toList());
+
+        log.info("Selected 10 randomized recommendations from a pool of {} candidates",
+                recommendationCandidates.size());
 
         // 3. Get media details for recommendations
         List<Media> recommendedMedia = mediaRepository.findAllById(topRecommendedIds);

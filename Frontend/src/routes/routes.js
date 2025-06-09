@@ -12,7 +12,7 @@ import NewMovies from '@/pages/MediaType/NewMovies';
 import Movie from '@/pages/MediaType/Movie';
 import Series from '@/pages/MediaType/Series';
 import Animation from '@/pages/MediaType/Animation';
-import MediaStream from '@/pages/MediaStream/MediaStream'; // Import MediaStream
+import MediaStream from '@/pages/MediaStream/MediaStream';
 import SubscriptionPage from '@/pages/SubscriptionPage/SubscriptionPage';
 import UserProfile from '@/pages/User/UserProflie';
 import DashboardPage from '@/pages/DashboardPage/DashboardPage';
