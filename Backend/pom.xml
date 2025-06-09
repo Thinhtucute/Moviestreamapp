@@ -131,6 +131,13 @@
         	<artifactId>pytorch-native-cpu</artifactId>
         	<version>1.13.0</version>
     	</dependency>
+
+		<!-- dotenv -->
+		<dependency>
+			<groupId>me.paulschwarz</groupId>
+			<artifactId>spring-dotenv</artifactId>
+			<version>4.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
