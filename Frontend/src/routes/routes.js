@@ -57,7 +57,7 @@ const ProtectedRoute = ({ children }) => {
     return children;
 };
 
-// Public routes - không cần đăng nhập
+// Public routes
 const publicRoutes = [
     { path: '/', component: Home },
     { path: '/search', component: Search },
@@ -73,12 +73,12 @@ const publicRoutes = [
     { path: '/actor', component: ActorsPage },
 ];
 
-// Private routes - cần đăng nhập
+// Private routes - log in required
 const privateRoutes = [
     {
         path: '/watch/:mediaId',
         component: MediaStream,
-        protectedRoute: ProtectedRoute, // Thêm protection
+        protectedRoute: ProtectedRoute,
     },
     {
         path: '/subscription',
@@ -91,15 +91,6 @@ const privateRoutes = [
         component: UserProfile,
         protectedRoute: ProtectedRoute,
     },
-    // {
-    //     path: '/dashboard',
-    //     element: <DashboardPage />,
-    //     protectedRoute: ProtectedRoute,
-    // }
-
-    // Có thể thêm các trang khác cần đăng nhập ở đây
-    // { path: '/profile', component: Profile, protectedRoute: ProtectedRoute },
-    // { path: '/favorites', component: Favorites, protectedRoute: ProtectedRoute },
 ];
 
 export { publicRoutes, privateRoutes, ProtectedRoute };

@@ -10,7 +10,6 @@ import { useBanners } from '@/hooks/useBanners';
 import { useNavigate } from 'react-router-dom';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import GenreCategory from '@/components/Movie/GenreCategory';
 import useNotification from '@/hooks/useNotification';
 
 const cx = classNames.bind(styles);
@@ -88,29 +87,27 @@ function BannerSlider() {
     const sliderRef = useRef(null);
     const navigate = useNavigate();
 
-    // Redux state - thêm loading check
+    // Redux state - add loading check
     const { isAuthenticated, loading: authLoading } = useSelector((state) => state.auth);
     const { showNotification } = useNotification();
 
-    // State cho favorites
+    // State for favorites
     const [favorites, setFavorites] = useState(new Set());
     const [loadingFavorites, setLoadingFavorites] = useState({});
     const [authInitialized, setAuthInitialized] = useState(false);
 
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-    // Wait for auth to be initialized
     useEffect(() => {
-        // Đợi auth loading complete (bao gồm cả verify token)
+        // Wait for auth loading complete (include token verification)
         if (!authLoading) {
             setAuthInitialized(true);
         }
     }, [authLoading]);
 
-    // Fetch favorite status - chỉ chạy khi auth đã initialized
+    // Fetch favorite status 
     useEffect(() => {
         const fetchFavoriteStatuses = async () => {
-            // Kiểm tra auth đã initialized và user đã authenticated
             if (!authInitialized || !isAuthenticated || !banners.length) {
                 return;
             }
@@ -157,7 +154,7 @@ function BannerSlider() {
         fetchFavoriteStatuses();
     }, [authInitialized, isAuthenticated, banners, apiUrl]);
 
-    // Handle toggle favorite - cải thiện error handling
+    // Handle toggle favorite
     const handleToggleFavorite = async (mediaId, event) => {
         event?.stopPropagation();
 
@@ -323,7 +320,6 @@ function BannerSlider() {
 
     return (
         <Box className={cx('banner-slider')}>
-            {/* Show loading indicator if auth is still initializing */}
             {!authInitialized && (
                 <Box
                     sx={{
@@ -356,7 +352,7 @@ function BannerSlider() {
                 <AnimatePresence initial={false} custom={state.direction}>
                     <motion.img
                         key={state.currentIndex}
-                        src={currentBanner.posterURL || ''}
+                        src={currentBanner.backdropURL || ''}
                         alt={currentBanner.title || 'Banner'}
                         custom={state.direction}
                         variants={posterVariants}
@@ -384,7 +380,7 @@ function BannerSlider() {
                         position: 'absolute',
                         top: 0,
                         left: 0,
-                        width: '100%', // Adjusted from 160% to 100% for better fit
+                        width: '100%',
                         height: '20%',
                         background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent)', // Gradient from top to bottom
                     }}
@@ -428,7 +424,6 @@ function BannerSlider() {
                             zIndex: 10,
                         }}
                     >
-                        <GenreCategory />
                     </Box>
                     <motion.div
                         className={cx('info')}
@@ -524,7 +519,7 @@ function BannerSlider() {
                                 Watch Now
                             </Button>
 
-                            {/* Favorite Button - disable khi auth chưa ready */}
+                            {/* Favorite Button - disable when auth is not ready */}
                             <Button
                                 onClick={(event) => handleToggleFavorite(currentBanner.mediaId, event)}
                                 disabled={isCurrentLoading || !authInitialized}
@@ -573,7 +568,7 @@ function BannerSlider() {
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Thumbnails Section với favorite indicators */}
+                {/* Thumbnails Section with favorite indicators */}
                 <Box
                     className={cx('thumbnails')}
                     sx={{
@@ -604,7 +599,7 @@ function BannerSlider() {
                             }}
                         >
                             <img
-                                src={banner.posterURL || ''}
+                                src={banner.backdropURL || ''}
                                 alt={banner.title || 'Thumbnail'}
                                 style={{
                                     width: '100%',

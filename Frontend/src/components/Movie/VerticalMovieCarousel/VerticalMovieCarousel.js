@@ -119,7 +119,7 @@ function VerticalMovieCarousel({ movies = [], size = 'large', orientation = 'por
             background: 'linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent)',
             padding: '10px',
             color: 'white',
-            minHeight: '60px', // Đảm bảo đủ chiều cao
+            minHeight: '60px',
         },
         navButton: {
             position: 'absolute',

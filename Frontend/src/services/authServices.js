@@ -27,7 +27,7 @@ export const refreshToken = async (token) => {
 export const logout = async (token) => {
     const response = await axios.post(
         `${API_URL}/auth/logout`,
-        { token }, // Gửi token trong body
+        { token },
         {
             headers: {
                 'Content-Type': 'application/json',

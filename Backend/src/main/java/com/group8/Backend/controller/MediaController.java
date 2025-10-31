@@ -71,7 +71,7 @@ public class MediaController {
             @RequestParam(required = false) String mediaType,
             @RequestParam(required = false) Integer releaseYear,
             @RequestParam(required = false) Integer genreId,
-            @RequestParam(required = false) String genreName) { // Added genreName parameter
+            @RequestParam(required = false) String genreName) {
         return ApiResponse.<PaginatedResponse<MediaResponse>>builder()
                 .code(1000)
                 .result(mediaService.searchMedia(page, size, title, mediaType, releaseYear, genreId, genreName))

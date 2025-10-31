@@ -45,7 +45,7 @@ function MediaDetail() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // Redux state - chỉ khai báo 1 lần
+    // Redux state
     const { isAuthenticated, loading: authLoading, user } = useSelector((state) => state.auth);
 
     const [media, setMedia] = useState(null);
@@ -82,7 +82,7 @@ function MediaDetail() {
 
             console.log('User info response:', response.data);
 
-            if (response.data && response.data.code === 0) {  // Changed from 1000 to 0
+            if (response.data && response.data.code === 0) {
                 setCurrentUser(response.data.result);
                 dispatch(updateUser(response.data.result));
             } else {
@@ -214,29 +214,17 @@ function MediaDetail() {
             showNotification('Failed to update favorites', 'error');
         }
     };
-
-    const handleAddToList = () => {
-        if (!isAuthenticated) {
-            setShowLoginDialog(true);
-            return;
-        }
-
-        setIsFavorite(!isFavorite);
-        // This is for the secondary Add button - you can implement watchlist functionality here
-        console.log('Add to list clicked');
-        // Implement add to list functionality
-    };
-
+    
     const handleShare = () => {
         if (navigator.share) {
             navigator.share({
-                title: media.title,
-                text: media.description,
+                title: media?.title,
+                text: media?.description,
                 url: window.location.href,
             });
         } else {
             navigator.clipboard.writeText(window.location.href);
-            alert('Link copied to clipboard!');
+            showNotification('Link copied to clipboard!', 'info');
         }
     };
 
@@ -738,7 +726,7 @@ function MediaDetail() {
                                 ))}
                         </Box>
 
-                        {/* Action Buttons - Enhanced with authentication check */}
+                        {/* Action Buttons */}
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px', mt: 1, mb: 4 }}>
                             <Button
                                 variant="contained"
@@ -751,7 +739,7 @@ function MediaDetail() {
                                     textTransform: 'none',
                                     fontSize: '16px',
                                     padding: '10px 40px',
-                                    '&:hover': { backgroundColor: '#e55b00' },
+                                   '&:hover': { backgroundColor: '#e55b00' },
                                 }}
                             >
                                 {isAuthenticated ? 'Watch Now' : 'Login to Watch'}
@@ -772,6 +760,23 @@ function MediaDetail() {
                                 }}
                             >
                                 {isFavorite ? <Favorite fontSize="large" /> : <FavoriteBorder fontSize="large" />}
+                            </Button>
+                            {/* Share Button */}
+                            <Button
+                                variant="outlined"
+                                startIcon={<Share />}
+                                onClick={handleShare}
+                                sx={{
+                                    color: 'white',
+                                    borderColor: 'var(--primary)',
+                                    fontWeight: 'bold',
+                                    textTransform: 'none',
+                                    fontSize: '16px',
+                                    padding: '10px 24px',
+                                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' },
+                                }}
+                            >
+                                Share
                             </Button>
                         </Box>
 

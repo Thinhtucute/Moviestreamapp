@@ -1,7 +1,6 @@
 package com.group8.Backend.mapper;
 
 import com.group8.Backend.dto.request.MediaCreationRequest;
-//import com.group8.Backend.dto.request.MediaUpdateRequest;
 import com.group8.Backend.dto.request.MediaUpdateRequest;
 import com.group8.Backend.dto.response.*;
 import com.group8.Backend.entity.*;

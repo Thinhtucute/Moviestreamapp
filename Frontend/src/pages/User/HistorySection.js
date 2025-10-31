@@ -3,7 +3,6 @@ import {
     Box,
     Typography,
     Grid,
-    LinearProgress,
     IconButton,
     Button,
     Card,
@@ -15,41 +14,73 @@ import { useNavigate } from 'react-router-dom';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useSelector } from 'react-redux';
+import { getLocalHistory, removeLocalView, clearLocalHistory } from '../../utils/historyLocal';
+import { fetchHistoryBackend, removeHistoryItemBackend, clearHistoryBackend } from '../../services/historyServices';
 
-function KeepWatchingSection() {
-    const [watchHistory, setWatchHistory] = useState([]);
+function HistorySection() {
+    const [history, setHistory] = useState([]);
     const navigate = useNavigate();
+    const isAuthenticated = useSelector((s) => s.auth && s.auth.isAuthenticated);
 
-    // Mock data - replace with actual API call
+    // Load history from backend if logged in, otherwise localStorage
     useEffect(() => {
-        setWatchHistory([
-            {
-                mediaId: 1,
-                title: 'The Dark Knight',
-                posterURL: '/placeholder-movie.jpg',
-                progress: 65,
-                lastWatched: '2024-01-15',
-                duration: 152,
-                watchedTime: 99,
-            },
-            {
-                mediaId: 2,
-                title: 'Breaking Bad',
-                posterURL: '/placeholder-movie.jpg',
-                progress: 30,
-                lastWatched: '2024-01-14',
-                episode: 'S01E03',
-                watchedTime: 15,
-            },
-        ]);
-    }, []);
+        let mounted = true;
+        if (isAuthenticated) {
+            fetchHistoryBackend()
+                .then((data) => {
+                    if (!mounted) return;
+                    setHistory(Array.isArray(data) ? data : []);
+                })
+                .catch(() => {
+                    if (!mounted) return;
+                    setHistory(getLocalHistory());
+                });
+        } else {
+            setHistory(getLocalHistory());
+        }
+        return () => {
+            mounted = false;
+        };
+    }, [isAuthenticated]);
 
-    const handleContinueWatching = (mediaId) => {
-        navigate(`/media/${mediaId}`);
+    // Remove item from history
+    const handleRemoveFromHistory = async (mediaId) => {
+        if (isAuthenticated) {
+            try {
+                // try server-side delete (if implemented)
+                await removeHistoryItemBackend(mediaId);
+                // refresh list from backend
+                const updated = await fetchHistoryBackend();
+                setHistory(Array.isArray(updated) ? updated : []);
+            } catch (e) {
+                // fallback: optimistic UI removal
+                setHistory((prev) => prev.filter((item) => item.mediaId !== mediaId));
+            }
+        } else {
+            const updatedHistory = removeLocalView(mediaId);
+            setHistory(updatedHistory);
+        }
     };
 
-    const handleRemoveFromHistory = (mediaId) => {
-        setWatchHistory((prev) => prev.filter((item) => item.mediaId !== mediaId));
+    // Clear all history
+    const handleClearHistory = async () => {
+        if (isAuthenticated) {
+            try {
+                await clearHistoryBackend();
+                setHistory([]);
+            } catch {
+                // ignore
+            }
+        } else {
+            clearLocalHistory();
+            setHistory([]);
+        }
+    };
+
+    // Continue watching (navigate to media)
+    const handleContinueWatching = (mediaId) => {
+        navigate(`/media/${mediaId}`);
     };
 
     return (
@@ -79,8 +110,17 @@ function KeepWatchingSection() {
                             margin: 0,
                         }}
                     >
-                        Keep Watching
+                        History
                     </Typography>
+                    <Box sx={{ marginLeft: 'auto' }}>
+                        <Button
+                            onClick={handleClearHistory}
+                            size="small"
+                            sx={{ color: 'rgba(255,255,255,0.7)', textTransform: 'none' }}
+                        >
+                            Clear
+                        </Button>
+                    </Box>
                 </Box>
                 <Typography
                     variant="body1"
@@ -88,11 +128,11 @@ function KeepWatchingSection() {
                         color: 'rgba(255, 255, 255, 0.7)',
                     }}
                 >
-                    Continue where you left off
+                    All movies and media you have viewed
                 </Typography>
             </Box>
 
-            {watchHistory.length === 0 ? (
+            {history.length === 0 ? (
                 <Box
                     sx={{
                         textAlign: 'center',
@@ -108,7 +148,7 @@ function KeepWatchingSection() {
                             fontWeight: 'bold',
                         }}
                     >
-                        No viewing history
+                        No history yet
                     </Typography>
                     <Typography
                         variant="body1"
@@ -116,12 +156,12 @@ function KeepWatchingSection() {
                             color: 'rgba(255, 255, 255, 0.7)',
                         }}
                     >
-                        Start watching something to see your progress here
+                        Start watching something to see it here
                     </Typography>
                 </Box>
             ) : (
                 <Grid container spacing={3}>
-                    {watchHistory.map((item) => (
+                    {history.map((item) => (
                         <Grid item xs={12} sm={6} md={6} lg={4} key={item.mediaId}>
                             <Card
                                 sx={{
@@ -191,7 +231,10 @@ function KeepWatchingSection() {
                                                     fontSize: '0.85rem',
                                                 }}
                                             >
-                                                Last watched: {new Date(item.lastWatched).toLocaleDateString()}
+                                                Last viewed:{' '}
+                                                {item.lastViewed
+                                                    ? new Date(item.lastViewed).toLocaleString()
+                                                    : 'N/A'}
                                             </Typography>
                                         </Box>
                                         <IconButton
@@ -207,34 +250,6 @@ function KeepWatchingSection() {
                                         >
                                             <DeleteIcon />
                                         </IconButton>
-                                    </Box>
-
-                                    {/* Progress Section */}
-                                    <Box sx={{ marginBottom: 2 }}>
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={item.progress}
-                                            sx={{
-                                                height: 6,
-                                                borderRadius: 3,
-                                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                                '& .MuiLinearProgress-bar': {
-                                                    backgroundColor: '#ff9800',
-                                                    borderRadius: 3,
-                                                },
-                                            }}
-                                        />
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'rgba(255, 255, 255, 0.8)',
-                                                fontSize: '0.8rem',
-                                                marginTop: 0.5,
-                                                textAlign: 'right',
-                                            }}
-                                        >
-                                            {item.progress}% complete
-                                        </Typography>
                                     </Box>
 
                                     {/* Continue Button */}
@@ -253,7 +268,7 @@ function KeepWatchingSection() {
                                             },
                                         }}
                                     >
-                                        Continue Watching
+                                        View Again
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -265,4 +280,4 @@ function KeepWatchingSection() {
     );
 }
 
-export default KeepWatchingSection;
+export default HistorySection;

@@ -262,7 +262,7 @@ public class RecommendationService {
     }
 
     public List<MediaResponse> getRecommendationsForUser(int userId) {
-        // 1. Get user's favorite movies
+        // Get user's favorite movies
         List<Integer> favoriteMediaIds = favoriteRepository.findMediaIdsByUserId(userId);
 
         log.info("Finding recommendations for user {} with {} favorites", userId, favoriteMediaIds.size());
@@ -273,7 +273,7 @@ public class RecommendationService {
             return getPopularRecommendations();
         }
 
-        // 2. For each favorite, get similar movies using the mapping table and ML model
+        // For each favorite, get similar movies using the mapping table and ML model
         Map<Integer, Double> recommendationScores = new HashMap<>();
 
         for (Integer mediaId : favoriteMediaIds) {
@@ -331,12 +331,12 @@ public class RecommendationService {
         log.info("Selected 10 randomized recommendations from a pool of {} candidates",
                 recommendationCandidates.size());
 
-        // 3. Get media details for recommendations
+        // Get media details for recommendations
         List<Media> recommendedMedia = mediaRepository.findAllById(topRecommendedIds);
 
         log.info("Retrieved {} media details for recommendations", recommendedMedia.size());
 
-        // 4. Convert to response objects
+        // Convert to response objects
         List<MediaResponse> recommendations = recommendedMedia.stream()
                 .map(mediaMapper::toMediaResponse)
                 .collect(Collectors.toList());

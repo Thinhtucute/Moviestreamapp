@@ -13,7 +13,7 @@ function NewMovies() {
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const pageSize = 15;
-    const currentYear = new Date().getFullYear(); // 2025
+    const currentYear = new Date().getFullYear();
 
     // Scroll to top when component mounts
     useEffect(() => {

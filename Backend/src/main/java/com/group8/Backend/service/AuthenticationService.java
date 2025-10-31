@@ -44,15 +44,15 @@ public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
 
-    @NonFinal  // de key inject vao constructor
+    @NonFinal // inject key to constructor
     @Value("${jwt.valid-duration}")
     protected Long VALID_DURATION;
 
-    @NonFinal  // de key inject vao constructor
+    @NonFinal
     @Value("${jwt.refreshable-duration}")
     protected Long REFRESHABLE_DURATION;
 
-    @NonFinal  // de key inject vao constructor
+    @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
@@ -127,7 +127,7 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
-        // Kiểm tra chữ ký và thời gian hết hạn
+        // Check signature and expiry time
         if (!signedJWT.verify(verifier) || expiryTime.before(new Date())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
@@ -145,7 +145,7 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
                 ))
-                .jwtID(UUID.randomUUID().toString())  //dat id cho token
+                .jwtID(UUID.randomUUID().toString())  // Unique identifier for the token
                 .claim("scope", buildScope(user))
                 .build();
 
@@ -175,22 +175,22 @@ public class AuthenticationService {
         }
         return stringJoiner.toString();
 
-    } // them role vao token
+    } // Add role to token
 
     // refresh token
     public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
-        // kiem tra hieu luc token
+        // Check token validity
         var signedJWT = verifyToken(request.getToken(), true);
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
         var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        //logout token
+        // Logout token
         InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                 .id(jit)
                 .expiryTime(expiryTime)
                 .build();
 
         invalidatedTokenRepository.save(invalidatedToken);
-        // tao token moi
+        // Create new token
 
         var username = signedJWT.getJWTClaimsSet().getSubject();
 

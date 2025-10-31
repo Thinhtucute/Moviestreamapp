@@ -29,8 +29,7 @@ export default function Register() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
-    const { notification, showNotification, closeNotification } = useNotification(); // Sử dụng custom hook
-
+    const { notification, showNotification, closeNotification } = useNotification();
     const togglepasswordHashVisibility = () => {
         setShowpasswordHash(!showpasswordHash);
     };
@@ -43,14 +42,14 @@ export default function Register() {
         e.preventDefault();
         const result = await dispatch(register(userData));
         if (register.fulfilled.match(result)) {
-            showNotification('Registration successful! Please log in.', 'success'); // Hiển thị thông báo
+            showNotification('Registration successful! Please log in.', 'success');
             setTimeout(() => {
-                navigate('/login'); // Chuyển hướng sau 1 giây để người dùng thấy thông báo
+                navigate('/login');
             }, 3000);
         }
     };
 
-    // Chuyển hướng nếu đã đăng nhập
+    // Redirect if already logged in
     useEffect(() => {
         if (isAuthenticated) {
             navigate('/');

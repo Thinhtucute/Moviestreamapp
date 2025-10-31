@@ -411,7 +411,7 @@
 // Trailer section
 .trailer-container {
     position: relative;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    padding-bottom: 56.25%;
     height: 0;
     overflow: hidden;
     border-radius: 12px;
@@ -626,13 +626,12 @@
     }
 }
 
-// Episodes section - additional styles
+// Episodes section
 .episodes-section {
     max-width: 1400px;
     margin: 60px auto 0;
     padding: 0 40px;
 
-    // Section title giống như cast và directors
     .section-title {
         margin-bottom: 30px;
         font-weight: 700;
@@ -667,7 +666,6 @@
     }
 }
 
-// Episodes grid giống như cast-grid
 .episodes-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -873,6 +871,7 @@
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         overflow: hidden;
         text-overflow: ellipsis;
         line-height: 1.3;

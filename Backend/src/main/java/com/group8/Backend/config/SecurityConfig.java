@@ -39,12 +39,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Kích hoạt CORS trong Spring Security
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Use CORS in Spring Security
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.GET, PUBLIC_MEDIA_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Cho phép OPTIONS cho tất cả endpoint
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permit OPTIONS for all endpoints
                         .requestMatchers("/api/recommendations/clear-cache").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -66,7 +66,7 @@ public class SecurityConfig {
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addExposedHeader("Authorization");
-        corsConfiguration.setAllowCredentials(true); // Bật credentials
+        corsConfiguration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);

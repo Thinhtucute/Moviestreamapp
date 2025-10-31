@@ -4,13 +4,13 @@ const Notification = ({ notification, closeNotification }) => {
     return (
         <Snackbar
             open={notification.open}
-            autoHideDuration={notification.duration || 3000} // Sử dụng duration từ props hoặc mặc định là 3 giây
+            autoHideDuration={notification.duration || 3000}
             onClose={closeNotification}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} // Hiển thị ở góc trái trên
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             sx={{
                 '& .MuiSnackbarContent-root': {
-                    minWidth: '500px', // Tăng chiều rộng
-                    minHeight: '120px', // Tăng chiều cao
+                    minWidth: '500px',
+                    minHeight: '120px',
                 },
             }}
         >

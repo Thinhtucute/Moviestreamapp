@@ -31,7 +31,7 @@ public class Episode {
     @Column(name = "Title", nullable = false)
     String title;
 
-    @Column(name = "Description", columnDefinition = "TEXT") // Hoặc @Column(length = 500)
+    @Column(name = "Description", columnDefinition = "TEXT")
     String description;
 
     @Column(name = "Duration")

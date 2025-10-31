@@ -20,7 +20,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "UserID") // Khớp với tên cột trong DB
+    @Column(name = "UserID")
     int userID;
 
     @Column(name = "Username", nullable = false, unique = true, length = 50)
@@ -54,7 +54,7 @@ public class User {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_role", // Khớp với tên bảng trong DB
+            name = "user_role",
             joinColumns = @JoinColumn(name = "UserID"),
             inverseJoinColumns = @JoinColumn(name = "RoleID")
     )

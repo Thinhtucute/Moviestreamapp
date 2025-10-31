@@ -32,8 +32,8 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 // Import components for each section
 import FavoriteSection from './FavoriteSection';
-import KeepWatchingSection from './KeepWatchingSection';
-import ProfileSection from './ProfileSection ';
+import HistorySection from './HistorySection';
+import ProfileSection from './ProfileSection';
 import SettingsSection from './SettingsSection';
 
 const menuItems = [
@@ -44,10 +44,10 @@ const menuItems = [
         component: FavoriteSection,
     },
     {
-        id: 'keep-watching',
-        label: 'Keep Watching',
+        id: 'history',
+        label: 'Viewing History',
         icon: <VisibilityIcon />,
-        component: KeepWatchingSection,
+        component: HistorySection,
     },
     {
         id: 'profile',
@@ -117,7 +117,7 @@ function UserProfile() {
             }
         };
 
-        // Gọi API ngay khi component mount, không cần đợi user state
+        // Call API as soon as component mounts
         console.log('🎯 useEffect triggered');
         const token = localStorage.getItem('token');
 
@@ -127,7 +127,7 @@ function UserProfile() {
             console.log('❌ No token, setting loading false');
             setUserLoading(false);
         }
-    }, []); // Bỏ dependency user
+    }, []);
 
     const handleMenuClick = (sectionId) => {
         setActiveSection(sectionId);

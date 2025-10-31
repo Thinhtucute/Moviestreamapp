@@ -9,14 +9,12 @@
   }
 }
 
-// Custom video player controls (limited support)
 :global {
   video::-webkit-media-controls-panel {
     justify-content: space-between;
     align-items: center;
   }
 
-  // Optional: hide download button
   video::-webkit-media-controls-enclosure {
     overflow: hidden;
   }

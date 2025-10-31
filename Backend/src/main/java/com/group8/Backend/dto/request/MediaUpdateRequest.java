@@ -19,6 +19,7 @@ public class MediaUpdateRequest {
     String language;
     String ageRating;
     String posterURL;
+    String backdropURL;
     String trailerURL;
     String streamURL;
     String accessLevel;

@@ -75,19 +75,17 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')") // kiemr tra role admin truoc khi goi duoc ham
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
-    @PostAuthorize("returnObject.username == authentication.name") // se goi ham truoc nhung se check kets qua tra ve
-                                                                   // neu username trung voi authen thi success
+    @PostAuthorize("returnObject.username == authentication.name") // Call function first, check the result after
     public UserResponse getUser(int userId) {
         return userMapper.toUserResponse(userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTS)));
     }
 
-    // lay thong tin sau khi dang nhap khong can truong tham so
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();

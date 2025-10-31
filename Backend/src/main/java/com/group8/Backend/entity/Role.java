@@ -26,7 +26,7 @@ public class Role {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "role_permission", // Khớp với tên bảng trong DB
+            name = "role_permission",
             joinColumns = @JoinColumn(name = "RoleID"),
             inverseJoinColumns = @JoinColumn(name = "PermissionID")
     )

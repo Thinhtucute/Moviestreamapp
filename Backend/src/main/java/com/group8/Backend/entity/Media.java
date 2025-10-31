@@ -19,12 +19,12 @@ public class Media {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MediaID")
-    int mediaId;
+    Long mediaId;
 
     @Column(name = "Title", nullable = false)
     String title;
 
-    @Column(name = "Description", columnDefinition = "TEXT") // Hoặc @Column(length = 500)
+    @Column(name = "Description", columnDefinition = "TEXT")
     String description;
 
     @Column(name = "ReleaseYear")
@@ -41,6 +41,9 @@ public class Media {
 
     @Column(name = "PosterURL")
     String posterURL;
+
+    @Column(name = "BackdropURL")
+    String backdropURL;
 
     @Column(name = "TrailerURL")
     String trailerURL;

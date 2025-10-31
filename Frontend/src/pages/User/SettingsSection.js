@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -16,9 +16,11 @@ import {
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import RestoreIcon from '@mui/icons-material/Restore';
+import useLocalStorage from '../../hooks/useLocalStorage';
+import useDebounce from '../../hooks/useDebounce';
 
 function SettingsSection() {
-    const [settings, setSettings] = useState({
+    const defaultSettings = {
         language: 'en',
         theme: 'dark',
         videoQuality: 'auto',
@@ -26,13 +28,32 @@ function SettingsSection() {
         volume: 80,
         subtitles: true,
         parentalControl: false,
-    });
+    };
+
+    // persistent storage hook
+    const [storedSettings, setStoredSettings] = useLocalStorage('appSettings', defaultSettings);
+
+    // local UI state (initialized from stored value)
+    const [settings, setSettings] = useState(storedSettings ?? defaultSettings);
     const [resetSuccess, setResetSuccess] = useState(false);
+    const [saved, setSaved] = useState(false);
+
+    // debounce changes before writing to localStorage to avoid excessive writes
+    const debouncedSettings = useDebounce(settings, 800);
+
+    useEffect(() => {
+        // write debounced settings to localStorage
+        setStoredSettings(debouncedSettings);
+        setSaved(true);
+        const t = setTimeout(() => setSaved(false), 1500);
+        return () => clearTimeout(t);
+    }, [debouncedSettings, setStoredSettings]);
 
     const handleSettingChange = (field) => (event) => {
+        const value = event?.target ? event.target.value : event;
         setSettings((prev) => ({
             ...prev,
-            [field]: event.target.value,
+            [field]: value,
         }));
     };
 
@@ -51,17 +72,12 @@ function SettingsSection() {
     };
 
     const handleResetSettings = () => {
-        setSettings({
-            language: 'en',
-            theme: 'dark',
-            videoQuality: 'auto',
-            autoplay: true,
-            volume: 80,
-            subtitles: true,
-            parentalControl: false,
-        });
+        setSettings(defaultSettings);
+        setStoredSettings(defaultSettings);
         setResetSuccess(true);
+        setSaved(true);
         setTimeout(() => setResetSuccess(false), 3000);
+        setTimeout(() => setSaved(false), 1500);
     };
 
     return (
@@ -117,6 +133,22 @@ function SettingsSection() {
                     }}
                 >
                     Settings reset to default successfully!
+                </Alert>
+            )}
+
+            {saved && (
+                <Alert
+                    severity="success"
+                    sx={{
+                        marginBottom: 2,
+                        backgroundColor: 'rgba(255, 152, 0, 0.08)',
+                        color: '#ffb74d',
+                        '& .MuiAlert-icon': {
+                            color: '#ffb74d',
+                        },
+                    }}
+                >
+                    Settings saved
                 </Alert>
             )}
 

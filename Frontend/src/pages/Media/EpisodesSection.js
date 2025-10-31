@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Container, Chip } from '@mui/material';
 import { PlayArrow, AccessTime, CalendarToday, Lock } from '@mui/icons-material';
 import classNames from 'classnames/bind';
-
-// Import styles từ MediaDetail để sử dụng chung
 import styles from './MediaDetail.module.scss';
 
 const cx = classNames.bind(styles);
@@ -32,9 +30,7 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
     const displayedEpisodes = episodes.slice(0, maxEpisodesToShow);
 
     return (
-        // Sử dụng cùng structure như các section khác
         <Container maxWidth={false} className={cx('episodes-section')}>
-            {/* Section Header - giống như cast-section và directors-section */}
             <Typography variant="h4" component="h2" className={cx('section-title')}>
                 Episodes
             </Typography>
@@ -52,7 +48,7 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
                 {episodes.length} episodes available
             </Typography>
 
-            {/* Episodes Grid - sử dụng class từ SCSS */}
+            {/* Episodes Grid */}
             <Box className={cx('episodes-grid')}>
                 {displayedEpisodes.map((episode) => (
                     <Box

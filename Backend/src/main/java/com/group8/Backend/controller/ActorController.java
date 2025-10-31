@@ -49,9 +49,4 @@ public class ActorController {
         actorService.deleteActor(actorId);
         return ResponseEntity.ok().build();
     }
-
-//    @GetMapping("/search")
-//    public ResponseEntity<List<ActorResponse>> searchActors(@RequestParam String keyword) {
-//        return ResponseEntity.ok(actorService.searchActors(keyword));
-//    }
 } 

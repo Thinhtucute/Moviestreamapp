@@ -102,7 +102,7 @@ function GenreDetail() {
     const handlePageChange = (event, value) => {
         setCurrentPage(value - 1);
         // Scroll to top of the grid when changing pages
-        window.scrollTo({ top: 200, behavior: 'smooth' }); // 200px để tránh header
+        window.scrollTo({ top: 200, behavior: 'smooth' });
     };
 
     const handleMovieClick = (mediaId) => {

@@ -8,8 +8,8 @@ const store = configureStore({
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat((store) => (next) => (action) => {
-            // Kiểm tra token trước các action liên quan đến auth
-            // Bỏ qua login, register, refresh, logout, và checkToken
+            // Check token before auth related actions
+            // Skip login, register, refresh, logout, and checkToken
             if (
                 action.type.startsWith('auth/') &&
                 !action.type.includes('login') &&

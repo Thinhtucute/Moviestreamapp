@@ -46,21 +46,18 @@ public class MediaService {
         media.setAddedDate(LocalDateTime.now());
         media.setViewCount(0);
 
-        // Gán genres
         List<Genre> genres = genreRepository.findAllById(request.getGenreIds());
         if (genres.size() != request.getGenreIds().size()) {
             throw new AppException(ErrorCode.GENRE_NOT_FOUND);
         }
         media.setGenres(new HashSet<>(genres));
 
-        // Gán actors
         List<Actor> actors = actorRepository.findAllById(request.getActorIds());
         if (actors.size() != request.getActorIds().size()) {
             throw new AppException(ErrorCode.ACTOR_NOT_FOUND);
         }
         media.setActors(new HashSet<>(actors));
 
-        // Gán directors
         List<Director> directors = directorRepository.findAllById(request.getDirectorIds());
         if (directors.size() != request.getDirectorIds().size()) {
             throw new AppException(ErrorCode.DIRECTOR_NOT_FOUND);
@@ -78,7 +75,6 @@ public class MediaService {
 
         mediaMapper.updateMedia(media, request);
 
-        // Cập nhật genres
         if (request.getGenreIds() != null) {
             List<Genre> genres = genreRepository.findAllById(request.getGenreIds());
             if (genres.size() != request.getGenreIds().size()) {
@@ -87,7 +83,6 @@ public class MediaService {
             media.setGenres(new HashSet<>(genres));
         }
 
-        // Cập nhật actors
         if (request.getActorIds() != null) {
             List<Actor> actors = actorRepository.findAllById(request.getActorIds());
             if (actors.size() != request.getActorIds().size()) {
@@ -96,7 +91,6 @@ public class MediaService {
             media.setActors(new HashSet<>(actors));
         }
 
-        // Cập nhật directors
         if (request.getDirectorIds() != null) {
             List<Director> directors = directorRepository.findAllById(request.getDirectorIds());
             if (directors.size() != request.getDirectorIds().size()) {
@@ -139,6 +133,14 @@ public class MediaService {
         Media media = mediaRepository.findById(mediaId)
                 .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
         return mediaMapper.toMediaResponse(media);
+    }
+
+    /**
+     * Return Media entity (used by controllers/services that need the entity object).
+     */
+    public Media findEntityById(int mediaId) {
+        return mediaRepository.findById(mediaId)
+                .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
     }
 
     public String getExternalUrl(Integer mediaId) {

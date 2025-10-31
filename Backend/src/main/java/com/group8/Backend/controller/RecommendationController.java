@@ -27,7 +27,6 @@ public class RecommendationController {
                 .build();
     }
     
-    // You could also add other recommendation-related endpoints here
     @GetMapping("/for-user/{userId}")
     public ApiResponse<List<MediaResponse>> getRecommendationsForUser(@PathVariable int userId) {
         List<MediaResponse> recommendations = recommendationService.getRecommendationsForUser(userId);

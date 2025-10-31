@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoleRepository extends JpaRepository<Role, Integer> {
-    Optional<Role> findById(Integer id); // Đúng cách: nhận Integer
+    Optional<Role> findById(Integer id);
 
-    List<Role> findAllById(Iterable<Integer> ids); // Để tìm nhiều Role theo danh sách ID
+    List<Role> findAllById(Iterable<Integer> ids); // Multiple roles by ID
 
-    Optional<Role> findByRoleName(String roleName); // Phương thức tùy chỉnh để tìm theo roleName
+    Optional<Role> findByRoleName(String roleName); // Custom method to find by roleName
 }

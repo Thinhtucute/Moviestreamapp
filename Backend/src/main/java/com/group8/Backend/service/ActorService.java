@@ -57,12 +57,4 @@ public class ActorService {
         }
         actorRepository.deleteById(actorId);
     }
-
-
-
-    // public List<ActorResponse> searchActors(String keyword) {
-    //     return actorRepository.findByNameContainingIgnoreCase(keyword).stream()
-    //             .map(actorMapper::toResponse)
-    //             .collect(Collectors.toList());
-    // }
 } 

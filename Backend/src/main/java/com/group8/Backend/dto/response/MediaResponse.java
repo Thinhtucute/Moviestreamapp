@@ -26,6 +26,7 @@ public class MediaResponse {
     String language;
     String ageRating;
     String posterURL;
+    String backdropURL;
     String trailerURL;
     String streamURL;
     LocalDateTime addedDate;

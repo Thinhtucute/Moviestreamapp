@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicRoutes, privateRoutes } from './routes/routes';
 import DefaultLayout from './components/Layout/DefaultLayout/DefaultLayout';
 import { useDispatch } from 'react-redux';
-import { verifyToken } from '@/redux/features/auth/authSlice'; // Import action to verify token
+import { verifyToken } from '@/redux/features/auth/authSlice';
 
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            dispatch(verifyToken()); // Verify token nếu có
+            dispatch(verifyToken());
         }
     }, [dispatch]);
 

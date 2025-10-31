@@ -46,7 +46,7 @@ const cx = classNames.bind(styles);
 
 const settings = [
     { text: 'Favorite', icon: <FavoriteBorderIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
-    { text: 'Keep watching', icon: <VisibilityIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
+    { text: 'Viewing History', icon: <VisibilityIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
     { text: 'Profile', icon: <PersonOutlineIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
     { text: 'Logout', icon: <ExitToAppIcon sx={{ fontSize: '20px', color: 'var(--primary)' }} /> },
 ];
@@ -104,7 +104,6 @@ function Header() {
         { text: 'TV Series', path: '/series' },
         { text: 'Movies', path: '/movies' },
         { text: 'Animation', path: '/animation' },
-        { text: 'Actor', path: '/actor' },
     ];
 
     // Search functionality
@@ -127,6 +126,7 @@ function Header() {
                     mediaId: item.mediaId,
                     mediaType: item.mediaType,
                     posterURL: item.posterURL,
+                    backdropURL: item.backdropURL,
                     releaseYear: item.releaseYear,
                 }));
                 setSearchOptions(suggestions);
@@ -170,7 +170,6 @@ function Header() {
         }
     };
 
-    // Existing handlers...
     const handleGenreMouseEnter = (event) => {
         setGenreAnchorEl(event.currentTarget);
         setGenreMenuOpen(true);
@@ -211,11 +210,7 @@ function Header() {
             } catch (error) {
                 console.error('Logout failed:', error);
             }
-        } else if (setting === 'Favorite') {
-            navigate('/user/profile');
-        } else if (setting === 'Keep watching') {
-            navigate('/user/profile');
-        } else if (setting === 'Profile') {
+        } else {
             navigate('/user/profile');
         }
     };
@@ -312,7 +307,7 @@ function Header() {
                                             }}
                                         >
                                             <img
-                                                src={option.posterURL || '/placeholder-movie.jpg'}
+                                                src={option.backdropURL || '/placeholder-movie.jpg'}
                                                 alt={option.label}
                                                 style={{
                                                     width: 40,
@@ -398,7 +393,6 @@ function Header() {
                                             borderColor: 'rgba(255, 165, 0, 0.4)',
                                             backgroundColor: 'rgba(49, 51, 61, 0.9)',
                                         },
-                                        // Chỉ áp dụng viền cam khi searchValue không rỗng
                                         ...(searchValue && {
                                             '&.Mui-focused': {
                                                 borderColor: 'var(--primary)',
@@ -407,7 +401,6 @@ function Header() {
                                         }),
                                     },
                                     '& .Mui-focused .MuiInputBase-root': {
-                                        // Chỉ áp dụng khi searchValue không rỗng
                                         ...(searchValue && {
                                             borderColor: 'var(--primary)',
                                             boxShadow: '0 0 0 2px rgba(255, 165, 0, 0.2)',
@@ -581,11 +574,6 @@ function Header() {
                                         Buy Package
                                     </Button>
                                 )}
-                                <IconButton size="large" aria-label="show 17 new notifications" color="inherit">
-                                    <Badge badgeContent={17} color="error">
-                                        <NotificationsIcon sx={{ fontSize: '20px' }} />
-                                    </Badge>
-                                </IconButton>
                                 <Tooltip>
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                                         <Avatar alt="User" src={avatar} />

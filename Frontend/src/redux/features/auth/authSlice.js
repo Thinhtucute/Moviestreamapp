@@ -14,7 +14,7 @@ export const login = createAsyncThunk('auth/login', async (credentials, { reject
         return rejectWithValue(response);
     } catch (error) {
         console.error('Login API error:', error);
-        return rejectWithValue(error.response?.data || { message: 'Lỗi kết nối mạng' });
+        return rejectWithValue(error.response?.data || { message: 'Network connection error' });
     }
 });
 
@@ -26,7 +26,7 @@ export const register = createAsyncThunk('auth/register', async (userData, { rej
         }
         return rejectWithValue(response);
     } catch (error) {
-        return rejectWithValue(error.response?.data || { message: 'Lỗi kết nối mạng' });
+        return rejectWithValue(error.response?.data || { message: 'Network connection error' });
     }
 });
 
@@ -38,7 +38,7 @@ export const introspect = createAsyncThunk('auth/introspect', async (token, { re
         }
         return rejectWithValue(response);
     } catch (error) {
-        return rejectWithValue(error.response?.data || { message: 'Lỗi kết nối mạng' });
+        return rejectWithValue(error.response?.data || { message: 'Network connection error' });
     }
 });
 
@@ -46,12 +46,11 @@ export const refresh = createAsyncThunk('auth/refresh', async (token, { rejectWi
     try {
         const response = await authApi.refreshToken(token);
         if (response.code === 1000) {
-            // Fix: Đổi từ 0 thành 1000
             return response.result;
         }
         return rejectWithValue(response);
     } catch (error) {
-        return rejectWithValue(error.response?.data || { message: 'Lỗi kết nối mạng' });
+        return rejectWithValue(error.response?.data || { message: 'Network connection error' });
     }
 });
 
@@ -63,25 +62,24 @@ export const logout = createAsyncThunk('auth/logout', async (token, { rejectWith
         }
         return rejectWithValue(response);
     } catch (error) {
-        return rejectWithValue(error.response?.data || { message: 'Lỗi kết nối mạng' });
+        return rejectWithValue(error.response?.data || { message: 'Network connection error' });
     }
 });
 
-// Fix: Thêm thunk để verify token hiện tại
 export const verifyToken = createAsyncThunk('auth/verifyToken', async (_, { getState, rejectWithValue }) => {
     try {
         const token = localStorage.getItem('token');
         if (!token) {
-            return rejectWithValue({ message: 'Không có token' });
+            return rejectWithValue({ message: 'No token found' });
         }
 
         const response = await authApi.introspect(token);
         if (response.code === 1000 && response.result.valid) {
             return { token, authenticated: true, valid: response.result.valid };
         }
-        return rejectWithValue({ message: 'Token không hợp lệ' });
+        return rejectWithValue({ message: 'Invalid token' });
     } catch (error) {
-        return rejectWithValue(error.response?.data || { message: 'Lỗi verify token' });
+        return rejectWithValue(error.response?.data || { message: 'Token verification error' });
     }
 });
 
@@ -90,26 +88,26 @@ export const checkToken = createAsyncThunk('auth/checkToken', async (_, { getSta
     const token = auth.token || localStorage.getItem('token');
 
     if (!token) {
-        return rejectWithValue({ message: 'Không có token' });
+        return rejectWithValue({ message: 'No token found' });
     }
 
     try {
         const decoded = jwtDecode(token);
         const currentTime = Date.now() / 1000;
 
-        // valid-duration: 36000s (10 giờ)
+        // Valid-duration: 36000s (10h)
         if (decoded.exp < currentTime) {
-            // refreshable-duration: 360000s (100 giờ)
+            // Refreshable-duration: 360000s (100h)
             const issuedAt = decoded.iat;
             if (currentTime - issuedAt > 360000) {
-                return rejectWithValue({ message: 'Token không còn có thể làm mới' });
+                return rejectWithValue({ message: 'Token can no longer be refreshed' });
             }
             const response = await dispatch(refresh(token)).unwrap();
             return response;
         }
         return { token, authenticated: true };
     } catch (error) {
-        return rejectWithValue({ message: 'Token không hợp lệ' });
+        return rejectWithValue({ message: 'Invalid token' });
     }
 });
 
@@ -138,7 +136,7 @@ export const fetchCurrentUser = createAsyncThunk('auth/fetchCurrentUser', async 
     }
 });
 
-// Fix: Initial state với proper initialization
+// Initial state with proper initialization
 const getInitialState = () => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
@@ -150,7 +148,7 @@ const getInitialState = () => {
         }
     } catch (error) {
         console.error('Error parsing user from localStorage:', error);
-        localStorage.removeItem('user'); // Xóa dữ liệu không hợp lệ
+        localStorage.removeItem('user'); // Remove invalid data
     }
 
     return {
@@ -176,17 +174,14 @@ const authSlice = createSlice({
             localStorage.removeItem('token');
             localStorage.removeItem('user');
         },
-        // Fix: Thêm action để set user
         setUser: (state, action) => {
             state.user = action.payload;
             localStorage.setItem('user', JSON.stringify(action.payload));
         },
-        // Add updateUser action
         updateUser: (state, action) => {
             state.user = action.payload;
             localStorage.setItem('user', JSON.stringify(action.payload));
         },
-        // Fix: Thêm action để clear error
         clearError: (state) => {
             state.error = null;
         },
@@ -212,7 +207,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.token = null;
                 state.user = null;
-                state.error = action.payload?.message || 'Đăng nhập thất bại';
+                state.error = action.payload?.message || 'Login failed';
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 console.log('Login rejected payload:', action.payload);
@@ -237,7 +232,7 @@ const authSlice = createSlice({
             })
             .addCase(register.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload?.message || 'Đăng ký thất bại';
+                state.error = action.payload?.message || 'Registration failed';
             });
 
         // Verify Token
@@ -257,7 +252,7 @@ const authSlice = createSlice({
                 state.token = null;
                 state.isAuthenticated = false;
                 state.user = null;
-                state.error = action.payload?.message || 'Token không hợp lệ';
+                state.error = action.payload?.message || 'Invalid token';
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
             });
@@ -276,7 +271,7 @@ const authSlice = createSlice({
             .addCase(introspect.rejected, (state, action) => {
                 state.loading = false;
                 state.isAuthenticated = false;
-                state.error = action.payload?.message || 'Kiểm tra token thất bại';
+                state.error = action.payload?.message || 'Token introspection failed';
             });
 
         // Refresh
@@ -297,7 +292,7 @@ const authSlice = createSlice({
                 state.token = null;
                 state.isAuthenticated = false;
                 state.user = null;
-                state.error = action.payload?.message || 'Làm mới token thất bại';
+                state.error = action.payload?.message || 'Token refresh failed';
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
             });
@@ -322,7 +317,7 @@ const authSlice = createSlice({
                 state.token = null;
                 state.isAuthenticated = false;
                 state.user = null;
-                state.error = action.payload?.message || 'Đăng xuất thất bại';
+                state.error = action.payload?.message || 'Logout failed';
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
             });
@@ -340,7 +335,7 @@ const authSlice = createSlice({
                 state.token = null;
                 state.isAuthenticated = false;
                 state.user = null;
-                state.error = action.payload?.message || 'Kiểm tra token thất bại';
+                state.error = action.payload?.message || 'Token check failed';
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
             });
@@ -366,4 +361,3 @@ const authSlice = createSlice({
 
 export const { clearAuthState, setUser, clearError, updateUser } = authSlice.actions;
 export default authSlice.reducer;
-

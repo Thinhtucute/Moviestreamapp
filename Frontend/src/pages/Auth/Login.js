@@ -29,7 +29,7 @@ export default function Login() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
-    const { notification, showNotification, closeNotification } = useNotification(); // Sử dụng custom hook
+    const { notification, showNotification, closeNotification } = useNotification();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -43,14 +43,11 @@ export default function Login() {
         e.preventDefault();
         const result = await dispatch(login(credentials));
         if (login.fulfilled.match(result)) {
-            showNotification('Login successful!', 'success'); // Hiển thị thông báo
-            // setTimeout(() => {
-            //     navigate('/'); // Chuyển hướng sau 1 giây để người dùng thấy thông báo
-            // }, 3000);
+            showNotification('Login successful!', 'success');
         }
     };
 
-    // Chuyển hướng nếu đã đăng nhập
+    // Redirect if already logged in
     useEffect(() => {
         if (isAuthenticated) {
             const redirectPath = sessionStorage.getItem('redirectAfterLogin');

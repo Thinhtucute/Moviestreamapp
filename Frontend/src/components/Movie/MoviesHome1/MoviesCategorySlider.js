@@ -1,11 +1,10 @@
 import React from 'react';
 import { Box, Typography, Button, CircularProgress, Skeleton } from '@mui/material';
 import { ErrorOutline } from '@mui/icons-material';
-import MoviesHome from './MoviesHome'; // Đường dẫn tới MoviesHome
-import useFetch from '@/hooks/useFetch'; // Đường dẫn tới useFetch hook
+import MoviesHome from './MoviesHome';
+import useFetch from '@/hooks/useFetch';
 
 function MoviesCategorySlider() {
-    // Gọi API cho từng thể loại phim
     const comedyMovies = useFetch(
         `${process.env.REACT_APP_API_URL}/api/media/search?releaseYear=2025&genreName=Comedy`,
     );
@@ -16,7 +15,7 @@ function MoviesCategorySlider() {
         `${process.env.REACT_APP_API_URL}/api/media/search?releaseYear=2025&genreName=Family`,
     );
 
-    // Hàm ánh xạ dữ liệu API sang định dạng MoviesHome
+    // Map API data to MoviesHome format
     const mapMovies = (data) => {
         if (!data || !data.result || !Array.isArray(data.result.content)) {
             console.warn('Dữ liệu API không hợp lệ:', data);
@@ -25,7 +24,7 @@ function MoviesCategorySlider() {
 
         return data.result.content.map((item) => ({
             mediaId: item.mediaId,
-            image: item.posterURL || 'https://via.placeholder.com/300x169',
+            image: item.backdropURL || 'https://via.placeholder.com/300x169',
             title: item.title || 'Không có tiêu đề',
             releaseYear: item.releaseYear || 'N/A',
             duration: item.duration || 'N/A',
@@ -34,7 +33,7 @@ function MoviesCategorySlider() {
         }));
     };
 
-    // Ánh xạ dữ liệu cho từng danh sách
+    // Map API data for each movie list
     const comedyMoviesList = mapMovies(comedyMovies.data);
     const actionMoviesList = mapMovies(actionMovies.data);
     const familyMoviesList = mapMovies(familyMovies.data);
@@ -127,7 +126,7 @@ function MoviesCategorySlider() {
         </Box>
     );
 
-    // Main loading state - nếu tất cả đều đang loading
+    // Main loading state
     const isAllLoading = comedyMovies.loading && actionMovies.loading && familyMovies.loading;
 
     if (isAllLoading) {
@@ -174,7 +173,7 @@ function MoviesCategorySlider() {
                 borderRadius: '20px',
             }}
         >
-            {/* Phim hài */}
+            {/* Comedy */}
             <Box sx={{ marginBottom: '40px' }}>
                 {comedyMovies.loading ? (
                     <LoadingSkeleton />
@@ -206,7 +205,7 @@ function MoviesCategorySlider() {
                 )}
             </Box>
 
-            {/* Phim hành động */}
+            {/* Action */}
             <Box sx={{ marginBottom: '40px' }}>
                 {actionMovies.loading ? (
                     <LoadingSkeleton />
@@ -238,7 +237,7 @@ function MoviesCategorySlider() {
                 )}
             </Box>
 
-            {/* Phim gia đình */}
+            {/* Family */}
             <Box>
                 {familyMovies.loading ? (
                     <LoadingSkeleton />

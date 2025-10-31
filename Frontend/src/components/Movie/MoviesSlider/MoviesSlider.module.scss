@@ -1,4 +1,3 @@
-// src/components/MovieSlider/MovieSlider.module.scss
 .movie-slider {
   position: relative;
   width: 100%;
@@ -11,28 +10,28 @@
   .movie-list {
     &.large {
       .movie-item {
-        width: 300px; // Dọc lớn
+        width: 300px;
         height: 450px;
       }
     }
 
     &.small {
       .movie-item {
-        width: 200px; // Dọc nhỏ
+        width: 200px;
         height: 300px;
       }
     }
 
     &.landscape.large {
       .movie-item {
-        width: 450px; // Ngang lớn
+        width: 450px;
         height: 250px;
       }
     }
 
     &.landscape.small {
       .movie-item {
-        width: 300px; // Ngang nhỏ
+        width: 300px;
         height: 170px;
       }
     }

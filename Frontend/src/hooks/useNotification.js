@@ -4,7 +4,7 @@ const useNotification = () => {
     const [notification, setNotification] = useState({
         open: false,
         message: '',
-        severity: 'success', // Có thể là 'success', 'error', 'warning', 'info'
+        severity: 'success', // Can be 'success', 'error', 'warning', 'info'
     });
 
     const showNotification = useCallback((message, severity = 'success') => {

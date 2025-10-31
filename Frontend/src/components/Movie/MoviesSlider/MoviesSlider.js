@@ -1,10 +1,11 @@
-// src/components/MoviesSlider/MoviesSlider.jsx
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import classNames from 'classnames/bind';
 import styles from './MoviesSlider.module.scss';
+import recordView from '../../../utils/recordView';
 
 const cx = classNames.bind(styles);
 
@@ -14,63 +15,21 @@ const mockData = [
         image: 'https://image.phunuonline.com.vn/fckeditor/upload/2023/20230919/images/tac-gia-thiet-ke-poster-phim-_161695124133.jpg',
         title: 'Mắt Biếc',
         description: '2019 • T13 • Việt Nam',
+        mediaId: 'mat-biec-1',
     },
     {
         image: 'https://trustmedia.com.vn/wp-content/uploads/2023/09/mat-biec-1_1607937967.jpg',
         title: 'Naruto Shippuden',
         description: '2007 • T13 • 500/500 tập • Nhật Bản',
+        mediaId: 'naruto-1',
     },
     {
         image: 'https://cdn2.tuoitre.vn/thumb_w/640/471584752817336320/2024/1/8/385544047-381849924250089-5746515858023972788-n-1-1704696010134123316828.jpg',
         title: 'Học Viện Anh Hùng Phần 5',
         description: '2021 • T13 • 27/27 tập • Nhật Bản',
+        mediaId: 'hero-academy-s5',
     },
-    {
-        image: 'https://image.phunuonline.com.vn/fckeditor/upload/2023/20230919/images/tac-gia-thiet-ke-poster-phim-_161695124133.jpg',
-        title: 'Mắt Biếc',
-        description: '2019 • T13 • Việt Nam',
-    },
-    {
-        image: 'https://trustmedia.com.vn/wp-content/uploads/2023/09/mat-biec-1_1607937967.jpg',
-        title: 'Naruto Shippuden',
-        description: '2007 • T13 • 500/500 tập • Nhật Bản',
-    },
-    {
-        image: 'https://cdn2.tuoitre.vn/thumb_w/640/471584752817336320/2024/1/8/385544047-381849924250089-5746515858023972788-n-1-1704696010134123316828.jpg',
-        title: 'Học Viện Anh Hùng Phần 5',
-        description: '2021 • T13 • 27/27 tập • Nhật Bản',
-    },
-    {
-        image: 'https://image.phunuonline.com.vn/fckeditor/upload/2023/20230919/images/tac-gia-thiet-ke-poster-phim-_161695124133.jpg',
-        title: 'Mắt Biếc',
-        description: '2019 • T13 • Việt Nam',
-    },
-    {
-        image: 'https://trustmedia.com.vn/wp-content/uploads/2023/09/mat-biec-1_1607937967.jpg',
-        title: 'Naruto Shippuden',
-        description: '2007 • T13 • 500/500 tập • Nhật Bản',
-    },
-    {
-        image: 'https://cdn2.tuoitre.vn/thumb_w/640/471584752817336320/2024/1/8/385544047-381849924250089-5746515858023972788-n-1-1704696010134123316828.jpg',
-        title: 'Học Viện Anh Hùng Phần 5',
-        description: '2021 • T13 • 27/27 tập • Nhật Bản',
-    },
-    {
-        image: 'https://image.phunuonline.com.vn/fckeditor/upload/2023/20230919/images/tac-gia-thiet-ke-poster-phim-_161695124133.jpg',
-        title: 'Mắt Biếc',
-        description: '2019 • T13 • Việt Nam',
-    },
-    {
-        image: 'https://trustmedia.com.vn/wp-content/uploads/2023/09/mat-biec-1_1607937967.jpg',
-        title: 'Naruto Shippuden',
-        description: '2007 • T13 • 500/500 tập • Nhật Bản',
-    },
-    {
-        image: 'https://cdn2.tuoitre.vn/thumb_w/640/471584752817336320/2024/1/8/385544047-381849924250089-5746515858023972788-n-1-1704696010134123316828.jpg',
-        title: 'Học Viện Anh Hùng Phần 5',
-        description: '2021 • T13 • 27/27 tập • Nhật Bản',
-    },
-    // Add more items if needed
+    // ...existing code...
 ];
 
 function MoviesSlider({ movies = mockData, size = 'large', orientation = 'portrait', title = '' }) {
@@ -81,6 +40,8 @@ function MoviesSlider({ movies = mockData, size = 'large', orientation = 'portra
 
     const [canScrollLeft, setCanScrollLeft] = React.useState(false);
     const [canScrollRight, setCanScrollRight] = React.useState(true);
+
+    const navigate = useNavigate();
 
     const checkScrollPosition = () => {
         const el = scrollRef.current;
@@ -129,6 +90,20 @@ function MoviesSlider({ movies = mockData, size = 'large', orientation = 'portra
 
     const handleMouseUpOrLeave = () => {
         setIsDragging(false);
+    };
+
+    // NEW: record view then navigate to media detail
+    const handleMovieClick = (movie) => {
+        try {
+            recordView(movie);
+        } catch (e) {
+            /* ignore errors */
+        }
+        const id = movie?.mediaId ?? movie?.id ?? movie?.movieId;
+        if (id) {
+            navigate(`/media/${id}`);
+            window.scrollTo(0, 0);
+        }
     };
 
     if (!movies || movies.length === 0) {
@@ -188,7 +163,7 @@ function MoviesSlider({ movies = mockData, size = 'large', orientation = 'portra
                 >
                     {movies.map((movie, index) => (
                         <Box
-                            key={index}
+                            key={movie.mediaId ?? movie.id ?? index}
                             className={cx('movie-item', size, { landscape: orientation === 'landscape' })}
                             sx={{
                                 flex: '0 0 auto',
@@ -201,6 +176,7 @@ function MoviesSlider({ movies = mockData, size = 'large', orientation = 'portra
                                     transform: 'scale(1.05)',
                                 },
                             }}
+                            onClick={() => handleMovieClick(movie)}
                         >
                             <img
                                 src={movie.image}

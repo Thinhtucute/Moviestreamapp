@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)  // khong tra ve mess null
+@JsonInclude(JsonInclude.Include.NON_NULL)  // Dont return NULL message
 public class ApiResponse <T> {
     private int code = 1000;
     private String message;

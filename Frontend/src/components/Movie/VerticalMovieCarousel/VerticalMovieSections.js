@@ -1,4 +1,3 @@
-// src/components/MoviesSection/MoviesSection.jsx
 import React, { useEffect } from 'react';
 import { Box, Typography, Button, CircularProgress, Skeleton } from '@mui/material';
 import { ErrorOutline } from '@mui/icons-material';
@@ -263,4 +262,4 @@ function VerticalMovieSections({ onLoad }) {
     );
 }
 
-export default VerticalMovieSections; // Thay đổi export name từ MoviesSection thành VerticalMovieSections
+export default VerticalMovieSections;
