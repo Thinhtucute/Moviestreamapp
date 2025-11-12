@@ -2,6 +2,7 @@ package com.group8.Backend.config;
 
 import com.group8.Backend.entity.Role;
 import com.group8.Backend.entity.User;
+import com.group8.Backend.enums.AccountStatus;
 import com.group8.Backend.repository.RoleRepository;
 import com.group8.Backend.repository.UserRepository;
 import lombok.AccessLevel;
@@ -46,6 +47,10 @@ public class ApplicationInitConfig {
                         .passwordHash(passwordEncoder.encode("admin1234"))
                         .roles(roles)
                         .build();
+
+                // Ensure AccountStatus is set to a valid non-null value.
+                // Use enum from project - set to ACTIVE by convention.
+                user.setAccountStatus(AccountStatus.ACTIVE);
 
                 userRepository.save(user);
                 log.warn("Admin has been created with default password: admin1234, please change it!");
