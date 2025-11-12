@@ -13,6 +13,10 @@ server:
 
 jwt:
   signerKey: ${JWT_SIGNER_KEY:}
+  valid-duration: ${JWT_VALID_DURATION:36000}
+  refreshable-duration: ${JWT_REFRESHABLE_DURATION:360000}
+  algorithm: ${JWT_ALGORITHM:HS256}
+  
 recommendation:
   modelBasePath: ${MODEL_BASE_PATH:classpath:models/gcn_model_scripted.pt}
   cache:
