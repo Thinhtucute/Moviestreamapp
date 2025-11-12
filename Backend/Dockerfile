@@ -1,10 +1,24 @@
-FROM openjdk:17-jdk-slim AS build
+# build
+FROM maven:3.9.4-eclipse-temurin-17 AS build
 WORKDIR /app
-COPY . .
-RUN ./mvnw clean package -DskipTests
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+COPY src ./src
+RUN ./mvnw -B -DskipTests package
 
-FROM openjdk:17-jdk-slim
+# runtime
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
-COPY --from=build /app/target/DrComputer-0.0.1-SNAPSHOT.war drcomputer.war
+
+COPY --from=build /app/target/*.jar app.jar
+COPY src/main/resources/certs/ca.pem /tmp/ca.pem
+
+RUN if [ -f /tmp/ca.pem ]; then \
+      keytool -importcert -noprompt -alias aiven-ca -file /tmp/ca.pem -keystore /app/aiven-truststore.jks -storepass changeit ; \
+    fi
+
+ENV JAVA_OPTS="-Djavax.net.ssl.trustStore=/app/aiven-truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "drcomputer.war"]
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]
