@@ -1,32 +1,20 @@
 spring:
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:MOVIE_STREAMING_APP}?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:1}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:moviestream}?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
   jpa:
+    show-sql: ${JPA_SHOW_SQL:false}
     hibernate:
-      ddl-auto: none   # Prevent Hibernate from automatically altering DB schema at startup
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: ${JPA_SHOW_SQL:true}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jws-algorithm: HS256
+      ddl-auto: none   # prevent Hibernate from performing automatic schema changes on startup
 
 server:
   port: ${SERVER_PORT:8080}
 
 jwt:
-  signerKey: ${JWT_SIGNER_KEY:Nn+SxidQSS72KF1eLyV9UMzBco/U/zauCadj15iEEStFO3uTePbAlkssV7sfPqvp}
-  valid-duration: ${JWT_VALID_DURATION:36000}
-  refreshable-duration: ${JWT_REFRESHABLE_DURATION:360000}
-  algorithm: HS256
-
+  signerKey: ${JWT_SIGNER_KEY:}
 recommendation:
-  model:
-    path: ${MODEL_BASE_PATH:D:/hacker/IE303 jav/Moviestreamapp/Backend/src/main/resources/models/gcn_model_scripted.pt}
+  modelBasePath: ${MODEL_BASE_PATH:classpath:models/gcn_model_scripted.pt}
   cache:
     enabled: ${RECOMMENDATION_CACHE_ENABLED:true}
     size: ${RECOMMENDATION_CACHE_SIZE:1000}

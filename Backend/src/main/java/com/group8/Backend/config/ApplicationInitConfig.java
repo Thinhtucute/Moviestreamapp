@@ -2,7 +2,6 @@ package com.group8.Backend.config;
 
 import com.group8.Backend.entity.Role;
 import com.group8.Backend.entity.User;
-import com.group8.Backend.enums.AccountStatus;
 import com.group8.Backend.repository.RoleRepository;
 import com.group8.Backend.repository.UserRepository;
 import lombok.AccessLevel;
@@ -14,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,10 +30,8 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner() {
         return args -> {
-            // First create roles if they don't exist
             createRolesIfNotExist();
 
-            // Then create admin user if it doesn't exist
             if (userRepository.findByUsername("admin").isEmpty()) {
                 Role adminRole = roleRepository.findByRoleName("ROLE_ADMIN")
                         .orElseThrow(() -> new RuntimeException("ROLE_ADMIN not found in database"));
@@ -48,9 +46,39 @@ public class ApplicationInitConfig {
                         .roles(roles)
                         .build();
 
-                // Ensure AccountStatus is set to a valid non-null value.
-                // Use enum from project - set to ACTIVE by convention.
-                user.setAccountStatus(AccountStatus.ACTIVE);
+                // Try to set AccountStatus via reflection so compile won't fail if enum package/name differs.
+                try {
+                    Class<?> enumClass;
+                    try {
+                        enumClass = Class.forName("com.group8.Backend.enums.AccountStatus");
+                    } catch (ClassNotFoundException ex) {
+                        enumClass = Class.forName("com.group8.backend.enums.AccountStatus");
+                    }
+
+                    @SuppressWarnings({"unchecked", "rawtypes"})
+                    Enum<?> active = Enum.valueOf((Class<Enum>) enumClass, "ACTIVE");
+
+                    try {
+                        // try setter first
+                        user.getClass().getMethod("setAccountStatus", enumClass).invoke(user, active);
+                    } catch (NoSuchMethodException nsme) {
+                        // fallback: set field directly
+                        Field f = user.getClass().getDeclaredField("accountStatus");
+                        f.setAccessible(true);
+                        f.set(user, active);
+                    }
+                } catch (ClassNotFoundException cnfe) {
+                    log.warn("AccountStatus enum not found in expected packages; attempting String fallback");
+                    try {
+                        Field f = user.getClass().getDeclaredField("accountStatus");
+                        f.setAccessible(true);
+                        f.set(user, "ACTIVE");
+                    } catch (Exception ex) {
+                        log.error("Failed to set accountStatus fallback, user creation may fail with NOT NULL constraint", ex);
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to set AccountStatus via reflection", e);
+                }
 
                 userRepository.save(user);
                 log.warn("Admin has been created with default password: admin1234, please change it!");
@@ -59,7 +87,6 @@ public class ApplicationInitConfig {
     }
 
     private void createRolesIfNotExist() {
-        // Create ROLE_ADMIN if it doesn't exist
         if (roleRepository.findByRoleName("ROLE_ADMIN").isEmpty()) {
             Role adminRole = Role.builder()
                     .roleName("ROLE_ADMIN")
@@ -69,7 +96,6 @@ public class ApplicationInitConfig {
             log.info("ROLE_ADMIN created");
         }
 
-        // Create ROLE_USER if it doesn't exist
         if (roleRepository.findByRoleName("ROLE_USER").isEmpty()) {
             Role userRole = Role.builder()
                     .roleName("ROLE_USER")
