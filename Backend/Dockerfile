@@ -5,6 +5,9 @@ COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 COPY src ./src
+
+# ensure mvnw has unix line endings and is executable, then build
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
 RUN ./mvnw -B -DskipTests package
 
 # runtime
