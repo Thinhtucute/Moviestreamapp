@@ -7,9 +7,11 @@ spring:
     show-sql: ${JPA_SHOW_SQL:false}
     hibernate:
       ddl-auto: none   # prevent Hibernate from performing automatic schema changes on startup
+      physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:8080}
 
 jwt:
   signerKey: ${JWT_SIGNER_KEY:}

@@ -42,7 +42,7 @@ public class RecommendationService {
     final MediaMapper mediaMapper;
     final JdbcTemplate jdbcTemplate;
 
-    @Value("${recommendation.model.path:src/main/resources/models/gcn_model.pt}")
+    @Value("${recommendation.model.path:src/main/resources/models/gcn_model_scripted.pt}")
     String modelPath;
 
     // Cache to store movie embeddings for fast similarity calculation
