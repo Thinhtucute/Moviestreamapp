@@ -32,5 +32,3 @@ export default function recordView(media) {
     .then(res => console.debug('recordView: addViewBackend success', res && res.status ? res.status : res))
     .catch(err => console.error('recordView: addViewBackend failed', err));
 }
-
-export default recordView;

@@ -23,6 +23,11 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -76,6 +81,33 @@ public class RecommendationService {
             log.info("Falling back to sample data...");
             // Create fallback data just in case
             populateSampleData();
+        }
+    }
+
+    private String loadModel(String pathOrClasspath) {
+        try {
+            String cp = pathOrClasspath;
+            if (cp.startsWith("classpath:")) {
+                cp = cp.substring("classpath:".length());
+            }
+            Resource resource = new ClassPathResource(cp);
+            if (resource.exists()) {
+                File tmp = File.createTempFile("gcn_model_", ".pt");
+                tmp.deleteOnExit();
+                try (InputStream is = resource.getInputStream();
+                     OutputStream os = new FileOutputStream(tmp)) {
+                    is.transferTo(os);
+                }
+                logger.info("Copied model from classpath '{}' to temp file '{}'", cp, tmp.getAbsolutePath());
+                return tmp.getAbsolutePath();
+            } else {
+                // fallback
+                File f = new File(pathOrClasspath);
+                if (f.exists()) return f.getAbsolutePath();
+                throw new RuntimeException("Model file not found: " + pathOrClasspath);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load model: " + pathOrClasspath, e);
         }
     }
 

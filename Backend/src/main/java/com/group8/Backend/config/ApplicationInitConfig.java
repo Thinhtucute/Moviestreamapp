@@ -46,39 +46,7 @@ public class ApplicationInitConfig {
                         .roles(roles)
                         .build();
 
-                // Try to set AccountStatus via reflection so compile won't fail if enum package/name differs.
-                try {
-                    Class<?> enumClass;
-                    try {
-                        enumClass = Class.forName("com.group8.Backend.enums.AccountStatus");
-                    } catch (ClassNotFoundException ex) {
-                        enumClass = Class.forName("com.group8.backend.enums.AccountStatus");
-                    }
-
-                    @SuppressWarnings({"unchecked", "rawtypes"})
-                    Enum<?> active = Enum.valueOf((Class<Enum>) enumClass, "ACTIVE");
-
-                    try {
-                        // try setter first
-                        user.getClass().getMethod("setAccountStatus", enumClass).invoke(user, active);
-                    } catch (NoSuchMethodException nsme) {
-                        // fallback: set field directly
-                        Field f = user.getClass().getDeclaredField("accountStatus");
-                        f.setAccessible(true);
-                        f.set(user, active);
-                    }
-                } catch (ClassNotFoundException cnfe) {
-                    log.warn("AccountStatus enum not found in expected packages; attempting String fallback");
-                    try {
-                        Field f = user.getClass().getDeclaredField("accountStatus");
-                        f.setAccessible(true);
-                        f.set(user, "ACTIVE");
-                    } catch (Exception ex) {
-                        log.error("Failed to set accountStatus fallback, user creation may fail with NOT NULL constraint", ex);
-                    }
-                } catch (Exception e) {
-                    log.error("Failed to set AccountStatus via reflection", e);
-                }
+                setFieldWithFallback(user, "accountStatus", "ACTIVE", null);
 
                 userRepository.save(user);
                 log.warn("Admin has been created with default password: admin1234, please change it!");
@@ -103,6 +71,47 @@ public class ApplicationInitConfig {
                     .build();
             roleRepository.save(userRole);
             log.info("ROLE_USER created");
+        }
+    }
+
+    private void setFieldWithFallback(Object target, String fieldName, Object value, Object enumFallback) {
+        try {
+            Field field = target.getClass().getDeclaredField(fieldName);
+            field.setAccessible(true);
+            if (value == null && enumFallback == null) {
+                return;
+            }
+            Class<?> fieldType = field.getType();
+            if (fieldType.isEnum()) {
+                // value may be an enum instance, or a String name
+                if (value != null && fieldType.isInstance(value)) {
+                    field.set(target, value);
+                    return;
+                }
+                String name = (value != null) ? value.toString() : (enumFallback != null ? enumFallback.toString() : null);
+                if (name != null) {
+                    try {
+                        @SuppressWarnings({ "unchecked", "rawtypes" })
+                        Object enumVal = Enum.valueOf((Class<? extends Enum>) fieldType, name);
+                        field.set(target, enumVal);
+                        return;
+                    } catch (IllegalArgumentException ex) {
+                        log.warn("Invalid enum name '{}' for {}, will try fallback/default", name, fieldType.getSimpleName());
+                    }
+                }
+                // final safety: if enum has values, pick the first as default
+                Object[] constants = fieldType.getEnumConstants();
+                if (constants != null && constants.length > 0) {
+                    field.set(target, constants[0]);
+                    return;
+                }
+                // leave null if nothing fits (but caller should avoid saving entity with NOT NULL columns)
+            } else {
+                // non-enum, set normally (convert if necessary)
+                field.set(target, value != null ? value : enumFallback);
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            log.error("Failed to set field value via reflection", e);
         }
     }
 }
