@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:moviestream}?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     show-sql: ${JPA_SHOW_SQL:false}
     hibernate:
-      ddl-auto: none   # prevent Hibernate from performing automatic schema changes on startup
+      ddl-auto: none
       physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
       implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
 
