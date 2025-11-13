@@ -36,6 +36,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Slf4j
 @Service
@@ -60,6 +62,8 @@ public class RecommendationService {
     ZooModel<NDList, NDList> model;
     Predictor<NDList, NDList> predictor;
     NDManager manager;
+
+    private static final Logger logger = LoggerFactory.getLogger(RecommendationService.class);
 
     @PostConstruct
     public void init() {
