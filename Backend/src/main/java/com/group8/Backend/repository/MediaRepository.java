@@ -29,9 +29,8 @@ public interface MediaRepository extends JpaRepository<Media, Integer> {
                         "WHERE (:title IS NULL OR LOWER(m.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
                         "AND (:mediaType IS NULL OR m.mediaType = :mediaType) " +
                         "AND (:releaseYear IS NULL OR m.releaseYear = :releaseYear) " +
-                        "AND (:genreId IS NULL OR EXISTS (SELECT g FROM m.genres g WHERE g.genreId = :genreId))" +
+                        "AND (:genreId IS NULL OR EXISTS (SELECT g FROM m.genres g WHERE g.genreId = :genreId)) " +
                         "AND (:genreName IS NULL OR EXISTS (SELECT g FROM m.genres g WHERE LOWER(g.genreName) LIKE LOWER(CONCAT('%', :genreName, '%'))))")
-
         Page<Media> searchMedia(
                         @Param("title") String title,
                         @Param("mediaType") MediaType mediaType,

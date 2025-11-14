@@ -1,6 +1,7 @@
 package com.group8.Backend.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,13 +21,16 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.Ordered;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users", "/users/add", "/auth/token", "/auth/introspect", "/auth/refresh", "/auth/logout", 
+            "/users", "/users/add", "/auth/token", "/auth/introspect", "/auth/refresh", "/auth/logout",
     };
 
     private final String[] PUBLIC_MEDIA_ENDPOINTS = {
@@ -35,6 +39,10 @@ public class SecurityConfig {
 
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
+
+    // allow overriding via env var FRONTEND_ORIGINS (comma separated)
+    @Value("${FRONTEND_ORIGINS:http://localhost:3000,https://moviestreamapp-fe.onrender.com}")
+    private String frontendOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -62,7 +70,10 @@ public class SecurityConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin("http://localhost:3000");
+
+        List<String> origins = Arrays.asList(frontendOrigins.split(","));
+        origins.forEach(corsConfiguration::addAllowedOrigin);
+
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addExposedHeader("Authorization");
@@ -77,7 +88,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:3000");
+
+        List<String> origins = Arrays.asList(frontendOrigins.split(","));
+        origins.forEach(configuration::addAllowedOrigin);
+
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("Authorization");
