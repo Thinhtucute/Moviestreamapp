@@ -29,8 +29,9 @@ function Series() {
             setLoading(true);
             console.log('Fetching series...');
 
+            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
             const response = await axios.get(
-                `http://localhost:8080/api/media/search?page=${page}&size=${pageSize}&mediaType=Series`,
+                `${API_URL}/api/media/search?page=${page}&size=${pageSize}&mediaType=Series`,
             );
 
             console.log('API Response:', response.data);

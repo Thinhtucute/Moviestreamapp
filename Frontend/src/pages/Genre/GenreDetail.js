@@ -71,8 +71,9 @@ function GenreDetail() {
             setLoading(true);
             console.log('Fetching movies with genre:', originalGenreName);
 
+            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
             const response = await axios.get(
-                `http://localhost:8080/api/media/search?page=${page}&size=${pageSize}&genreName=${encodeURIComponent(
+                `${API_URL}/api/media/search?page=${page}&size=${pageSize}&genreName=${encodeURIComponent(
                     originalGenreName,
                 )}`,
             );
