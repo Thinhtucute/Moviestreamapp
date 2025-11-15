@@ -5,6 +5,8 @@ import { PlayArrow, Star, Clear } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
 function Search() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -36,7 +38,7 @@ function Search() {
             console.log('Searching for:', query);
 
             const response = await axios.get(
-                `http://localhost:8080/api/media/search?page=${page}&size=${pageSize}&title=${encodeURIComponent(
+                `${apiUrl}/api/media/search?page=${page}&size=${pageSize}&title=${encodeURIComponent(
                     query,
                 )}`,
             );

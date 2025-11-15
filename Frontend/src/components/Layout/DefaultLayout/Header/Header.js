@@ -43,6 +43,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import axios from 'axios';
 
 const cx = classNames.bind(styles);
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 const settings = [
     { text: 'Favorite', icon: <FavoriteBorderIcon sx={{ fontSize: '20px', color: 'var(--white)' }} /> },
@@ -116,7 +117,7 @@ function Header() {
         try {
             setSearchLoading(true);
             const response = await axios.get(
-                `http://localhost:8080/api/media/search?page=0&size=5&title=${encodeURIComponent(query)}`,
+                `${apiUrl}/api/media/search?page=0&size=5&title=${encodeURIComponent(query)}`,
             );
 
             if (response.data && response.data.result && response.data.result.content) {
