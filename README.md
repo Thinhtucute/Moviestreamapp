@@ -75,26 +75,30 @@ MySQL Database (Aiven)
 **Clone the repository:**
    ```bash
    git clone https://github.com/Thinhtucute/Moviestreamapp.git
-   cd Moviestreamapp/Backend
    ```
 
 ### Backend Setup
 
-1. **Set up MySQL database:**
+1. **Navigate to Backend directory:**
+   ```bash
+   cd Backend
+   ```
+   
+2. **Set up MySQL database:**
    ```sql
    CREATE DATABASE MOVIE_STREAMING_APP;
    ```
 
-2. **Import the database schema:**
+3. **Import the database schema:**
    ```bash
    mysql -u root -p MOVIE_STREAMING_APP < ../Database/Database.sql
    ```
 
-3. **Configure environment variables:**
+4. **Configure environment variables:**
    
    Create `.env` file in `Backend/` directory (see `.env.example` below)
 
-4. **Run the application:**
+5. **Run the application:**
    ```bash
    # Using Maven
    ./mvnw spring-boot:run
@@ -107,7 +111,7 @@ MySQL Database (Aiven)
 
 ### Frontend Setup
 
-1. **Navigate to frontend directory:**
+1. **Navigate to Frontend directory:**
    ```bash
    cd Frontend
    ```
@@ -191,11 +195,6 @@ REACT_APP_API_URL=http://localhost:8080
 - `GET /api/actors` - List actors with pagination
 - `GET /api/actors/{id}` - Get actor details
 
-### Admin (Premium)
-- `GET /api/admin/users` - Manage users
-- `GET /api/admin/media` - Manage media content
-- `POST /api/admin/media` - Upload new content
-
 ---
 
 ## Database Schema
@@ -228,5 +227,5 @@ REACT_APP_API_URL=http://localhost:8080
 - [Spring Boot](https://spring.io/projects/spring-boot) framework
 - [React](https://react.dev/) library
 - [Vercel](https://vercel.com) for frontend hosting
-
 - [Render](https://render.com) for backend hosting
+- [Aiven](https://aiven.io/) for database hosting
