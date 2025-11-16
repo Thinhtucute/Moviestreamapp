@@ -181,7 +181,6 @@ REACT_APP_API_URL=http://localhost:8080
 - `GET /api/media/search` - Search movies/series (with filters)
 - `GET /api/media/{id}` - Get media details
 - `GET /api/media/{id}/episodes` - Get series episodes
-- `GET /api/media/{id}/recommendations` - Get AI recommendations
 
 ### User Features
 - `GET /api/favorites` - Get user favorites
@@ -229,3 +228,4 @@ REACT_APP_API_URL=http://localhost:8080
 - [Vercel](https://vercel.com) for frontend hosting
 - [Render](https://render.com) for backend hosting
 - [Aiven](https://aiven.io/) for database hosting
+
