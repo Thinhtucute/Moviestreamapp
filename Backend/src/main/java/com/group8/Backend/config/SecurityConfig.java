@@ -40,8 +40,7 @@ public class SecurityConfig {
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
 
-    // allow overriding via env var FRONTEND_ORIGINS (comma separated)
-    @Value("${FRONTEND_ORIGINS:http://localhost:3000,https://moviestreamapp-fe.onrender.com}")
+    @Value("${FRONTEND_ORIGINS:http://localhost:3000,https://moviestreamapp-fe.vercel.app/}")
     private String frontendOrigins;
 
     @Bean
