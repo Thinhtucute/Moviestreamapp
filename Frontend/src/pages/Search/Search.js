@@ -4,6 +4,7 @@ import { Box, Typography, Pagination, CircularProgress, Container, Button, Chip 
 import { PlayArrow, Star, Clear } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
@@ -46,7 +47,7 @@ function Search() {
             console.log('Search Response:', response.data);
 
             if (response.data && response.data.result && response.data.result.content) {
-                setSearchResults(response.data.result.content || []);
+                setSearchResults(sanitizeMediaList(response.data.result.content));
                 setTotalPages(response.data.result.totalPages || 0);
                 setTotalElements(response.data.result.totalElements || 0);
             } else {
@@ -169,12 +170,12 @@ function Search() {
                     {searchResults.length > 0 ? (
                         <motion.div variants={containerVariants} initial="hidden" animate="visible">
                             <div className="movie-grid">
-                                {searchResults.map((item, index) => (
+                                {sanitizeMediaList(searchResults).map((item, index) => (
                                     <motion.div variants={itemVariants} key={item.mediaId || index}>
                                         <div className="movie-card" onClick={() => handleMovieClick(item.mediaId)}>
                                             {/* Movie Image */}
                                             <img
-                                                src={item.posterURL || '/placeholder-movie.jpg'}
+                                                src={getPosterImage(item)}
                                                 alt={item.title}
                                                 onDragStart={(e) => e.preventDefault()}
                                                 style={{
@@ -183,7 +184,7 @@ function Search() {
                                                     objectFit: 'cover',
                                                 }}
                                                 onError={(e) => {
-                                                    e.target.src = '/placeholder-movie.jpg';
+                                                    e.target.src = getPosterImage(null);
                                                 }}
                                             />
 
@@ -194,7 +195,7 @@ function Search() {
                                                     top: 8,
                                                     left: 8,
                                                     background:
-                                                        item.mediaType === 'Movie'
+                                                        String(item.mediaType || '').trim().toLowerCase() === 'movie'
                                                             ? 'linear-gradient(135deg, #2563eb, #3b82f6)'
                                                             : 'linear-gradient(135deg, #7c3aed, #a855f7)',
                                                     color: 'white',
@@ -248,7 +249,7 @@ function Search() {
                                                     )}
 
                                                     {/* Duration/Episodes Badge */}
-                                                    {item.mediaType === 'Movie' && item.duration && (
+                                                    {String(item.mediaType || '').trim().toLowerCase() === 'movie' && item.duration && (
                                                         <div
                                                             className="movie-badge"
                                                             style={{
@@ -262,7 +263,7 @@ function Search() {
                                                         </div>
                                                     )}
 
-                                                    {item.mediaType === 'Series' && item.totalEpisodes && (
+                                                    {String(item.mediaType || '').trim().toLowerCase() === 'tv' && item.totalEpisodes && (
                                                         <div
                                                             className="movie-badge"
                                                             style={{

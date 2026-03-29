@@ -3,6 +3,7 @@ import { Box, Typography, Button, CircularProgress, Skeleton } from '@mui/materi
 import { ErrorOutline } from '@mui/icons-material';
 import VerticalMovieCarousel from '../VerticalMovieCarousel/VerticalMovieCarousel';
 import useFetch from '@/hooks/useFetch';
+import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 function VerticalMovieSections({ onLoad }) {
     // Add onLoad to props
@@ -17,9 +18,9 @@ function VerticalMovieSections({ onLoad }) {
             return [];
         }
 
-        return data.result.content.map((item) => ({
+        return sanitizeMediaList(data.result.content).map((item) => ({
             mediaId: item.mediaId,
-            image: item.posterURL || 'https://via.placeholder.com/300x169',
+            image: getPosterImage(item),
             title: item.title || 'No title',
             releaseYear: item.releaseYear || 'N/A',
             duration: item.duration || 'N/A',

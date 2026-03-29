@@ -1,6 +1,9 @@
 import classNames from 'classnames/bind';
 import styles from './Footer.module.scss';
 import { Box, Typography, Link } from '@mui/material';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 
 const cx = classNames.bind(styles);
 
@@ -18,7 +21,7 @@ function Footer() {
                             textTransform: 'none',
                         }}
                     >
-                        JAVA Play
+                        HKTPlay
                     </Typography>
                 </Box>
 
@@ -55,15 +58,26 @@ function Footer() {
                     <Typography variant="h6" className={cx('footer-title')}>
                         Contact
                     </Typography>
-                    <Typography className={cx('footer-text')}>Email: support@javaplay.vn</Typography>
-                    <Typography className={cx('footer-text')}>Phone: 1900 1234</Typography>
-                    <Typography className={cx('footer-text')}>Address: 123 Java Street, District 1, HCMC</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                        <EmailOutlinedIcon sx={{ color: 'var(--primary)', fontSize: 18 }} />
+                        <Typography className={cx('footer-text')}>info@dmfpt.gg</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                        <LocalPhoneOutlinedIcon sx={{ color: 'var(--primary)', fontSize: 18 }} />
+                        <Typography className={cx('footer-text')}>1900 480p</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        <LocationOnOutlinedIcon sx={{ color: 'var(--primary)', fontSize: 18, mt: '2px' }} />
+                        <Typography className={cx('footer-text')}>
+                            Tầng 36, tòa nhà HKT Tower, số 18 Yên Lãng, Hà Nội
+                        </Typography>
+                    </Box>
                 </Box>
             </Box>
 
             {/* Copyright */}
             <Box className={cx('footer-copyright')}>
-                <Typography className={cx('footer-text')}>© 2025 JAVA Play. All rights reserved.</Typography>
+                <Typography className={cx('footer-text')}>© 2026 HKTPlay. All rights reserved.</Typography>
             </Box>
         </Box>
     );

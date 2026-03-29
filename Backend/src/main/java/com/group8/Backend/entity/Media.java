@@ -60,8 +60,8 @@ public class Media {
     @Column(name = "AccessLevel")
     String accessLevel;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "MediaType", nullable = false)
+        @Convert(converter = MediaTypeConverter.class)
     MediaType mediaType;
 
     @ManyToMany

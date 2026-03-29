@@ -1,6 +1,7 @@
 package com.group8.Backend.controller;
 
 import com.group8.Backend.dto.response.ViewingHistoryResponse;
+import com.group8.Backend.entity.MediaType;
 import com.group8.Backend.service.ViewingHistoryService;
 import com.group8.Backend.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,9 @@ public class ViewingHistoryController {
     }
 
     @PostMapping("/view/{mediaId}")
-    public void addView(@PathVariable Long mediaId) {
+    public void addView(@PathVariable Long mediaId, @RequestParam MediaType mediaType) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        historyService.addOrUpdateByUsernameAndMediaId(username, mediaId);
+        historyService.addOrUpdateByUsernameAndMediaId(username, mediaId, mediaType);
     }
 
     @GetMapping
@@ -50,9 +51,9 @@ public class ViewingHistoryController {
     }
 
     @DeleteMapping("/{mediaId}")
-    public ResponseEntity<Void> deleteEntry(@PathVariable Long mediaId) {
+    public ResponseEntity<Void> deleteEntry(@PathVariable Long mediaId, @RequestParam MediaType mediaType) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        historyService.deleteEntryByUsernameAndMediaId(username, mediaId);
+        historyService.deleteEntryByUsernameAndMediaId(username, mediaId, mediaType);
         return ResponseEntity.noContent().build();
     }
 }

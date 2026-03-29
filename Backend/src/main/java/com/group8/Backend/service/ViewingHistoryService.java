@@ -3,6 +3,7 @@ package com.group8.Backend.service;
 import com.group8.Backend.entity.ViewingHistory;
 import com.group8.Backend.entity.User;
 import com.group8.Backend.entity.Media;
+import com.group8.Backend.entity.MediaType;
 import com.group8.Backend.repository.ViewingHistoryRepository;
 import com.group8.Backend.repository.UserRepository;
 import com.group8.Backend.repository.MediaRepository;
@@ -31,11 +32,11 @@ public class ViewingHistoryService {
         return repo.save(vh);
     }
 
-    public ViewingHistory addOrUpdateByUsernameAndMediaId(String username, Long mediaId) {
+        public ViewingHistory addOrUpdateByUsernameAndMediaId(String username, Long mediaId, MediaType mediaType) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
-        Media media = mediaRepository.findById(mediaId.intValue())
-                .orElseThrow(() -> new RuntimeException("Media not found: " + mediaId));
+        Media media = mediaRepository.findByMediaIdAndMediaType(mediaId, mediaType)
+            .orElseThrow(() -> new RuntimeException("Media not found: " + mediaId + " and type: " + mediaType));
         return addOrUpdate(user, media);
     }
 
@@ -53,11 +54,11 @@ public class ViewingHistoryService {
         repo.findByUserAndMedia(user, media).ifPresent(repo::delete);
     }
 
-    public void deleteEntryByUsernameAndMediaId(String username, Long mediaId) {
+        public void deleteEntryByUsernameAndMediaId(String username, Long mediaId, MediaType mediaType) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
-        Media media = mediaRepository.findById(mediaId.intValue())
-                .orElseThrow(() -> new RuntimeException("Media not found: " + mediaId));
+        Media media = mediaRepository.findByMediaIdAndMediaType(mediaId, mediaType)
+            .orElseThrow(() -> new RuntimeException("Media not found: " + mediaId + " and type: " + mediaType));
         deleteEntry(user, media);
     }
 

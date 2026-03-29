@@ -3,6 +3,7 @@ package com.group8.Backend.service;
 import com.group8.Backend.dto.response.MediaResponse;
 import com.group8.Backend.entity.Favorite;
 import com.group8.Backend.entity.Media;
+import com.group8.Backend.entity.MediaType;
 import com.group8.Backend.entity.User;
 import com.group8.Backend.exception.AppException;
 import com.group8.Backend.exception.ErrorCode;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,7 +33,6 @@ public class FavoriteService {
     MediaRepository mediaRepository;
     UserService userService;
     MediaMapper mediaMapper;
-    RecommendationService recommendationService;
 
     public int getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -42,27 +41,28 @@ public class FavoriteService {
     }
 
     @Transactional
-    public boolean toggleFavorite(int mediaId) {
+    public boolean toggleFavorite(int mediaId, MediaType mediaType) {
         int userId = getCurrentUserId();
 
         // Check if media exists
-        Optional<Media> mediaOptional = mediaRepository.findById(mediaId);
+        Optional<Media> mediaOptional = mediaRepository.findByMediaIdAndMediaType((long) mediaId, mediaType);
         if (mediaOptional.isEmpty()) {
             throw new AppException(ErrorCode.MEDIA_NOT_FOUND);
         }
 
         // Check if already favorited
-        boolean exists = favoriteRepository.existsByUserIdAndMediaId(userId, mediaId);
+        boolean exists = favoriteRepository.existsByUserIdAndMediaIdAndMediaType(userId, mediaId, mediaType);
 
         if (exists) {
             // Remove from favorites
-            favoriteRepository.deleteByUserIdAndMediaId(userId, mediaId);
+            favoriteRepository.deleteByUserIdAndMediaIdAndMediaType(userId, mediaId, mediaType);
             return false;
         } else {
             // Add to favorites
             Favorite favorite = Favorite.builder()
                     .userId(userId)
                     .mediaId(mediaId)
+                    .mediaType(mediaType)
                     .addedDate(LocalDateTime.now())
                     .build();
             favoriteRepository.save(favorite);
@@ -70,28 +70,20 @@ public class FavoriteService {
         }
     }
 
-    public List<MediaResponse> getUserFavorites() {
+    public List<MediaResponse> getUserFavorites(MediaType mediaType) {
         int userId = getCurrentUserId();
-        List<Favorite> favorites = favoriteRepository.findByUserId(userId);
+        List<Favorite> favorites = favoriteRepository.findByUserIdAndMediaType(userId, mediaType);
 
-        List<Media> favoriteMedia = new ArrayList<>();
-        for (Favorite favorite : favorites) {
-            mediaRepository.findById(favorite.getMediaId())
-                    .ifPresent(favoriteMedia::add);
-        }
-
-        return favoriteMedia.stream()
+        return favorites.stream()
+                .map(favorite -> mediaRepository.findByMediaIdAndMediaType((long) favorite.getMediaId(), favorite.getMediaType()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(mediaMapper::toMediaResponse)
                 .collect(Collectors.toList());
     }
 
-    public boolean isFavorite(int mediaId) {
+    public boolean isFavorite(int mediaId, MediaType mediaType) {
         int userId = getCurrentUserId();
-        return favoriteRepository.existsByUserIdAndMediaId(userId, mediaId);
-    }
-
-    public List<MediaResponse> getRecommendations() {
-        int userId = getCurrentUserId();
-        return recommendationService.getRecommendationsForUser(userId);
+        return favoriteRepository.existsByUserIdAndMediaIdAndMediaType(userId, mediaId, mediaType);
     }
 }

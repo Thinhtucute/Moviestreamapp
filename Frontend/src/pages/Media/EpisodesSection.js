@@ -14,17 +14,19 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
         return null;
     }
 
-    const handleEpisodeClick = (episodeId) => {
+    const handleEpisodeClick = (episode) => {
         if (isAuthenticated) {
-            navigate(`/watch/${mediaId}/episode/${episodeId}`);
+            navigate(
+                `/watch/${mediaId}/season/${encodeURIComponent(episode.season)}/episode/${episode.episodeNumber}?mediaType=tv&episodeId=${episode.episodeId}`,
+            );
         } else {
             onLoginRequired();
         }
     };
 
-    const handleWatchButtonClick = (e, episodeId) => {
+    const handleWatchButtonClick = (e, episode) => {
         e.stopPropagation();
-        handleEpisodeClick(episodeId);
+        handleEpisodeClick(episode);
     };
 
     const displayedEpisodes = episodes.slice(0, maxEpisodesToShow);
@@ -81,7 +83,7 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
                                 },
                             },
                         }}
-                        onClick={() => handleEpisodeClick(episode.episodeId)}
+                        onClick={() => handleEpisodeClick(episode)}
                     >
                         {/* Episode Header */}
                         <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
@@ -245,7 +247,7 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
                                     },
                                     transition: 'all 0.3s ease',
                                 }}
-                                onClick={(e) => handleWatchButtonClick(e, episode.episodeId)}
+                                onClick={(e) => handleWatchButtonClick(e, episode)}
                             >
                                 {isAuthenticated ? 'Watch' : 'Login'}
                             </Button>

@@ -1,6 +1,7 @@
 package com.group8.Backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 import com.group8.Backend.entity.Media;
 import com.group8.Backend.entity.MediaType;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MediaRepository extends JpaRepository<Media, Integer> {
         boolean existsByTitle(String title);
+
+        Optional<Media> findByMediaIdAndMediaType(Long mediaId, MediaType mediaType);
 
         @Query("SELECT m FROM Media m " +
                         "WHERE (:mediaType IS NULL OR m.mediaType = :mediaType) " +

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { checkToken, updateUser } from '@/redux/features/auth/authSlice';
 import axios from 'axios';
@@ -37,13 +37,26 @@ import {
 import EpisodesSection from '@/pages/Media/EpisodesSection';
 import { Favorite, FavoriteBorder } from '@mui/icons-material';
 import useNotification from '@/hooks/useNotification';
+import { getPosterImage, getBackdropImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 const cx = classNames.bind(styles);
+
+const normalizeMediaType = (mediaType) => {
+    const raw = String(mediaType || '').trim().toLowerCase();
+    if (raw === 'movie') return 'movie';
+    if (raw === 'tv') return 'tv';
+    return null;
+};
+
+const isMovieType = (mediaType) => normalizeMediaType(mediaType) === 'movie';
+const isTvType = (mediaType) => normalizeMediaType(mediaType) === 'tv';
 
 function MediaDetail() {
     const { mediaId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
+    const mediaTypeParam = normalizeMediaType(new URLSearchParams(location.search).get('mediaType'));
 
     // Redux state
     const { isAuthenticated, loading: authLoading, user } = useSelector((state) => state.auth);
@@ -168,7 +181,7 @@ function MediaDetail() {
             return;
         }
 
-        navigate(`/watch/${mediaId}`);
+        navigate(`/watch/${mediaId}?mediaType=${normalizeMediaType(media?.mediaType) || 'movie'}`);
     };
 
     const handleLoginRedirect = () => {
@@ -194,6 +207,9 @@ function MediaDetail() {
                 `${apiUrl}/api/favorites/${mediaId}`,
                 {},
                 {
+                    params: {
+                        mediaType: normalizeMediaType(media?.mediaType) || mediaTypeParam || 'movie',
+                    },
                     withCredentials: true,
                     headers: {
                         Authorization: `Bearer ${token}`, // Add authorization header
@@ -429,8 +445,9 @@ function MediaDetail() {
             });
 
             if (response.data && response.data.result) {
-                setRecommendations(response.data.result);
-                console.log('Received recommendations:', response.data.result.length);
+                const normalizedRecommendations = sanitizeMediaList(response.data.result);
+                setRecommendations(normalizedRecommendations);
+                console.log('Received recommendations:', normalizedRecommendations.length);
             }
 
             setLoadingRecommendations(false);
@@ -447,7 +464,29 @@ function MediaDetail() {
         const fetchMediaDetails = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${apiUrl}/api/media/${mediaId}`);
+                let response;
+
+                if (mediaTypeParam) {
+                    response = await axios.get(`${apiUrl}/api/media/${mediaId}`, {
+                        params: {
+                            mediaType: mediaTypeParam,
+                        },
+                    });
+                } else {
+                    try {
+                        response = await axios.get(`${apiUrl}/api/media/${mediaId}`, {
+                            params: {
+                                mediaType: 'movie',
+                            },
+                        });
+                    } catch {
+                        response = await axios.get(`${apiUrl}/api/media/${mediaId}`, {
+                            params: {
+                                mediaType: 'tv',
+                            },
+                        });
+                    }
+                }
 
                 if (response.data && response.data.result) {
                     console.log('Media data received:', response.data.result);
@@ -467,17 +506,21 @@ function MediaDetail() {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
         fetchMediaDetails();
-    }, [mediaId, dispatch, apiUrl]);
+    }, [mediaId, mediaTypeParam, dispatch, apiUrl]);
 
     // Check if the current media is in favorites
     useEffect(() => {
         const checkFavoriteStatus = async () => {
-            if (!isAuthenticated || !mediaId) return;
+            const favoriteMediaType = normalizeMediaType(media?.mediaType) || mediaTypeParam;
+            if (!isAuthenticated || !mediaId || !favoriteMediaType) return;
 
             try {
                 const token = localStorage.getItem('token');
 
                 const response = await axios.get(`${apiUrl}/api/favorites/status/${mediaId}`, {
+                    params: {
+                        mediaType: favoriteMediaType,
+                    },
                     withCredentials: true,
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -493,7 +536,7 @@ function MediaDetail() {
         };
 
         checkFavoriteStatus();
-    }, [mediaId, isAuthenticated, apiUrl]);
+    }, [mediaId, isAuthenticated, apiUrl, media?.mediaType, mediaTypeParam]);
 
     // Fetch recommendations based on user favorites
     useEffect(() => {
@@ -577,12 +620,12 @@ function MediaDetail() {
     return (
         <Box className={cx('media-detail-container')}>
             {/* Hero section with backdrop */}
-            <Box className={cx('backdrop')} style={{ backgroundImage: `url(${media.posterURL})` }}>
+            <Box className={cx('backdrop')} style={{ backgroundImage: `url(${getBackdropImage(media)})` }}>
                 <Box className={cx('backdrop-overlay')}></Box>
 
                 <Box className={cx('hero-content')}>
                     <Box className={cx('poster')}>
-                        <img src={media.posterURL} alt={media.title} />
+                        <img src={getPosterImage(media)} alt={media.title} />
 
                         {/* Media Type Badge */}
                         <Chip
@@ -592,9 +635,9 @@ function MediaDetail() {
                                 top: 10,
                                 left: 10,
                                 backgroundColor:
-                                    media.mediaType === 'Movie'
+                                    isMovieType(media.mediaType)
                                         ? '#2563eb'
-                                        : media.mediaType === 'Series'
+                                        : isTvType(media.mediaType)
                                         ? '#7c3aed'
                                         : '#ec4899',
                                 color: 'white',
@@ -648,14 +691,14 @@ function MediaDetail() {
                             </Box>
 
                             {/* Hiển thị Duration cho Movie hoặc Total Episodes cho Series */}
-                            {media.mediaType === 'Movie' && media.duration ? (
+                            {isMovieType(media.mediaType) && media.duration ? (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                                     <AccessTime fontSize="medium" sx={{ color: 'var(--primary)' }} />
                                     <Typography variant="h5" sx={{ color: 'var(--white)' }}>
                                         {media.duration} min
                                     </Typography>
                                 </Box>
-                            ) : media.mediaType === 'Series' && media.episodes ? (
+                            ) : isTvType(media.mediaType) && media.episodes ? (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                                     <AccessTime fontSize="medium" sx={{ color: 'var(--primary)' }} />
                                     <Typography variant="h5" sx={{ color: 'var(--white)' }}>
@@ -931,7 +974,7 @@ function MediaDetail() {
             )}
 
             {/* Episodes section for Series - sử dụng component riêng */}
-            {media.mediaType === 'Series' && media.episodes && media.episodes.length > 0 && (
+            {isTvType(media.mediaType) && media.episodes && media.episodes.length > 0 && (
                 <EpisodesSection
                     episodes={media.episodes}
                     mediaId={mediaId}
@@ -966,22 +1009,22 @@ function MediaDetail() {
                         </Box>
                     ) : recommendations.length > 0 ? (
                         <Box className={cx('recommendations-grid')}>
-                            {recommendations.slice(0, 6).map((item) => (
+                            {sanitizeMediaList(recommendations).slice(0, 6).map((item) => (
                                 <Box
                                     key={item.mediaId}
                                     className={cx('recommendation-card')}
-                                    onClick={() => navigate(`/media/${item.mediaId}`)}
+                                    onClick={() =>
+                                        navigate(
+                                            `/media/${item.mediaId}?mediaType=${normalizeMediaType(item.mediaType) || 'movie'}`,
+                                        )
+                                    }
                                 >
                                     {/* Movie Image */}
                                     <img
-                                        src={
-                                            item.posterURL ||
-                                            'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image'
-                                        }
+                                        src={getPosterImage(item)}
                                         alt={item.title}
                                         onError={(e) => {
-                                            e.target.src =
-                                                'https://via.placeholder.com/300x450/1a1a1a/666?text=No+Image';
+                                            e.target.src = getPosterImage(null);
                                         }}
                                         onDragStart={(e) => e.preventDefault()}
                                         style={{

@@ -4,6 +4,7 @@ import { Box, Typography, Pagination, CircularProgress, Container, Button } from
 import { PlayArrow, Star } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 function NewMovies() {
     const navigate = useNavigate();
@@ -38,7 +39,7 @@ function NewMovies() {
             console.log('API Response:', response.data);
 
             if (response.data && response.data.result && response.data.result.content) {
-                setMovies(response.data.result.content || []);
+                setMovies(sanitizeMediaList(response.data.result.content));
                 setTotalPages(response.data.result.totalPages || 0);
                 setTotalElements(response.data.result.totalElements || 0);
             } else {
@@ -130,12 +131,12 @@ function NewMovies() {
                     {movies.length > 0 ? (
                         <motion.div variants={containerVariants} initial="hidden" animate="visible">
                             <div className="movie-grid">
-                                {movies.map((movie, index) => (
+                                {sanitizeMediaList(movies).map((movie, index) => (
                                     <motion.div variants={itemVariants} key={movie.mediaId || index}>
                                         <div className="movie-card" onClick={() => handleMovieClick(movie.mediaId)}>
                                             {/* Movie Image */}
                                             <img
-                                                src={movie.posterURL || '/placeholder-movie.jpg'}
+                                                src={getPosterImage(movie)}
                                                 alt={movie.title}
                                                 onDragStart={(e) => e.preventDefault()}
                                                 style={{
@@ -144,7 +145,7 @@ function NewMovies() {
                                                     objectFit: 'cover',
                                                 }}
                                                 onError={(e) => {
-                                                    e.target.src = '/placeholder-movie.jpg';
+                                                    e.target.src = getPosterImage(null);
                                                 }}
                                             />
 

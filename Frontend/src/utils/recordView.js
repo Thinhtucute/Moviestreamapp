@@ -1,6 +1,13 @@
 import { addLocalView } from './historyLocal';
 import { addViewBackend } from '../services/historyServices';
 
+const normalizeMediaType = (mediaType) => {
+  const raw = String(mediaType || '').trim().toLowerCase();
+  if (raw === 'movie') return 'movie';
+  if (raw === 'tv') return 'tv';
+  return 'movie';
+};
+
 export default function recordView(media) {
   if (!media) {
     console.debug('recordView: no media provided');
@@ -17,7 +24,7 @@ export default function recordView(media) {
     mediaId,
     title: media.title ?? media.name ?? '',
     posterURL: media.posterUrl ?? media.posterURL ?? media.poster ?? '',
-    mediaType: media.type ?? media.mediaType ?? '',
+    mediaType: normalizeMediaType(media.type ?? media.mediaType ?? ''),
     lastViewed: new Date().toISOString(),
   };
 
@@ -28,7 +35,7 @@ export default function recordView(media) {
   }
 
   console.debug('recordView: calling backend for mediaId', mediaId);
-  addViewBackend(mediaId)
+  addViewBackend(mediaId, item.mediaType)
     .then(res => console.debug('recordView: addViewBackend success', res && res.status ? res.status : res))
     .catch(err => console.error('recordView: addViewBackend failed', err));
 }

@@ -171,7 +171,7 @@ export default function Register() {
                             fullWidth
                             name="passwordHash"
                             label="Password"
-                            type={showpasswordHash ? 'text' : 'passwordHash'}
+                            type={showpasswordHash ? 'text' : 'password'}
                             id="passwordHash"
                             autoComplete="current-passwordHash"
                             variant="outlined"

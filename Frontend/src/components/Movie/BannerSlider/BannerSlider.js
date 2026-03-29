@@ -11,8 +11,18 @@ import { useNavigate } from 'react-router-dom';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import useNotification from '@/hooks/useNotification';
+import { getBackdropImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 const cx = classNames.bind(styles);
+
+const normalizeMediaType = (mediaType) => {
+    const raw = String(mediaType || '').trim().toLowerCase();
+    if (raw === 'movie') return 'movie';
+    if (raw === 'tv') return 'tv';
+    return 'movie';
+};
+
+const favoriteKey = (mediaId, mediaType) => `${mediaId}:${normalizeMediaType(mediaType)}`;
 
 // Variants for the poster (slide in from the right)
 const posterVariants = {
@@ -84,6 +94,7 @@ const sliderReducer = (state, action) => {
 function BannerSlider() {
     const [state, dispatch] = useReducer(sliderReducer, initialState);
     const { banners, loading, error } = useBanners();
+    const validBanners = sanitizeMediaList(banners);
     const sliderRef = useRef(null);
     const navigate = useNavigate();
 
@@ -108,7 +119,7 @@ function BannerSlider() {
     // Fetch favorite status 
     useEffect(() => {
         const fetchFavoriteStatuses = async () => {
-            if (!authInitialized || !isAuthenticated || !banners.length) {
+            if (!authInitialized || !isAuthenticated || !validBanners.length) {
                 return;
             }
 
@@ -121,27 +132,30 @@ function BannerSlider() {
                     return;
                 }
 
-                const favoritePromises = banners.map(async (banner) => {
+                const favoritePromises = validBanners.map(async (banner) => {
                     try {
                         const response = await axios.get(`${apiUrl}/api/favorites/status/${banner.mediaId}`, {
+                            params: {
+                                mediaType: normalizeMediaType(banner.mediaType),
+                            },
                             withCredentials: true,
                             headers: {
                                 Authorization: `Bearer ${token}`,
                             },
                         });
-                        return { mediaId: banner.mediaId, isFavorite: response.data.result };
+                        return { mediaId: banner.mediaId, mediaType: banner.mediaType, isFavorite: response.data.result };
                     } catch (error) {
                         console.error(`Failed to check favorite status for ${banner.mediaId}:`, error);
-                        return { mediaId: banner.mediaId, isFavorite: false };
+                        return { mediaId: banner.mediaId, mediaType: banner.mediaType, isFavorite: false };
                     }
                 });
 
                 const favoriteResults = await Promise.all(favoritePromises);
                 const newFavorites = new Set();
 
-                favoriteResults.forEach(({ mediaId, isFavorite }) => {
+                favoriteResults.forEach(({ mediaId, mediaType, isFavorite }) => {
                     if (isFavorite) {
-                        newFavorites.add(mediaId);
+                        newFavorites.add(favoriteKey(mediaId, mediaType));
                     }
                 });
 
@@ -152,10 +166,10 @@ function BannerSlider() {
         };
 
         fetchFavoriteStatuses();
-    }, [authInitialized, isAuthenticated, banners, apiUrl]);
+    }, [authInitialized, isAuthenticated, validBanners, apiUrl]);
 
     // Handle toggle favorite
-    const handleToggleFavorite = async (mediaId, event) => {
+    const handleToggleFavorite = async (mediaId, mediaType, event) => {
         event?.stopPropagation();
 
         // Check auth state
@@ -178,13 +192,17 @@ function BannerSlider() {
             return;
         }
 
-        setLoadingFavorites((prev) => ({ ...prev, [mediaId]: true }));
+        const key = favoriteKey(mediaId, mediaType);
+        setLoadingFavorites((prev) => ({ ...prev, [key]: true }));
 
         try {
             const response = await axios.post(
                 `${apiUrl}/api/favorites/${mediaId}`,
                 {},
                 {
+                    params: {
+                        mediaType: normalizeMediaType(mediaType),
+                    },
                     withCredentials: true,
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -194,13 +212,13 @@ function BannerSlider() {
 
             if (response.data) {
                 const newFavorites = new Set(favorites);
-                const isFavorite = favorites.has(mediaId);
+                const isFavorite = favorites.has(key);
 
                 if (isFavorite) {
-                    newFavorites.delete(mediaId);
+                    newFavorites.delete(key);
                     showNotification('Removed from favorites', 'success');
                 } else {
-                    newFavorites.add(mediaId);
+                    newFavorites.add(key);
                     showNotification('Added to favorites', 'success');
                 }
 
@@ -217,28 +235,28 @@ function BannerSlider() {
                 showNotification('Failed to update favorites', 'error');
             }
         } finally {
-            setLoadingFavorites((prev) => ({ ...prev, [mediaId]: false }));
+            setLoadingFavorites((prev) => ({ ...prev, [key]: false }));
         }
     };
 
     const handleWatchNow = useCallback(() => {
-        const currentBanner = banners[state.currentIndex];
+        const currentBanner = validBanners[state.currentIndex];
         if (currentBanner && currentBanner.mediaId) {
-            navigate(`/media/${currentBanner.mediaId}`);
+            navigate(`/media/${currentBanner.mediaId}?mediaType=${normalizeMediaType(currentBanner.mediaType)}`);
         }
-    }, [banners, state.currentIndex, navigate]);
+    }, [validBanners, state.currentIndex, navigate]);
 
     const handleNext = useCallback(() => {
-        if (banners.length > 0) {
-            dispatch({ type: 'NEXT', payload: banners.length });
+        if (validBanners.length > 0) {
+            dispatch({ type: 'NEXT', payload: validBanners.length });
         }
-    }, [banners.length]);
+    }, [validBanners.length]);
 
     const handlePrev = useCallback(() => {
-        if (banners.length > 0) {
-            dispatch({ type: 'PREV', payload: banners.length });
+        if (validBanners.length > 0) {
+            dispatch({ type: 'PREV', payload: validBanners.length });
         }
-    }, [banners.length]);
+    }, [validBanners.length]);
 
     const handleThumbnailClick = useCallback((index) => {
         dispatch({ type: 'SET_INDEX', payload: index });
@@ -258,13 +276,13 @@ function BannerSlider() {
 
     // Auto-play slider
     useEffect(() => {
-        if (banners.length > 0 && state.isPlaying) {
+        if (validBanners.length > 0 && state.isPlaying) {
             const interval = setInterval(() => {
                 handleNext();
             }, 30000);
             return () => clearInterval(interval);
         }
-    }, [banners.length, state.isPlaying, handleNext]);
+    }, [validBanners.length, state.isPlaying, handleNext]);
 
     // Handle mouse drag events
     useEffect(() => {
@@ -312,11 +330,12 @@ function BannerSlider() {
     // Render logic
     if (loading) return <Box>Đang tải...</Box>;
     if (error) return <Box>{error}</Box>;
-    if (!banners || banners.length === 0) return <Box>Không có dữ liệu banner</Box>;
+    if (validBanners.length === 0) return <Box>Không có dữ liệu banner</Box>;
 
-    const currentBanner = banners[state.currentIndex];
-    const isCurrentFavorite = favorites.has(currentBanner?.mediaId);
-    const isCurrentLoading = loadingFavorites[currentBanner?.mediaId];
+    const currentBanner = validBanners[state.currentIndex];
+    const currentFavoriteKey = favoriteKey(currentBanner?.mediaId, currentBanner?.mediaType);
+    const isCurrentFavorite = favorites.has(currentFavoriteKey);
+    const isCurrentLoading = loadingFavorites[currentFavoriteKey];
 
     return (
         <Box className={cx('banner-slider')}>
@@ -352,7 +371,7 @@ function BannerSlider() {
                 <AnimatePresence initial={false} custom={state.direction}>
                     <motion.img
                         key={state.currentIndex}
-                        src={currentBanner.backdropURL || ''}
+                        src={getBackdropImage(currentBanner)}
                         alt={currentBanner.title || 'Banner'}
                         custom={state.direction}
                         variants={posterVariants}
@@ -521,7 +540,7 @@ function BannerSlider() {
 
                             {/* Favorite Button - disable when auth is not ready */}
                             <Button
-                                onClick={(event) => handleToggleFavorite(currentBanner.mediaId, event)}
+                                onClick={(event) => handleToggleFavorite(currentBanner.mediaId, currentBanner.mediaType, event)}
                                 disabled={isCurrentLoading || !authInitialized}
                                 sx={{
                                     color: 'white',
@@ -579,7 +598,7 @@ function BannerSlider() {
                         gap: '8px',
                     }}
                 >
-                    {banners.map((banner, index) => (
+                    {validBanners.map((banner, index) => (
                         <Box
                             key={index}
                             onClick={() => handleThumbnailClick(index)}
@@ -599,7 +618,7 @@ function BannerSlider() {
                             }}
                         >
                             <img
-                                src={banner.backdropURL || ''}
+                                src={getBackdropImage(banner)}
                                 alt={banner.title || 'Thumbnail'}
                                 style={{
                                     width: '100%',

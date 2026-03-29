@@ -5,6 +5,7 @@ import com.group8.Backend.dto.request.MediaCreationRequest;
 import com.group8.Backend.dto.request.MediaUpdateRequest;
 import com.group8.Backend.dto.response.MediaResponse;
 import com.group8.Backend.dto.response.PaginatedResponse;
+import com.group8.Backend.entity.MediaType;
 import com.group8.Backend.service.MediaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -26,16 +27,17 @@ public class MediaController {
     @PutMapping("/{mediaId}")
     public ApiResponse<MediaResponse> updateMedia(
             @PathVariable int mediaId,
+                        @RequestParam MediaType mediaType,
             @RequestBody MediaUpdateRequest request) {
         return ApiResponse.<MediaResponse>builder()
                 .code(1000)
-                .result(mediaService.updateMedia(mediaId, request))
+                                .result(mediaService.updateMedia(mediaId, mediaType, request))
                 .build();
     }
 
     @DeleteMapping("/{mediaId}")
-    public ApiResponse<Void> deleteMedia(@PathVariable int mediaId) {
-        mediaService.deleteMedia(mediaId);
+        public ApiResponse<Void> deleteMedia(@PathVariable int mediaId, @RequestParam MediaType mediaType) {
+                mediaService.deleteMedia(mediaId, mediaType);
         return ApiResponse.<Void>builder()
                 .code(1000)
                 .message("Media deleted successfully")
@@ -56,10 +58,10 @@ public class MediaController {
     }
 
     @GetMapping("/{mediaId}")
-    public ApiResponse<MediaResponse> getMediaDetails(@PathVariable int mediaId) {
+        public ApiResponse<MediaResponse> getMediaDetails(@PathVariable int mediaId, @RequestParam MediaType mediaType) {
         return ApiResponse.<MediaResponse>builder()
                 .code(1000)
-                .result(mediaService.getMediaDetails(mediaId))
+                                .result(mediaService.getMediaDetails(mediaId, mediaType))
                 .build();
     }
 

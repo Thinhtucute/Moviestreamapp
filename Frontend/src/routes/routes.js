@@ -81,6 +81,16 @@ const privateRoutes = [
         protectedRoute: ProtectedRoute,
     },
     {
+        path: '/watch/:mediaId/episode/:episodeId',
+        component: MediaStream,
+        protectedRoute: ProtectedRoute,
+    },
+    {
+        path: '/watch/:mediaId/season/:season/episode/:episodeNumber',
+        component: MediaStream,
+        protectedRoute: ProtectedRoute,
+    },
+    {
         path: '/subscription',
         component: SubscriptionPage,
         protectedRoute: ProtectedRoute,

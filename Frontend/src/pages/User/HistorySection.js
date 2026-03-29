@@ -17,6 +17,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useSelector } from 'react-redux';
 import { getLocalHistory, removeLocalView, clearLocalHistory } from '../../utils/historyLocal';
 import { fetchHistoryBackend, removeHistoryItemBackend, clearHistoryBackend } from '../../services/historyServices';
+import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
+
+const normalizeMediaType = (mediaType) => {
+    const raw = String(mediaType || '').trim().toLowerCase();
+    if (raw === 'movie') return 'movie';
+    if (raw === 'tv') return 'tv';
+    return 'movie';
+};
 
 function HistorySection() {
     const [history, setHistory] = useState([]);
@@ -30,7 +38,7 @@ function HistorySection() {
             fetchHistoryBackend()
                 .then((data) => {
                     if (!mounted) return;
-                    setHistory(Array.isArray(data) ? data : []);
+                    setHistory(sanitizeMediaList(data));
                 })
                 .catch(() => {
                     if (!mounted) return;
@@ -45,14 +53,14 @@ function HistorySection() {
     }, [isAuthenticated]);
 
     // Remove item from history
-    const handleRemoveFromHistory = async (mediaId) => {
+    const handleRemoveFromHistory = async (mediaId, mediaType) => {
         if (isAuthenticated) {
             try {
                 // try server-side delete (if implemented)
-                await removeHistoryItemBackend(mediaId);
+                await removeHistoryItemBackend(mediaId, mediaType);
                 // refresh list from backend
                 const updated = await fetchHistoryBackend();
-                setHistory(Array.isArray(updated) ? updated : []);
+                setHistory(sanitizeMediaList(updated));
             } catch (e) {
                 // fallback: optimistic UI removal
                 setHistory((prev) => prev.filter((item) => item.mediaId !== mediaId));
@@ -79,8 +87,8 @@ function HistorySection() {
     };
 
     // Continue watching (navigate to media)
-    const handleContinueWatching = (mediaId) => {
-        navigate(`/media/${mediaId}`);
+    const handleContinueWatching = (mediaId, mediaType) => {
+        navigate(`/media/${mediaId}?mediaType=${normalizeMediaType(mediaType)}`);
     };
 
     return (
@@ -161,7 +169,7 @@ function HistorySection() {
                 </Box>
             ) : (
                 <Grid container spacing={3}>
-                    {history.map((item) => (
+                    {sanitizeMediaList(history).map((item) => (
                         <Grid item xs={12} sm={6} md={6} lg={4} key={item.mediaId}>
                             <Card
                                 sx={{
@@ -190,7 +198,7 @@ function HistorySection() {
                                     >
                                         <Avatar
                                             variant="rounded"
-                                            src={item.posterURL}
+                                            src={getPosterImage(item)}
                                             sx={{
                                                 width: 60,
                                                 height: 90,
@@ -238,7 +246,7 @@ function HistorySection() {
                                             </Typography>
                                         </Box>
                                         <IconButton
-                                            onClick={() => handleRemoveFromHistory(item.mediaId)}
+                                            onClick={() => handleRemoveFromHistory(item.mediaId, item.mediaType)}
                                             size="small"
                                             sx={{
                                                 color: 'rgba(244, 67, 54, 0.8)',
@@ -256,7 +264,7 @@ function HistorySection() {
                                     <Button
                                         variant="contained"
                                         startIcon={<PlayArrowIcon />}
-                                        onClick={() => handleContinueWatching(item.mediaId)}
+                                        onClick={() => handleContinueWatching(item.mediaId, item.mediaType)}
                                         fullWidth
                                         sx={{
                                             backgroundColor: '#ff9800',

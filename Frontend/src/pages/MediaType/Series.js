@@ -4,6 +4,7 @@ import { Box, Typography, Pagination, CircularProgress, Container, Button } from
 import { PlayArrow, Star } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 function Series() {
     const navigate = useNavigate();
@@ -31,13 +32,13 @@ function Series() {
 
             const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
             const response = await axios.get(
-                `${API_URL}/api/media/search?page=${page}&size=${pageSize}&mediaType=Series`,
+                `${API_URL}/api/media/search?page=${page}&size=${pageSize}&mediaType=tv`,
             );
 
             console.log('API Response:', response.data);
 
             if (response.data && response.data.result && response.data.result.content) {
-                setSeries(response.data.result.content || []);
+                setSeries(sanitizeMediaList(response.data.result.content));
                 setTotalPages(response.data.result.totalPages || 0);
                 setTotalElements(response.data.result.totalElements || 0);
             } else {
@@ -129,12 +130,12 @@ function Series() {
                     {series.length > 0 ? (
                         <motion.div variants={containerVariants} initial="hidden" animate="visible">
                             <div className="movie-grid">
-                                {series.map((show, index) => (
+                                {sanitizeMediaList(series).map((show, index) => (
                                     <motion.div variants={itemVariants} key={show.mediaId || index}>
                                         <div className="movie-card" onClick={() => handleSeriesClick(show.mediaId)}>
                                             {/* Series Image */}
                                             <img
-                                                src={show.posterURL || '/placeholder-movie.jpg'}
+                                                src={getPosterImage(show)}
                                                 alt={show.title}
                                                 onDragStart={(e) => e.preventDefault()}
                                                 style={{
@@ -143,7 +144,7 @@ function Series() {
                                                     objectFit: 'cover',
                                                 }}
                                                 onError={(e) => {
-                                                    e.target.src = '/placeholder-movie.jpg';
+                                                    e.target.src = getPosterImage(null);
                                                 }}
                                             />
 

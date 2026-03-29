@@ -4,6 +4,7 @@ import { Box, Typography, Pagination, CircularProgress, Container, Button } from
 import { PlayArrow, Star } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 function Animation() {
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ function Animation() {
             console.log('API Response:', response.data);
 
             if (response.data && response.data.result && response.data.result.content) {
-                setAnimations(response.data.result.content || []);
+                setAnimations(sanitizeMediaList(response.data.result.content));
                 setTotalPages(response.data.result.totalPages || 0);
                 setTotalElements(response.data.result.totalElements || 0);
             } else {
@@ -130,7 +131,7 @@ function Animation() {
                     {animations.length > 0 ? (
                         <motion.div variants={containerVariants} initial="hidden" animate="visible">
                             <div className="movie-grid">
-                                {animations.map((animation, index) => (
+                                {sanitizeMediaList(animations).map((animation, index) => (
                                     <motion.div variants={itemVariants} key={animation.mediaId || index}>
                                         <div
                                             className="movie-card"
@@ -138,7 +139,7 @@ function Animation() {
                                         >
                                             {/* Animation Image */}
                                             <img
-                                                src={animation.posterURL || '/placeholder-movie.jpg'}
+                                                src={getPosterImage(animation)}
                                                 alt={animation.title}
                                                 onDragStart={(e) => e.preventDefault()}
                                                 style={{
@@ -147,7 +148,7 @@ function Animation() {
                                                     objectFit: 'cover',
                                                 }}
                                                 onError={(e) => {
-                                                    e.target.src = '/placeholder-movie.jpg';
+                                                    e.target.src = getPosterImage(null);
                                                 }}
                                             />
 
@@ -192,7 +193,7 @@ function Animation() {
                                                     )}
 
                                                     {/* Duration/Episodes Badge */}
-                                                    {animation.mediaType === 'Movie' && animation.duration && (
+                                                    {String(animation.mediaType || '').trim().toLowerCase() === 'movie' && animation.duration && (
                                                         <div
                                                             className="movie-badge"
                                                             style={{
@@ -206,7 +207,7 @@ function Animation() {
                                                         </div>
                                                     )}
 
-                                                    {animation.mediaType === 'Series' && animation.totalEpisodes && (
+                                                    {String(animation.mediaType || '').trim().toLowerCase() === 'tv' && animation.totalEpisodes && (
                                                         <div
                                                             className="movie-badge"
                                                             style={{

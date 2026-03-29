@@ -7,7 +7,7 @@ import lombok.experimental.FieldDefaults;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "favorites")
+@Table(name = "Favorites")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,6 +22,11 @@ public class Favorite {
     @Id
     @Column(name = "MediaID")
     int mediaId;
+    
+    @Id
+    @Column(name = "MediaType")
+    @Convert(converter = MediaTypeConverter.class)
+    MediaType mediaType;
     
     @Column(name = "AddedDate")
     LocalDateTime addedDate;

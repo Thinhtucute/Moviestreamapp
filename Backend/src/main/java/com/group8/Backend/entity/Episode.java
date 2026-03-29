@@ -39,4 +39,7 @@ public class Episode {
 
     @Column(name = "ReleaseDate")
     LocalDate releaseDate;
+
+    @Column(name = "StreamURL")
+    String streamURL;
 }

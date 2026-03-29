@@ -41,6 +41,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import axios from 'axios';
+import { getBackdropImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 const cx = classNames.bind(styles);
 const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
@@ -121,7 +122,7 @@ function Header() {
             );
 
             if (response.data && response.data.result && response.data.result.content) {
-                const suggestions = response.data.result.content.map((item) => ({
+                const suggestions = sanitizeMediaList(response.data.result.content).map((item) => ({
                     label: item.title,
                     value: item.title,
                     mediaId: item.mediaId,
@@ -265,7 +266,7 @@ function Header() {
                                     },
                                 }}
                             >
-                                JAVA Play
+                                HKTPlay
                             </Typography>
                         </Button>
 
@@ -308,7 +309,7 @@ function Header() {
                                             }}
                                         >
                                             <img
-                                                src={option.backdropURL || '/placeholder-movie.jpg'}
+                                                src={getBackdropImage(option)}
                                                 alt={option.label}
                                                 style={{
                                                     width: 40,
@@ -316,7 +317,7 @@ function Header() {
                                                     objectFit: 'cover',
                                                 }}
                                                 onError={(e) => {
-                                                    e.target.src = '/placeholder-movie.jpg';
+                                                    e.target.src = images.noBackdrop;
                                                 }}
                                             />
                                             <Box
@@ -325,7 +326,7 @@ function Header() {
                                                     top: 2,
                                                     right: 2,
                                                     backgroundColor:
-                                                        option.mediaType === 'Movie'
+                                                        String(option.mediaType || '').trim().toLowerCase() === 'movie'
                                                             ? 'rgba(37, 99, 235, 0.9)'
                                                             : 'rgba(124, 58, 237, 0.9)',
                                                     color: 'white',

@@ -1,38 +1,129 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Container, CircularProgress, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import axios from 'axios';
 import styles from './MediaStream.module.scss';
 
+const PLAYER_ORIGIN = 'https://www.vidking.net';
+const WATCH_PROGRESS_PREFIX = 'watchProgress';
+
+const parsePlayerMessage = (rawData) => {
+    if (typeof rawData === 'string') {
+        try {
+            return JSON.parse(rawData);
+        } catch {
+            return null;
+        }
+    }
+
+    if (typeof rawData === 'object' && rawData !== null) {
+        return rawData;
+    }
+
+    return null;
+};
+
+const buildEmbedUrl = (baseUrl, options) => {
+    if (!baseUrl) {
+        return '';
+    }
+
+    try {
+        const url = new URL(baseUrl);
+
+        if (typeof options.autoPlay === 'boolean') {
+            url.searchParams.set('autoPlay', String(options.autoPlay));
+        }
+
+        if (Number.isFinite(options.progress) && options.progress > 0) {
+            url.searchParams.set('progress', String(Math.floor(options.progress)));
+        }
+
+        return url.toString();
+    } catch {
+        return baseUrl;
+    }
+};
+
+const normalizeMediaType = (mediaType) => {
+    const raw = String(mediaType || '').trim().toLowerCase();
+    if (raw === 'movie') return 'movie';
+    if (raw === 'tv') return 'tv';
+    return null;
+};
+
 export default function MediaStream() {
-    const { mediaId } = useParams();
+    const { mediaId, episodeId, season, episodeNumber } = useParams();
+    const location = useLocation();
     const [loading, setLoading] = useState(true);
     const [streamUrl, setStreamUrl] = useState(null);
     const [error, setError] = useState(null);
+    const [resumeProgress, setResumeProgress] = useState(0);
     const navigate = useNavigate();
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    const urlParams = new URLSearchParams(location.search);
+    const mediaTypeParam = normalizeMediaType(urlParams.get('mediaType'));
+    const episodeIdFromQuery = urlParams.get('episodeId');
+    const resolvedMediaType = mediaTypeParam || (episodeId || season || episodeNumber ? 'tv' : 'movie');
+    const resolvedEpisodeId = episodeId || episodeIdFromQuery;
+    const progressStorageKey = `${WATCH_PROGRESS_PREFIX}:${mediaId}`;
+
+    const iframeSrc = useMemo(
+        () =>
+            buildEmbedUrl(streamUrl, {
+                autoPlay: true,
+                progress: resumeProgress,
+            }),
+        [streamUrl, resumeProgress],
+    );
+
+    useEffect(() => {
+        const storedProgress = Number(localStorage.getItem(progressStorageKey));
+        if (Number.isFinite(storedProgress) && storedProgress > 0) {
+            setResumeProgress(storedProgress);
+        }
+    }, [progressStorageKey]);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
-            navigate('/login', { state: { from: `/stream/${mediaId}` } });
+            navigate('/login', { state: { from: location.pathname + location.search } });
             return;
         }
 
         const fetchStreamData = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`${apiUrl}/api/stream/${mediaId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                let response;
+
+                if (resolvedMediaType === 'tv') {
+                    if (!resolvedEpisodeId) {
+                        throw new Error('Missing episodeId for tv streaming route');
+                    }
+
+                    response = await axios.get(`${apiUrl}/api/stream/${mediaId}/episode/${resolvedEpisodeId}`, {
+                        params: {
+                            mediaType: 'tv',
+                        },
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                } else {
+                    response = await axios.get(`${apiUrl}/api/stream/${mediaId}`, {
+                        params: {
+                            mediaType: 'movie',
+                        },
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                }
+
                 setStreamUrl(response.data.streamURL);
                 setLoading(false);
             } catch (err) {
                 console.error('Error fetching stream data:', err);
                 if (err.response?.status === 401) {
                     localStorage.removeItem('token');
-                    navigate('/login', { state: { from: `/stream/${mediaId}` } });
+                    navigate('/login', { state: { from: location.pathname + location.search } });
                 } else {
                     setError(err.response?.data?.message || 'Failed to load video');
                 }
@@ -41,15 +132,46 @@ export default function MediaStream() {
         };
 
         fetchStreamData();
-    }, [mediaId, apiUrl, navigate]);
+    }, [mediaId, resolvedMediaType, resolvedEpisodeId, apiUrl, navigate, location.pathname, location.search]);
+
+    useEffect(() => {
+        const onPlayerMessage = (event) => {
+            if (event.origin !== PLAYER_ORIGIN) {
+                return;
+            }
+
+            const message = parsePlayerMessage(event.data);
+            if (!message || message.type !== 'PLAYER_EVENT' || !message.data) {
+                return;
+            }
+
+            const { currentTime, id } = message.data;
+            if (!Number.isFinite(currentTime) || currentTime < 0) {
+                return;
+            }
+
+            if (id && String(id) !== String(mediaId)) {
+                return;
+            }
+
+            localStorage.setItem(progressStorageKey, String(Math.floor(currentTime)));
+        };
+
+        window.addEventListener('message', onPlayerMessage);
+        return () => window.removeEventListener('message', onPlayerMessage);
+    }, [mediaId, progressStorageKey]);
 
     const handleBack = () => {
+        if (resolvedMediaType) {
+            navigate(`/media/${mediaId}?mediaType=${resolvedMediaType}`);
+            return;
+        }
         navigate(`/media/${mediaId}`);
     };
 
     if (loading) {
         return (
-            <Container maxWidth="lg" sx={{ py: 8, minHeight: '100vh' }}>
+            <Container maxWidth={false} sx={{ py: 8, minHeight: '100vh', width: '95%', mx: 'auto' }}>
                 <Box sx={{
                     display: 'flex',
                     justifyContent: 'center',
@@ -65,7 +187,7 @@ export default function MediaStream() {
 
     if (error) {
         return (
-            <Container maxWidth="lg" sx={{ pt: '50%', minHeight: '100vh' }}>
+            <Container maxWidth={false} sx={{ pt: '50%', minHeight: '100vh', width: '95%', mx: 'auto' }}>
                 <Button
                     variant="outlined"
                     startIcon={<ArrowBackIcon />}
@@ -97,7 +219,7 @@ export default function MediaStream() {
     }
 
     return (
-        <Container maxWidth="lg" sx={{ py: 12, minHeight: '100vh' }}>
+        <Container maxWidth={false} sx={{ py: 12, minHeight: '100vh', width: '97%', mx: 'auto' }}>
             <Button
                 variant="outlined"
                 startIcon={<ArrowBackIcon />}
@@ -115,6 +237,12 @@ export default function MediaStream() {
                 Back to Details
             </Button>
 
+            {resolvedMediaType === 'tv' && season && episodeNumber && (
+                <Box sx={{ color: 'white', mb: 2, opacity: 0.85 }}>
+                    Media {mediaId} - Season {season} Episode {episodeNumber}
+                </Box>
+            )}
+
             {streamUrl && (
                 <Box sx={{
                     width: '100%',
@@ -125,24 +253,24 @@ export default function MediaStream() {
                     position: 'relative',
                     paddingTop: '56.25%' // 16:9
                 }}>
-                    <video
-                        controls
-                        controlsList="nodownload"
+                    <iframe
+                        src={iframeSrc}
+                        title={`Media Player ${mediaId}`}
+                        width="100%"
+                        height="600"
+                        frameBorder="0"
+                        allow="autoplay; encrypted-media; picture-in-picture"
+                        allowFullScreen
                         className={styles.videoPlayer}
-                        autoPlay
-                        playsInline
                         style={{
                             position: 'absolute',
                             top: 0,
                             left: 0,
                             width: '100%',
                             height: '100%',
-                            objectFit: 'cover'
+                            border: 0,
                         }}
-                    >
-                        <source src={streamUrl} type="video/mp4" />
-                        Your browser does not support the video tag.
-                    </video>
+                    />
                 </Box>
             )}
         </Container>

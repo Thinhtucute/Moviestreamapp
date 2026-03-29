@@ -21,6 +21,14 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DeleteIcon from '@mui/icons-material/Delete';
 import useNotification from '@/hooks/useNotification';
+import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
+
+const normalizeMediaType = (mediaType) => {
+    const raw = String(mediaType || '').trim().toLowerCase();
+    if (raw === 'movie') return 'movie';
+    if (raw === 'tv') return 'tv';
+    return 'movie';
+};
 
 function FavoriteSection() {
     const [favorites, setFavorites] = useState([]);
@@ -43,16 +51,30 @@ function FavoriteSection() {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${apiUrl}/api/favorites`, {
+            const requestConfig = {
                 withCredentials: true,
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
-            });
+            };
 
-            if (response.data && response.data.result) {
-                setFavorites(response.data.result);
-            }
+            const [movieResponse, seriesResponse] = await Promise.all([
+                axios.get(`${apiUrl}/api/favorites`, {
+                    ...requestConfig,
+                    params: { mediaType: 'movie' },
+                }),
+                axios.get(`${apiUrl}/api/favorites`, {
+                    ...requestConfig,
+                    params: { mediaType: 'tv' },
+                }),
+            ]);
+
+            const merged = [
+                ...(movieResponse.data?.result || []),
+                ...(seriesResponse.data?.result || []),
+            ];
+
+            setFavorites(sanitizeMediaList(merged));
         } catch (err) {
             console.error('Failed to fetch favorites:', err);
             setError('Failed to load favorites');
@@ -61,13 +83,16 @@ function FavoriteSection() {
         }
     };
 
-    const handleRemoveFavorite = async (mediaId) => {
+    const handleRemoveFavorite = async (mediaId, mediaType) => {
         try {
             const token = localStorage.getItem('token');
             await axios.post(
                 `${apiUrl}/api/favorites/${mediaId}`,
                 {},
                 {
+                    params: {
+                        mediaType: normalizeMediaType(mediaType),
+                    },
                     withCredentials: true,
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -75,7 +100,12 @@ function FavoriteSection() {
                 },
             );
 
-            setFavorites((prev) => prev.filter((item) => item.mediaId !== mediaId));
+            setFavorites((prev) =>
+                prev.filter(
+                    (item) =>
+                        !(item.mediaId === mediaId && normalizeMediaType(item.mediaType) === normalizeMediaType(mediaType)),
+                ),
+            );
             showNotification('Removed from favorites', 'success');
         } catch (error) {
             console.error('Failed to remove favorite:', error);
@@ -83,8 +113,8 @@ function FavoriteSection() {
         }
     };
 
-    const handleWatchNow = (mediaId) => {
-        navigate(`/media/${mediaId}`);
+    const handleWatchNow = (mediaId, mediaType) => {
+        navigate(`/media/${mediaId}?mediaType=${normalizeMediaType(mediaType)}`);
     };
 
     if (loading) {
@@ -209,7 +239,7 @@ function FavoriteSection() {
                 </Box>
             ) : (
                 <Grid container spacing={3}>
-                    {favorites.map((item) => (
+                    {sanitizeMediaList(favorites).map((item) => (
                         <Grid item xs={12} sm={6} md={4} lg={3} key={item.mediaId}>
                             <Card
                                 sx={{
@@ -228,10 +258,10 @@ function FavoriteSection() {
                                 <CardMedia
                                     component="img"
                                     height="300"
-                                    image={item.posterURL || '/placeholder-movie.jpg'}
+                                    image={getPosterImage(item)}
                                     alt={item.title}
                                     onError={(e) => {
-                                        e.target.src = '/placeholder-movie.jpg';
+                                        e.target.src = getPosterImage(null);
                                     }}
                                     sx={{
                                         objectFit: 'cover',
@@ -275,10 +305,13 @@ function FavoriteSection() {
                                             size="small"
                                             sx={{
                                                 backgroundColor:
-                                                    item.mediaType === 'Movie'
+                                                    String(item.mediaType || '').trim().toLowerCase() === 'movie'
                                                         ? 'rgba(37, 99, 235, 0.2)'
                                                         : 'rgba(124, 58, 237, 0.2)',
-                                                color: item.mediaType === 'Movie' ? '#2563eb' : '#7c3aed',
+                                                color:
+                                                    String(item.mediaType || '').trim().toLowerCase() === 'movie'
+                                                        ? '#2563eb'
+                                                        : '#7c3aed',
                                                 fontSize: '0.75rem',
                                             }}
                                         />

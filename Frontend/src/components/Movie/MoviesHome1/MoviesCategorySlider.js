@@ -3,6 +3,7 @@ import { Box, Typography, Button, CircularProgress, Skeleton } from '@mui/materi
 import { ErrorOutline } from '@mui/icons-material';
 import MoviesHome from './MoviesHome';
 import useFetch from '@/hooks/useFetch';
+import { getBackdropImage, sanitizeMediaList } from '@/utils/mediaImage';
 
 function MoviesCategorySlider() {
     const comedyMovies = useFetch(
@@ -22,9 +23,9 @@ function MoviesCategorySlider() {
             return [];
         }
 
-        return data.result.content.map((item) => ({
+        return sanitizeMediaList(data.result.content).map((item) => ({
             mediaId: item.mediaId,
-            image: item.backdropURL || 'https://via.placeholder.com/300x169',
+            image: getBackdropImage(item),
             title: item.title || 'Không có tiêu đề',
             releaseYear: item.releaseYear || 'N/A',
             duration: item.duration || 'N/A',

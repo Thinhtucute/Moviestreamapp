@@ -12,4 +12,5 @@ import java.io.Serializable;
 public class FavoriteId implements Serializable {
     private int userId;
     private int mediaId;
+    private MediaType mediaType;
 }
