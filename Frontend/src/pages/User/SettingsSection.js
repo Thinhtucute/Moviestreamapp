@@ -11,7 +11,6 @@ import {
     Switch,
     FormControlLabel,
     Button,
-    Divider,
     Alert,
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';

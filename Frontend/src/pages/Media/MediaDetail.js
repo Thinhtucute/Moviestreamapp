@@ -37,7 +37,13 @@ import {
 import EpisodesSection from '@/pages/Media/EpisodesSection';
 import { Favorite, FavoriteBorder } from '@mui/icons-material';
 import useNotification from '@/hooks/useNotification';
-import { getPosterImage, getBackdropImage, sanitizeMediaList } from '@/utils/mediaImage';
+import {
+    getPosterImage,
+    getBackdropImage,
+    handlePosterImageError,
+    handleBackdropImageError,
+    sanitizeMediaList,
+} from '@/utils/mediaImage';
 
 const cx = classNames.bind(styles);
 
@@ -620,12 +626,18 @@ function MediaDetail() {
     return (
         <Box className={cx('media-detail-container')}>
             {/* Hero section with backdrop */}
-            <Box className={cx('backdrop')} style={{ backgroundImage: `url(${getBackdropImage(media)})` }}>
+            <Box className={cx('backdrop')}>
+                <img
+                    className={cx('backdrop-image')}
+                    src={getBackdropImage(media)}
+                    alt={media.title}
+                    onError={handleBackdropImageError}
+                />
                 <Box className={cx('backdrop-overlay')}></Box>
 
                 <Box className={cx('hero-content')}>
                     <Box className={cx('poster')}>
-                        <img src={getPosterImage(media)} alt={media.title} />
+                        <img src={getPosterImage(media)} alt={media.title} onError={handlePosterImageError} />
 
                         {/* Media Type Badge */}
                         <Chip

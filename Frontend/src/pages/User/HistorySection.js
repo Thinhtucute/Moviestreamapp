@@ -17,7 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useSelector } from 'react-redux';
 import { getLocalHistory, removeLocalView, clearLocalHistory } from '../../utils/historyLocal';
 import { fetchHistoryBackend, removeHistoryItemBackend, clearHistoryBackend } from '../../services/historyServices';
-import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
+import { getPosterImage, handlePosterImageError, sanitizeMediaList } from '@/utils/mediaImage';
 
 const normalizeMediaType = (mediaType) => {
     const raw = String(mediaType || '').trim().toLowerCase();
@@ -199,6 +199,9 @@ function HistorySection() {
                                         <Avatar
                                             variant="rounded"
                                             src={getPosterImage(item)}
+                                            imgProps={{
+                                                onError: handlePosterImageError,
+                                            }}
                                             sx={{
                                                 width: 60,
                                                 height: 90,

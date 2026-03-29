@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import useNotification from '@/hooks/useNotification';
-import { getBackdropImage, sanitizeMediaList } from '@/utils/mediaImage';
+import { getBackdropImage, handleBackdropImageError, sanitizeMediaList } from '@/utils/mediaImage';
 
 const cx = classNames.bind(styles);
 
@@ -373,6 +373,7 @@ function BannerSlider() {
                         key={state.currentIndex}
                         src={getBackdropImage(currentBanner)}
                         alt={currentBanner.title || 'Banner'}
+                        onError={handleBackdropImageError}
                         custom={state.direction}
                         variants={posterVariants}
                         initial="enter"
@@ -620,6 +621,7 @@ function BannerSlider() {
                             <img
                                 src={getBackdropImage(banner)}
                                 alt={banner.title || 'Thumbnail'}
+                                onError={handleBackdropImageError}
                                 style={{
                                     width: '100%',
                                     height: '100%',

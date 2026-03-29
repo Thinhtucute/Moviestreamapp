@@ -17,4 +17,22 @@ export const getBackdropImage = (media) => {
     return hasImageUrl(posterUrl) ? posterUrl : images.noBackdrop;
 };
 
+export const handlePosterImageError = (event) => {
+    const target = event?.currentTarget || event?.target;
+    if (!target || target.src === images.noPoster) {
+        return;
+    }
+
+    target.src = images.noPoster;
+};
+
+export const handleBackdropImageError = (event) => {
+    const target = event?.currentTarget || event?.target;
+    if (!target || target.src === images.noBackdrop) {
+        return;
+    }
+
+    target.src = images.noBackdrop;
+};
+
 export const sanitizeMediaList = (items) => (Array.isArray(items) ? items.filter(Boolean) : []);

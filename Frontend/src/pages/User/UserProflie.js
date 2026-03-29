@@ -28,7 +28,6 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import SettingsIcon from '@mui/icons-material/Settings';
 import StarIcon from '@mui/icons-material/Star';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 // Import components for each section
 import FavoriteSection from './FavoriteSection';
@@ -127,7 +126,7 @@ function UserProfile() {
             console.log('❌ No token, setting loading false');
             setUserLoading(false);
         }
-    }, []);
+    }, [apiUrl]);
 
     const handleMenuClick = (sectionId) => {
         setActiveSection(sectionId);

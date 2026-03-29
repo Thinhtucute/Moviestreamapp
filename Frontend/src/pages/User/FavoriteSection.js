@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Typography,
@@ -11,8 +11,6 @@ import {
     CardContent,
     CardActions,
     Chip,
-    useTheme,
-    useMediaQuery,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -37,15 +35,9 @@ function FavoriteSection() {
     const { isAuthenticated } = useSelector((state) => state.auth);
     const { showNotification } = useNotification();
     const navigate = useNavigate();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-    useEffect(() => {
-        fetchFavorites();
-    }, []);
-
-    const fetchFavorites = async () => {
+    const fetchFavorites = useCallback(async () => {
         if (!isAuthenticated) return;
 
         try {
@@ -81,7 +73,11 @@ function FavoriteSection() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isAuthenticated, apiUrl]);
+
+    useEffect(() => {
+        fetchFavorites();
+    }, [fetchFavorites]);
 
     const handleRemoveFavorite = async (mediaId, mediaType) => {
         try {
