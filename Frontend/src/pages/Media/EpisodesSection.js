@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Container, Chip } from '@mui/material';
 import { PlayArrow, AccessTime, CalendarToday, Lock } from '@mui/icons-material';
@@ -9,10 +9,7 @@ const cx = classNames.bind(styles);
 
 const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequired, maxEpisodesToShow = 12 }) => {
     const navigate = useNavigate();
-
-    if (!episodes || episodes.length === 0) {
-        return null;
-    }
+    const [visibleEpisodesCount, setVisibleEpisodesCount] = useState(maxEpisodesToShow);
 
     const handleEpisodeClick = (episode) => {
         if (isAuthenticated) {
@@ -29,7 +26,31 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
         handleEpisodeClick(episode);
     };
 
-    const displayedEpisodes = episodes.slice(0, maxEpisodesToShow);
+    const handleLoadMore = () => {
+        setVisibleEpisodesCount((prevCount) => prevCount + maxEpisodesToShow);
+    };
+
+    const sortedEpisodes = useMemo(() => {
+        return [...episodes].sort((a, b) => {
+            const seasonA = Number(a?.season) || 0;
+            const seasonB = Number(b?.season) || 0;
+
+            if (seasonA !== seasonB) {
+                return seasonA - seasonB;
+            }
+
+            const episodeA = Number(a?.episodeNumber) || 0;
+            const episodeB = Number(b?.episodeNumber) || 0;
+
+            return episodeA - episodeB;
+        });
+    }, [episodes]);
+
+    if (!episodes || episodes.length === 0) {
+        return null;
+    }
+
+    const displayedEpisodes = sortedEpisodes.slice(0, visibleEpisodesCount);
 
     return (
         <Container maxWidth={false} className={cx('episodes-section')}>
@@ -256,8 +277,7 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
                 ))}
             </Box>
 
-            {/* Load More Section */}
-            {episodes.length > maxEpisodesToShow && (
+            {sortedEpisodes.length > visibleEpisodesCount && (
                 <Box
                     sx={{
                         mt: 6,
@@ -284,7 +304,7 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
                                 fontSize: 'var(--current-font-size)',
                             }}
                         >
-                            Showing {maxEpisodesToShow} of {episodes.length} episodes
+                            Showing {displayedEpisodes.length} of {sortedEpisodes.length} episodes
                         </Typography>
                     </Box>
 
@@ -310,14 +330,13 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
                             },
                             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         }}
-                        onClick={() => {
-                            console.log('Show all episodes');
-                        }}
+                        onClick={handleLoadMore}
                     >
-                        View All {episodes.length} Episodes
+                        Load More Episodes
                     </Button>
                 </Box>
             )}
+
         </Container>
     );
 };
