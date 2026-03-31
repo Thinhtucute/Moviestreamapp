@@ -2,11 +2,13 @@ package com.group8.Backend.controller;
 
 import com.group8.Backend.dto.request.ApiResponse;
 import com.group8.Backend.dto.request.MediaCreationRequest;
+import com.group8.Backend.dto.request.TmdbImportRequest;
 import com.group8.Backend.dto.request.MediaUpdateRequest;
 import com.group8.Backend.dto.response.MediaResponse;
 import com.group8.Backend.dto.response.PaginatedResponse;
 import com.group8.Backend.entity.MediaType;
 import com.group8.Backend.service.MediaService;
+import com.group8.Backend.service.TmdbImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,15 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MediaController {
     private final MediaService mediaService;
+        private final TmdbImportService tmdbImportService;
+
+        @PostMapping("/import/tmdb")
+        public ApiResponse<MediaResponse> importFromTmdb(@RequestBody TmdbImportRequest request) {
+                return ApiResponse.<MediaResponse>builder()
+                                .code(1000)
+                                .result(tmdbImportService.importFromTmdb(request))
+                                .build();
+        }
 
     @PostMapping
     public ApiResponse<MediaResponse> createMedia(@RequestBody MediaCreationRequest request) {

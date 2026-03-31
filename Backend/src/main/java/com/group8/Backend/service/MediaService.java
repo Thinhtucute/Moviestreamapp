@@ -72,7 +72,7 @@ public class MediaService {
 
     // @PreAuthorize("hasRole('ADMIN')")
     public MediaResponse updateMedia(int mediaId, MediaUpdateRequest request) {
-        Media media = mediaRepository.findById(mediaId)
+        Media media = mediaRepository.findById((long) mediaId)
                 .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
 
         mediaMapper.updateMedia(media, request);
@@ -141,7 +141,7 @@ public class MediaService {
 
     // @PreAuthorize("hasRole('ADMIN')")
     public void deleteMedia(int mediaId) {
-        Media media = mediaRepository.findById(mediaId)
+        Media media = mediaRepository.findById((long) mediaId)
                 .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
         mediaRepository.delete(media);
     }
@@ -172,7 +172,7 @@ public class MediaService {
     }
 
     public MediaResponse getMediaDetails(int mediaId) {
-        Media media = mediaRepository.findById(mediaId)
+        Media media = mediaRepository.findById((long) mediaId)
                 .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
         return mediaMapper.toMediaResponse(media);
     }
@@ -187,7 +187,7 @@ public class MediaService {
      * Return Media entity (used by controllers/services that need the entity object).
      */
     public Media findEntityById(int mediaId) {
-        return mediaRepository.findById(mediaId)
+        return mediaRepository.findById((long) mediaId)
                 .orElseThrow(() -> new AppException(ErrorCode.MEDIA_NOT_FOUND));
     }
 
@@ -197,7 +197,7 @@ public class MediaService {
     }
 
     public String getExternalUrl(Integer mediaId) {
-        Media media = mediaRepository.findById(mediaId)
+        Media media = mediaRepository.findById(mediaId.longValue())
                 .orElseThrow(() -> new ResourceNotFoundException("Media not found with id: " + mediaId));
 
         if (media.getStreamURL() == null || media.getStreamURL().isEmpty()) {

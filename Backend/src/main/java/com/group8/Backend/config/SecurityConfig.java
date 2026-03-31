@@ -18,8 +18,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.Ordered;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -116,5 +118,10 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
+    }
+
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        return builder.build();
     }
 }

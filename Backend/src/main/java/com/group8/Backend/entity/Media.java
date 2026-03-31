@@ -17,7 +17,6 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Media {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MediaID")
     Long mediaId;
 
@@ -67,7 +66,10 @@ public class Media {
     @ManyToMany
     @JoinTable(
             name = "MediaGenres",
-            joinColumns = @JoinColumn(name = "MediaID"),
+            joinColumns = {
+                    @JoinColumn(name = "MediaID", referencedColumnName = "MediaID"),
+                    @JoinColumn(name = "MediaType", referencedColumnName = "MediaType")
+            },
             inverseJoinColumns = @JoinColumn(name = "GenreID")
     )
     Set<Genre> genres = new HashSet<>();
@@ -75,7 +77,10 @@ public class Media {
     @ManyToMany
     @JoinTable(
             name = "MediaActors",
-            joinColumns = @JoinColumn(name = "MediaID"),
+            joinColumns = {
+                    @JoinColumn(name = "MediaID", referencedColumnName = "MediaID"),
+                    @JoinColumn(name = "MediaType", referencedColumnName = "MediaType")
+            },
             inverseJoinColumns = @JoinColumn(name = "ActorID")
     )
     Set<Actor> actors = new HashSet<>();
@@ -83,7 +88,10 @@ public class Media {
     @ManyToMany
     @JoinTable(
             name = "MediaDirectors",
-            joinColumns = @JoinColumn(name = "MediaID"),
+            joinColumns = {
+                    @JoinColumn(name = "MediaID", referencedColumnName = "MediaID"),
+                    @JoinColumn(name = "MediaType", referencedColumnName = "MediaType")
+            },
             inverseJoinColumns = @JoinColumn(name = "DirectorID")
     )
     Set<Director> directors = new HashSet<>();

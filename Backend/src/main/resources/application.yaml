@@ -26,3 +26,8 @@ recommendation:
   cache:
     enabled: ${RECOMMENDATION_CACHE_ENABLED:true}
     size: ${RECOMMENDATION_CACHE_SIZE:1000}
+
+tmdb:
+  api:
+    key: ${TMDB_API_KEY:}
+    base-url: ${TMDB_BASE_URL:https://api.themoviedb.org/3}

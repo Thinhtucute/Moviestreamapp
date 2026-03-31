@@ -30,7 +30,7 @@ public class MediaStreamController {
             @RequestParam MediaType mediaType) {
         log.info("Request to get episode streaming URL for media: {} episode: {} type: {}", mediaId, episodeId, mediaType);
 
-        if (mediaType != MediaType.Series) {
+        if (mediaType != MediaType.Tv) {
             throw new IllegalArgumentException("Episode streaming is only supported for tv media type");
         }
 

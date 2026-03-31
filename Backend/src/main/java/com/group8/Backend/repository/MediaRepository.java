@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MediaRepository extends JpaRepository<Media, Integer> {
+public interface MediaRepository extends JpaRepository<Media, Long> {
         boolean existsByTitle(String title);
 
         Optional<Media> findByMediaIdAndMediaType(Long mediaId, MediaType mediaType);

@@ -7,7 +7,7 @@ import java.util.Locale;
 
 public enum MediaType {
     Movie("movie"),
-    Series("tv");
+    Tv("tv");
 
     private final String dbValue;
 
@@ -29,7 +29,7 @@ public enum MediaType {
         String normalized = rawValue.trim().toLowerCase(Locale.ROOT);
         return switch (normalized) {
             case "movie" -> Movie;
-            case "tv" -> Series;
+            case "tv" -> Tv;
             default -> throw new IllegalArgumentException("Unsupported media type: " + rawValue);
         };
     }
