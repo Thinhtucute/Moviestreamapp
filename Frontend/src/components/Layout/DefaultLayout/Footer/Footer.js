@@ -60,7 +60,7 @@ function Footer() {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
                         <EmailOutlinedIcon sx={{ color: 'var(--primary)', fontSize: 18 }} />
-                        <Typography className={cx('footer-text')}>info@dmfpt.gg</Typography>
+                        <Typography className={cx('footer-text')}>info@hkt.gg</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
                         <LocalPhoneOutlinedIcon sx={{ color: 'var(--primary)', fontSize: 18 }} />
