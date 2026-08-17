@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS "movie_streaming_app" /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `movie_streaming_app`;
 -- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
 --
 -- Host: moviestream-db-voduythinh2004-6080.l.aivencloud.com    Database: movie_streaming_app
@@ -23,7 +21,7 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 -- GTID state at the beginning of the backup 
 --
 
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ 'b592d899-012d-11f1-84cb-3297e0268485:1-289,
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ 'b592d899-012d-11f1-84cb-3297e0268485:1-339,
 d03f2f32-bf24-11f0-82a2-56ae92c5756d:1-271';
 
 --
@@ -40,7 +38,7 @@ CREATE TABLE `Actors` (
   `Birthdate` date DEFAULT NULL,
   `ProfileImageURL` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`ActorID`)
-) ENGINE=InnoDB AUTO_INCREMENT=5477216 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5477220 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -56,7 +54,7 @@ CREATE TABLE `Directors` (
   `Bio` text,
   `Birthdate` date DEFAULT NULL,
   PRIMARY KEY (`DirectorID`)
-) ENGINE=InnoDB AUTO_INCREMENT=5456817 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5456825 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,9 +93,10 @@ CREATE TABLE `Episodes` (
   `Duration` int DEFAULT NULL,
   `ReleaseDate` date DEFAULT NULL,
   `StreamURL` varchar(255) DEFAULT NULL,
+  `MediaType` enum('tv','movie') NOT NULL DEFAULT 'tv',
   PRIMARY KEY (`EpisodeID`),
   KEY `MediaID` (`MediaID`),
-  CONSTRAINT `Episodes_ibfk_1` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE
+  CONSTRAINT `chk_episodes_mediatype` CHECK ((`MediaType` = _utf8mb4'tv'))
 ) ENGINE=InnoDB AUTO_INCREMENT=62679 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -111,11 +110,13 @@ DROP TABLE IF EXISTS `Favorites`;
 CREATE TABLE `Favorites` (
   `UserID` int NOT NULL,
   `MediaID` int NOT NULL,
+  `MediaType` enum('movie','tv') NOT NULL,
   `AddedDate` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`UserID`,`MediaID`),
+  PRIMARY KEY (`UserID`,`MediaID`,`MediaType`),
   KEY `MediaID` (`MediaID`),
+  KEY `fk_favorites_media` (`MediaID`,`MediaType`),
   CONSTRAINT `Favorites_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `Users` (`UserID`) ON DELETE CASCADE,
-  CONSTRAINT `Favorites_ibfk_2` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE
+  CONSTRAINT `fk_favorites_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -185,11 +186,12 @@ DROP TABLE IF EXISTS `MediaActors`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `MediaActors` (
   `MediaID` int NOT NULL,
+  `MediaType` enum('movie','tv') NOT NULL,
   `ActorID` int NOT NULL,
   `RoleName` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`MediaID`,`ActorID`),
+  PRIMARY KEY (`MediaID`,`MediaType`,`ActorID`),
   KEY `ActorID` (`ActorID`),
-  CONSTRAINT `MediaActors_ibfk_1` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE,
+  CONSTRAINT `fk_mediaactors_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE,
   CONSTRAINT `MediaActors_ibfk_2` FOREIGN KEY (`ActorID`) REFERENCES `Actors` (`ActorID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -203,10 +205,11 @@ DROP TABLE IF EXISTS `MediaDirectors`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `MediaDirectors` (
   `MediaID` int NOT NULL,
+  `MediaType` enum('movie','tv') NOT NULL,
   `DirectorID` int NOT NULL,
-  PRIMARY KEY (`MediaID`,`DirectorID`),
+  PRIMARY KEY (`MediaID`,`MediaType`,`DirectorID`),
   KEY `DirectorID` (`DirectorID`),
-  CONSTRAINT `MediaDirectors_ibfk_1` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE,
+  CONSTRAINT `fk_mediadirectors_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE,
   CONSTRAINT `MediaDirectors_ibfk_2` FOREIGN KEY (`DirectorID`) REFERENCES `Directors` (`DirectorID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -220,10 +223,11 @@ DROP TABLE IF EXISTS `MediaGenres`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `MediaGenres` (
   `MediaID` int NOT NULL,
+  `MediaType` enum('movie','tv') NOT NULL,
   `GenreID` int NOT NULL,
-  PRIMARY KEY (`MediaID`,`GenreID`),
+  PRIMARY KEY (`MediaID`,`MediaType`,`GenreID`),
   KEY `GenreID` (`GenreID`),
-  CONSTRAINT `MediaGenres_ibfk_1` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE,
+  CONSTRAINT `fk_mediagenres_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE,
   CONSTRAINT `MediaGenres_ibfk_2` FOREIGN KEY (`GenreID`) REFERENCES `Genres` (`GenreID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -238,12 +242,14 @@ DROP TABLE IF EXISTS `MediaViews`;
 CREATE TABLE `MediaViews` (
   `ViewID` int NOT NULL AUTO_INCREMENT,
   `MediaID` int DEFAULT NULL,
+  `MediaType` enum('movie','tv') DEFAULT NULL,
   `EpisodeID` int DEFAULT NULL,
   `ViewDate` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ViewID`),
   KEY `MediaID` (`MediaID`),
   KEY `EpisodeID` (`EpisodeID`),
-  CONSTRAINT `MediaViews_ibfk_1` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE,
+  KEY `fk_mediaviews_media` (`MediaID`,`MediaType`),
+  CONSTRAINT `fk_mediaviews_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE,
   CONSTRAINT `MediaViews_ibfk_2` FOREIGN KEY (`EpisodeID`) REFERENCES `Episodes` (`EpisodeID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -274,12 +280,14 @@ DROP TABLE IF EXISTS `MovieStreams`;
 CREATE TABLE `MovieStreams` (
   `StreamID` int NOT NULL AUTO_INCREMENT,
   `MediaID` int NOT NULL,
+  `MediaType` enum('movie','tv') DEFAULT NULL,
   `StreamURL` varchar(200) DEFAULT NULL,
   `Quality` enum('SD','HD','4K') DEFAULT 'HD',
   `FileSize` bigint DEFAULT NULL,
   PRIMARY KEY (`StreamID`),
   KEY `MediaID` (`MediaID`),
-  CONSTRAINT `MovieStreams_ibfk_1` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE
+  KEY `fk_moviestreams_media` (`MediaID`,`MediaType`),
+  CONSTRAINT `fk_moviestreams_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=791 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -370,6 +378,7 @@ CREATE TABLE `Ratings` (
   `RatingID` int NOT NULL AUTO_INCREMENT,
   `UserID` int DEFAULT NULL,
   `MediaID` int DEFAULT NULL,
+  `MediaType` enum('movie','tv') DEFAULT NULL,
   `EpisodeID` int DEFAULT NULL,
   `RatingValue` tinyint DEFAULT NULL,
   `Comment` text,
@@ -378,8 +387,9 @@ CREATE TABLE `Ratings` (
   KEY `UserID` (`UserID`),
   KEY `EpisodeID` (`EpisodeID`),
   KEY `idx_ratings_media` (`MediaID`),
+  KEY `fk_ratings_media` (`MediaID`,`MediaType`),
+  CONSTRAINT `fk_ratings_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE,
   CONSTRAINT `Ratings_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `Users` (`UserID`) ON DELETE CASCADE,
-  CONSTRAINT `Ratings_ibfk_2` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE,
   CONSTRAINT `Ratings_ibfk_3` FOREIGN KEY (`EpisodeID`) REFERENCES `Episodes` (`EpisodeID`) ON DELETE CASCADE,
   CONSTRAINT `Ratings_chk_1` CHECK ((`RatingValue` between 1 and 5))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -419,33 +429,6 @@ CREATE TABLE `Roles` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `Series`
---
-
-DROP TABLE IF EXISTS `Series`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `Series` (
-  `SeriesID` int NOT NULL,
-  `Title` varchar(255) NOT NULL,
-  `Description` text,
-  `ReleaseYear` int DEFAULT NULL,
-  `Duration` int DEFAULT NULL,
-  `Language` varchar(255) DEFAULT NULL,
-  `AgeRating` varchar(255) DEFAULT NULL,
-  `PosterURL` varchar(255) DEFAULT NULL,
-  `BackdropURL` varchar(255) DEFAULT NULL,
-  `TrailerURL` varchar(255) DEFAULT NULL,
-  `AddedDate` datetime DEFAULT CURRENT_TIMESTAMP,
-  `ViewCount` int DEFAULT '0',
-  `AccessLevel` varchar(255) DEFAULT NULL,
-  `StreamURL` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`SeriesID`),
-  KEY `idx_series_title` (`Title`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `Subtitles`
 --
 
@@ -455,13 +438,15 @@ DROP TABLE IF EXISTS `Subtitles`;
 CREATE TABLE `Subtitles` (
   `SubtitleID` int NOT NULL AUTO_INCREMENT,
   `MediaID` int DEFAULT NULL,
+  `MediaType` enum('movie','tv') DEFAULT NULL,
   `EpisodeID` int DEFAULT NULL,
   `Language` varchar(50) NOT NULL,
   `SubtitleURL` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`SubtitleID`),
   KEY `MediaID` (`MediaID`),
   KEY `EpisodeID` (`EpisodeID`),
-  CONSTRAINT `Subtitles_ibfk_1` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE,
+  KEY `fk_subtitles_media` (`MediaID`,`MediaType`),
+  CONSTRAINT `fk_subtitles_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE,
   CONSTRAINT `Subtitles_ibfk_2` FOREIGN KEY (`EpisodeID`) REFERENCES `Episodes` (`EpisodeID`) ON DELETE CASCADE,
   CONSTRAINT `chk_subtitle_type` CHECK (((`MediaID` is not null) or (`EpisodeID` is not null)))
 ) ENGINE=InnoDB AUTO_INCREMENT=3915 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -506,7 +491,7 @@ CREATE TABLE `Users` (
   UNIQUE KEY `Username` (`Username`),
   UNIQUE KEY `Email` (`Email`),
   KEY `idx_username` (`Username`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -519,6 +504,7 @@ DROP TABLE IF EXISTS `ViewingHistory`;
 CREATE TABLE `ViewingHistory` (
   `UserID` int NOT NULL,
   `MediaID` int NOT NULL,
+  `MediaType` enum('movie','tv') DEFAULT NULL,
   `AddedDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `last_viewed` datetime(6) DEFAULT NULL,
   `media_id` bigint NOT NULL,
@@ -541,6 +527,7 @@ CREATE TABLE `WatchHistory` (
   `HistoryID` int NOT NULL AUTO_INCREMENT,
   `UserID` int DEFAULT NULL,
   `MediaID` int DEFAULT NULL,
+  `MediaType` enum('movie','tv') DEFAULT NULL,
   `EpisodeID` int DEFAULT NULL,
   `WatchDate` datetime DEFAULT CURRENT_TIMESTAMP,
   `Progress` int DEFAULT NULL,
@@ -548,8 +535,9 @@ CREATE TABLE `WatchHistory` (
   KEY `MediaID` (`MediaID`),
   KEY `EpisodeID` (`EpisodeID`),
   KEY `idx_watchhistory_user` (`UserID`),
+  KEY `fk_watchhistory_media` (`MediaID`,`MediaType`),
+  CONSTRAINT `fk_watchhistory_media` FOREIGN KEY (`MediaID`, `MediaType`) REFERENCES `Media` (`MediaID`, `MediaType`) ON DELETE CASCADE,
   CONSTRAINT `WatchHistory_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `Users` (`UserID`) ON DELETE CASCADE,
-  CONSTRAINT `WatchHistory_ibfk_2` FOREIGN KEY (`MediaID`) REFERENCES `Media` (`MediaID`) ON DELETE CASCADE,
   CONSTRAINT `WatchHistory_ibfk_3` FOREIGN KEY (`EpisodeID`) REFERENCES `Episodes` (`EpisodeID`) ON DELETE CASCADE,
   CONSTRAINT `chk_progress` CHECK ((`Progress` between 0 and 100))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -565,4 +553,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-28 23:02:44
+-- Dump completed on 2026-03-31 15:59:49

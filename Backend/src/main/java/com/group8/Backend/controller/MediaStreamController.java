@@ -37,4 +37,25 @@ public class MediaStreamController {
         String url = mediaService.getEpisodeExternalUrl(mediaId, episodeId);
         return ResponseEntity.ok(new StreamResponse(url));
     }
+
+    @GetMapping("/{mediaId}/season/{season}/episode/{episodeNumber}")
+    public ResponseEntity<StreamResponse> getEpisodeStreamingUrlBySeasonAndEpisode(
+            @PathVariable Integer mediaId,
+            @PathVariable String season,
+            @PathVariable Integer episodeNumber,
+            @RequestParam MediaType mediaType) {
+        log.info(
+                "Request to get episode streaming URL for media: {} season: {} episode: {} type: {}",
+                mediaId,
+                season,
+                episodeNumber,
+                mediaType);
+
+        if (mediaType != MediaType.Tv) {
+            throw new IllegalArgumentException("Episode streaming is only supported for tv media type");
+        }
+
+        String url = mediaService.getEpisodeExternalUrl(mediaId, season, episodeNumber);
+        return ResponseEntity.ok(new StreamResponse(url));
+    }
 }

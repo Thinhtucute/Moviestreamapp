@@ -948,3 +948,20 @@
         font-size: calc(var(--current-font-size) * 0.9);
     }
 }
+
+
+@media (max-width: 480px) {
+    .media-detail,
+    .media-detail-page,
+    .content,
+    .content-container,
+    .details-container {
+        max-width: 100%;
+    }
+
+    .hero,
+    .hero-section {
+        min-height: 0;
+        height: auto;
+    }
+}

@@ -257,7 +257,7 @@ function Header() {
                         <Button component={Link} to="/">
                             <Typography
                                 sx={{
-                                    fontSize: '30px',
+                                    fontSize: { xs: '22px', sm: '26px', md: '30px' },
                                     fontWeight: 'bold',
                                     color: 'var(--primary)',
                                     textTransform: 'none',
@@ -662,7 +662,8 @@ function Header() {
                 PaperProps={{
                     sx: {
                         backgroundColor: 'var(--black)',
-                        width: '250px',
+                        width: { xs: '82vw', sm: '250px' },
+                        maxWidth: '300px',
                     },
                 }}
             >

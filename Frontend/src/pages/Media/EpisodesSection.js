@@ -14,7 +14,7 @@ const EpisodesSection = ({ episodes = [], mediaId, isAuthenticated, onLoginRequi
     const handleEpisodeClick = (episode) => {
         if (isAuthenticated) {
             navigate(
-                `/watch/${mediaId}/season/${encodeURIComponent(episode.season)}/episode/${episode.episodeNumber}?mediaType=tv&episodeId=${episode.episodeId}`,
+                `/watch/${mediaId}/season/${encodeURIComponent(episode.season)}/episode/${episode.episodeNumber}?mediaType=tv`,
             );
         } else {
             onLoginRequired();

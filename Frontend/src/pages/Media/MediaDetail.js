@@ -187,7 +187,36 @@ function MediaDetail() {
             return;
         }
 
-        navigate(`/watch/${mediaId}?mediaType=${normalizeMediaType(media?.mediaType) || 'movie'}`);
+        const normalizedType = normalizeMediaType(media?.mediaType) || 'movie';
+
+        if (normalizedType === 'tv') {
+            const episodes = Array.isArray(media?.episodes) ? media.episodes : [];
+
+            if (episodes.length > 0) {
+                const firstEpisode = [...episodes].sort((a, b) => {
+                    const seasonA = Number(a?.season) || 0;
+                    const seasonB = Number(b?.season) || 0;
+                    if (seasonA !== seasonB) {
+                        return seasonA - seasonB;
+                    }
+
+                    const episodeA = Number(a?.episodeNumber) || 0;
+                    const episodeB = Number(b?.episodeNumber) || 0;
+                    return episodeA - episodeB;
+                })[0];
+
+                const firstSeason = Number(firstEpisode?.season) || 1;
+                const firstEpisodeNumber = Number(firstEpisode?.episodeNumber) || 1;
+                const query = new URLSearchParams({ mediaType: 'tv' });
+
+                navigate(
+                    `/watch/${mediaId}/season/${encodeURIComponent(firstSeason)}/episode/${firstEpisodeNumber}?${query.toString()}`,
+                );
+                return;
+            }
+        }
+
+        navigate(`/watch/${mediaId}?mediaType=${normalizedType}`);
     };
 
     const handleLoginRedirect = () => {
@@ -274,7 +303,8 @@ function MediaDetail() {
                     backgroundColor: 'var(--black)',
                     border: '1px solid rgba(255, 165, 0, 0.3)',
                     borderRadius: '12px',
-                    minWidth: '400px',
+                    minWidth: { xs: 'calc(100vw - 32px)', sm: '400px' },
+                    maxWidth: { xs: 'calc(100vw - 32px)', sm: '600px' },
                 },
             }}
         >
@@ -359,7 +389,8 @@ function MediaDetail() {
                     backgroundColor: 'var(--black)',
                     border: '1px solid rgba(255, 165, 0, 0.3)',
                     borderRadius: '12px',
-                    minWidth: '400px',
+                    minWidth: { xs: 'calc(100vw - 32px)', sm: '400px' },
+                    maxWidth: { xs: 'calc(100vw - 32px)', sm: '600px' },
                 },
             }}
         >
@@ -842,7 +873,7 @@ function MediaDetail() {
                                 sx={{
                                     backgroundColor: 'rgba(255, 165, 0, 0.1)',
                                     border: '1px solid rgba(255, 165, 0, 0.3)',
-                                    width: '36%',
+                                    width: { xs: '100%', sm: '70%', md: '36%' },
                                     color: 'white',
                                     mb: 3,
                                     '& .MuiAlert-icon': {

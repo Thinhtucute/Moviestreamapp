@@ -9,7 +9,8 @@ const Notification = ({ notification, closeNotification }) => {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             sx={{
                 '& .MuiSnackbarContent-root': {
-                    minWidth: '500px',
+                    minWidth: { xs: 'calc(100vw - 32px)', sm: '500px' },
+                    maxWidth: { xs: 'calc(100vw - 32px)', sm: '600px' },
                     minHeight: '120px',
                 },
             }}

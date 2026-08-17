@@ -64,9 +64,9 @@ export default function MediaStream() {
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
     const urlParams = new URLSearchParams(location.search);
     const mediaTypeParam = normalizeMediaType(urlParams.get('mediaType'));
-    const episodeIdFromQuery = urlParams.get('episodeId');
     const resolvedMediaType = mediaTypeParam || (episodeId || season || episodeNumber ? 'tv' : 'movie');
-    const resolvedEpisodeId = episodeId || episodeIdFromQuery;
+    const resolvedSeason = season;
+    const resolvedEpisodeNumber = episodeNumber;
     const progressStorageKey = `${WATCH_PROGRESS_PREFIX}:${mediaId}`;
 
     const iframeSrc = useMemo(
@@ -98,16 +98,26 @@ export default function MediaStream() {
                 let response;
 
                 if (resolvedMediaType === 'tv') {
-                    if (!resolvedEpisodeId) {
-                        throw new Error('Missing episodeId for tv streaming route');
+                    if (resolvedSeason && resolvedEpisodeNumber) {
+                        response = await axios.get(
+                            `${apiUrl}/api/stream/${mediaId}/season/${encodeURIComponent(resolvedSeason)}/episode/${resolvedEpisodeNumber}`,
+                            {
+                                params: {
+                                    mediaType: 'tv',
+                                },
+                                headers: { Authorization: `Bearer ${token}` },
+                            },
+                        );
+                    } else if (episodeId) {
+                        response = await axios.get(`${apiUrl}/api/stream/${mediaId}/episode/${episodeId}`, {
+                            params: {
+                                mediaType: 'tv',
+                            },
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                    } else {
+                        throw new Error('Missing season/episodeNumber or episodeId for tv streaming route');
                     }
-
-                    response = await axios.get(`${apiUrl}/api/stream/${mediaId}/episode/${resolvedEpisodeId}`, {
-                        params: {
-                            mediaType: 'tv',
-                        },
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
                 } else {
                     response = await axios.get(`${apiUrl}/api/stream/${mediaId}`, {
                         params: {
@@ -132,7 +142,17 @@ export default function MediaStream() {
         };
 
         fetchStreamData();
-    }, [mediaId, resolvedMediaType, resolvedEpisodeId, apiUrl, navigate, location.pathname, location.search]);
+    }, [
+        mediaId,
+        resolvedMediaType,
+        resolvedSeason,
+        resolvedEpisodeNumber,
+        episodeId,
+        apiUrl,
+        navigate,
+        location.pathname,
+        location.search,
+    ]);
 
     useEffect(() => {
         const onPlayerMessage = (event) => {
@@ -219,7 +239,7 @@ export default function MediaStream() {
     }
 
     return (
-        <Container maxWidth={false} sx={{ py: 12, minHeight: '100vh', width: '97%', mx: 'auto' }}>
+        <Container maxWidth={false} sx={{ py: { xs: 9, sm: 10, md: 12 }, px: { xs: 2, sm: 3 }, minHeight: '100vh', width: { xs: '100%', md: '97%' }, mx: 'auto' }}>
             <Button
                 variant="outlined"
                 startIcon={<ArrowBackIcon />}
@@ -259,7 +279,6 @@ export default function MediaStream() {
                         width="100%"
                         height="600"
                         frameBorder="0"
-                        allow="autoplay; encrypted-media; picture-in-picture"
                         allowFullScreen
                         className={styles.videoPlayer}
                         style={{

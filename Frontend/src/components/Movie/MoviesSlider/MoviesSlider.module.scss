@@ -55,3 +55,36 @@
   }
 }
 
+
+
+@media (max-width: 480px) {
+  .movie-slider {
+    margin: 12px 0;
+
+    .movie-list {
+      &.large .movie-item {
+        width: 160px;
+        height: 240px;
+      }
+
+      &.small .movie-item {
+        width: 145px;
+        height: 218px;
+      }
+
+      &.landscape.large .movie-item {
+        width: 260px;
+        height: 146px;
+      }
+
+      &.landscape.small .movie-item {
+        width: 230px;
+        height: 130px;
+      }
+    }
+
+    .movie-item:hover {
+      transform: none;
+    }
+  }
+}

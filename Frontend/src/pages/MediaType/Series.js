@@ -6,9 +6,9 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { getPosterImage, sanitizeMediaList } from '@/utils/mediaImage';
 
-function Series() {
+function TV() {
     const navigate = useNavigate();
-    const [series, setSeries] = useState([]);
+    const [tv, setTv] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -18,17 +18,17 @@ function Series() {
     // Scroll to top when component mounts
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        fetchSeries(0);
+        fetchTv(0);
     }, []);
 
     useEffect(() => {
-        fetchSeries(currentPage);
+        fetchTv(currentPage);
     }, [currentPage]);
 
-    const fetchSeries = async (page) => {
+    const fetchTv = async (page) => {
         try {
             setLoading(true);
-            console.log('Fetching series...');
+            console.log('Fetching TV series...');
 
             const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
             const response = await axios.get(
@@ -38,18 +38,18 @@ function Series() {
             console.log('API Response:', response.data);
 
             if (response.data && response.data.result && response.data.result.content) {
-                setSeries(sanitizeMediaList(response.data.result.content));
+                setTv(sanitizeMediaList(response.data.result.content));
                 setTotalPages(response.data.result.totalPages || 0);
                 setTotalElements(response.data.result.totalElements || 0);
             } else {
-                console.log('No series found or unexpected response structure');
-                setSeries([]);
+                console.log('No TV series found or unexpected response structure');
+                setTv([]);
                 setTotalPages(0);
                 setTotalElements(0);
             }
         } catch (error) {
-            console.error('Error fetching series:', error);
-            setSeries([]);
+            console.error('Error fetching TV series:', error);
+            setTv([]);
             setTotalPages(0);
             setTotalElements(0);
         } finally {
@@ -63,7 +63,7 @@ function Series() {
         window.scrollTo({ top: 200, behavior: 'smooth' });
     };
 
-    const handleSeriesClick = (mediaId) => {
+    const handleTvClick = (mediaId) => {
         navigate(`/media/${mediaId}`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -126,14 +126,14 @@ function Series() {
                 </Box>
             ) : (
                 <>
-                    {/* Series Grid */}
-                    {series.length > 0 ? (
+                    {/* TV Grid */}
+                    {tv.length > 0 ? (
                         <motion.div variants={containerVariants} initial="hidden" animate="visible">
                             <div className="movie-grid">
-                                {sanitizeMediaList(series).map((show, index) => (
+                                {sanitizeMediaList(tv).map((show, index) => (
                                     <motion.div variants={itemVariants} key={show.mediaId || index}>
-                                        <div className="movie-card" onClick={() => handleSeriesClick(show.mediaId)}>
-                                            {/* Series Image */}
+                                        <div className="movie-card" onClick={() => handleTvClick(show.mediaId)}>
+                                            {/* TV Image */}
                                             <img
                                                 src={getPosterImage(show)}
                                                 alt={show.title}
@@ -148,7 +148,7 @@ function Series() {
                                                 }}
                                             />
 
-                                            {/* Series Type Badge */}
+                                            {/* TV Type Badge */}
                                             <Box
                                                 sx={{
                                                     position: 'absolute',
@@ -163,7 +163,7 @@ function Series() {
                                                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
                                                 }}
                                             >
-                                                SERIES
+                                                TV
                                             </Box>
 
 
@@ -222,7 +222,7 @@ function Series() {
                         >
                             <img
                                 src="/no-movies.png"
-                                alt="No series"
+                                alt="No TV series"
                                 style={{
                                     maxWidth: '200px',
                                     width: '100%',
@@ -316,4 +316,4 @@ function Series() {
     );
 }
 
-export default Series;
+export default TV;

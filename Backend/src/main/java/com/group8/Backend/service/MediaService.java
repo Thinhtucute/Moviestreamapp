@@ -230,6 +230,21 @@ public class MediaService {
         return episode.getStreamURL();
     }
 
+    public String getEpisodeExternalUrl(Integer mediaId, String season, Integer episodeNumber) {
+        Episode episode = episodeRepository.findByMediaIdAndSeasonAndEpisodeNumber(mediaId, season, episodeNumber)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Episode not found with season: " + season + " episode: " + episodeNumber
+                                + " for media id: " + mediaId));
+
+        if (episode.getStreamURL() == null || episode.getStreamURL().isBlank()) {
+            throw new IllegalStateException(
+                    "No streaming URL available for media id: " + mediaId + " season: " + season
+                            + " episode: " + episodeNumber);
+        }
+
+        return episode.getStreamURL();
+    }
+
     public PaginatedResponse<MediaResponse> searchMedia(
             Integer page, Integer size, String title, String mediaType, Integer releaseYear, Integer genreId,
             String genreName) {

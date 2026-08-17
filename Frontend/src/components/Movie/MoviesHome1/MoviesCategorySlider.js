@@ -53,7 +53,7 @@ function MoviesCategorySlider() {
             />
             <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto' }}>
                 {[...Array(6)].map((_, index) => (
-                    <Box key={index} sx={{ minWidth: 200, flexShrink: 0 }}>
+                    <Box key={index} sx={{ minWidth: { xs: 150, sm: 180, md: 200 }, flexShrink: 0 }}>
                         <Skeleton
                             variant="rectangular"
                             width={200}
@@ -134,8 +134,8 @@ function MoviesCategorySlider() {
         return (
             <Box
                 sx={{
-                    margin: '40px 40px 0 40px',
-                    padding: '40px',
+                    margin: { xs: '20px 12px 0', sm: '28px 24px 0', md: '40px 40px 0' },
+                    padding: { xs: '16px', sm: '24px', md: '40px' },
                     background: 'linear-gradient(to bottom, var(--second-black), var(--black))',
                     borderRadius: '20px',
                 }}
@@ -168,8 +168,8 @@ function MoviesCategorySlider() {
     return (
         <Box
             sx={{
-                margin: '40px 40px 0 40px',
-                padding: '40px',
+                margin: { xs: '20px 12px 0', sm: '28px 24px 0', md: '40px 40px 0' },
+                padding: { xs: '16px', sm: '24px', md: '40px' },
                 background: 'linear-gradient(to bottom, var(--second-black), var(--black))',
                 borderRadius: '20px',
             }}

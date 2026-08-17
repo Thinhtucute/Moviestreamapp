@@ -39,3 +39,26 @@
         bottom: 150px;
     }
 }
+
+@media (max-width: 480px) {
+    .banner-slider {
+        height: 560px;
+    }
+
+    .slider-container {
+        img {
+            object-position: center;
+        }
+
+        .info {
+            left: 16px !important;
+            right: 16px;
+            bottom: 72px;
+            gap: 10px !important;
+        }
+
+        .thumbnails {
+            display: none !important;
+        }
+    }
+}

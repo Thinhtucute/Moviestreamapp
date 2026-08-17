@@ -457,6 +457,7 @@ function BannerSlider() {
                         style={{
                             position: 'absolute',
                             left: '40px',
+                            right: 0,
                             color: 'white',
                             display: 'flex',
                             flexDirection: 'column',
@@ -464,7 +465,7 @@ function BannerSlider() {
                         }}
                     >
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Typography variant="h2" sx={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
+                            <Typography variant="h2" sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: { xs: '3rem', sm: '4rem', md: '6rem' }, lineHeight: 1.05 }}>
                                 {currentBanner.title || 'No title'}
                             </Typography>
                         </Box>
@@ -472,13 +473,13 @@ function BannerSlider() {
                         <Box sx={{ display: 'flex', gap: '10px' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                                 <EventAvailableIcon fontSize="medium" sx={{ color: 'var(--primary)' }} />
-                                <Typography variant="h5" sx={{ color: 'var(--white)' }}>
+                                <Typography variant="h5" sx={{ color: 'var(--white)', fontSize: { xs: '1.4rem', md: '2.4rem' } }}>
                                     {currentBanner.releaseYear}
                                 </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                                 <HourglassEmptyIcon fontSize="medium" sx={{ color: 'var(--primary)' }} />
-                                <Typography variant="h5" sx={{ color: 'var(--white)' }}>
+                                <Typography variant="h5" sx={{ color: 'var(--white)', fontSize: { xs: '1.4rem', md: '2.4rem' } }}>
                                     {currentBanner.duration > 0 ? `${currentBanner.duration} min` : '90 min'}
                                 </Typography>
                             </Box>
@@ -488,7 +489,8 @@ function BannerSlider() {
                             variant="h5"
                             sx={{
                                 color: 'var(--white)',
-                                width: '40%',
+                                width: { xs: '100%', sm: '65%', md: '40%' },
+                                fontSize: { xs: '1.4rem', md: '2.4rem' },
                                 display: '-webkit-box',
                                 WebkitBoxOrient: 'vertical',
                                 WebkitLineClamp: 3,
